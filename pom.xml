@@ -84,8 +84,8 @@
           </execution>
         </executions>
       </plugin>
-      <!--
-          <plugin>
+<!--
+        <plugin>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>animal-sniffer-maven-plugin</artifactId>
           <configuration>
@@ -97,15 +97,15 @@
           </configuration>
           <executions>
             <execution>
-            <id>check-java16-sun</id>
-            <phase>test</phase>
-            <goals>
-              <goal>check</goal>
-            </goals>
+              <id>check-java16-sun</id>
+              <phase>test</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
             </execution>
           </executions>
-          </plugin>
-        -->
+        </plugin>
+-->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
