@@ -9,24 +9,12 @@
   <name>Guava: Google Core Libraries for Java</name>
   <packaging>bundle</packaging>
   <description> Guava is a suite of core and expanded libraries that include utility classes, google's collections, io classes, and much much more. Guava has only one code dependency - javax.annotation, per the JSR-305 spec. </description>
-  <properties>
-    <grt-testing.basedir>${grt-testing.basedir}</grt-testing.basedir>
-    <grt-testing.major.jar>build/major/lib/major.jar</grt-testing.major.jar>
-    <grt-testing.plugin>${grt-testing.plugin}</grt-testing.plugin>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
       <artifactId>jsr305</artifactId>
       <optional>true</optional>
       <!--  needed only for annotations  -->
-    </dependency>
-    <dependency>
-      <groupId>major</groupId>
-      <artifactId>major</artifactId>
-      <version>2.2.0</version>
-      <scope>system</scope>
-      <systemPath>${grt-testing.basedir}/${grt-testing.major.jar}</systemPath>
     </dependency>
     <!--  TODO(cpovirk): want this only for dependency plugin but seems not to work there? Maven runs without failure, but the resulting Javadoc is missing the hoped-for inherited text  -->
   </dependencies>
@@ -55,12 +43,6 @@
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
-        <configuration>
-          <testExcludes>
-            <exclude>**/*</exclude>
-          </testExcludes>
-          <compilerArgument>${grt-testing.plugin}</compilerArgument>
-        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
