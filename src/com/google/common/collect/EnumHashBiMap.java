@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -53,6 +55,7 @@ public final class EnumHashBiMap<K extends Enum<K>, V>
    *
    * @param keyType the key type
    */
+  @Impure
   public static <K extends Enum<K>, V> EnumHashBiMap<K, V>
       create(Class<K> keyType) {
     return new EnumHashBiMap<K, V>(keyType);
@@ -68,6 +71,7 @@ public final class EnumHashBiMap<K extends Enum<K>, V>
    * @throws IllegalArgumentException if map is not an {@code EnumBiMap} or an
    *     {@code EnumHashBiMap} instance and contains no mappings
    */
+  @Impure
   public static <K extends Enum<K>, V> EnumHashBiMap<K, V>
       create(Map<K, ? extends V> map) {
     EnumHashBiMap<K, V> bimap = create(EnumBiMap.inferKeyType(map));
@@ -75,6 +79,7 @@ public final class EnumHashBiMap<K extends Enum<K>, V>
     return bimap;
   }
 
+  @Impure
   private EnumHashBiMap(Class<K> keyType) {
     super(WellBehavedMap.wrap(
         new EnumMap<K, V>(keyType)),
@@ -85,20 +90,24 @@ public final class EnumHashBiMap<K extends Enum<K>, V>
 
   // Overriding these 3 methods to show that values may be null (but not keys)
 
+  @Impure
   @Override
   K checkKey(K key) {
     return checkNotNull(key);
   }
 
+  @Impure
   @Override public V put(K key, @Nullable V value) {
     return super.put(key, value);
   }
 
+  @Impure
   @Override public V forcePut(K key, @Nullable V value) {
     return super.forcePut(key, value);
   }
 
   /** Returns the associated key type. */
+  @Pure
   public Class<K> keyType() {
     return keyType;
   }
@@ -107,6 +116,7 @@ public final class EnumHashBiMap<K extends Enum<K>, V>
    * @serialData the key class, number of entries, first key, first value,
    *     second key, second value, and so on.
    */
+  @Impure
   @GwtIncompatible("java.io.ObjectOutputStream")
   private void writeObject(ObjectOutputStream stream) throws IOException {
     stream.defaultWriteObject();
@@ -114,6 +124,7 @@ public final class EnumHashBiMap<K extends Enum<K>, V>
     Serialization.writeMap(this, stream);
   }
 
+  @Impure
   @SuppressWarnings("unchecked") // reading field populated by writeObject
   @GwtIncompatible("java.io.ObjectInputStream")
   private void readObject(ObjectInputStream stream)

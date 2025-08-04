@@ -16,6 +16,9 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -62,12 +65,15 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
   /**
    * Constructor for use by subclasses.
    */
+  @SideEffectFree
   protected ByteSource() {}
 
   /**
    * Returns a {@link CharSource} view of this byte source that decodes bytes read from this source
    * as characters using the given {@link Charset}.
    */
+  @SideEffectFree
+  @Impure
   public CharSource asCharSource(Charset charset) {
     return new AsCharSource(charset);
   }
@@ -80,6 +86,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    *
    * @throws IOException if an I/O error occurs in the process of opening the stream
    */
+  @Impure
   public abstract InputStream openStream() throws IOException;
 
   /**
@@ -91,6 +98,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    *     {@link InputSupplier} interface and should not be called directly. Use {@link #openStream}
    *     instead. This method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Override
   @Deprecated
   public final InputStream getInput() throws IOException {
@@ -109,6 +117,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    * @throws IOException if an I/O error occurs in the process of opening the stream
    * @since 15.0 (in 14.0 with return type {@link BufferedInputStream})
    */
+  @Impure
   public InputStream openBufferedStream() throws IOException {
     InputStream in = openStream();
     return (in instanceof BufferedInputStream)
@@ -122,6 +131,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    *
    * @throws IllegalArgumentException if {@code offset} or {@code length} is negative
    */
+  @Impure
   public ByteSource slice(long offset, long length) {
     return new SlicedByteSource(offset, length);
   }
@@ -133,6 +143,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    * @throws IOException if an I/O error occurs
    * @since 15.0
    */
+  @Impure
   public boolean isEmpty() throws IOException {
     Closer closer = Closer.create();
     try {
@@ -160,6 +171,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    *
    * @throws IOException if an I/O error occurs in the process of reading the size of this source
    */
+  @Impure
   public long size() throws IOException {
     Closer closer = Closer.create();
     try {
@@ -186,6 +198,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    * Counts the bytes in the given input stream using skip if possible. Returns SKIP_FAILED if the
    * first call to skip threw, in which case skip may just not be supported.
    */
+  @Impure
   private long countBySkipping(InputStream in) throws IOException {
     long count = 0;
     while (true) {
@@ -209,6 +222,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
 
   private static final byte[] countBuffer = new byte[BUF_SIZE];
 
+  @Impure
   private long countByReading(InputStream in) throws IOException {
     long count = 0;
     long read;
@@ -225,6 +239,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    * @throws IOException if an I/O error occurs in the process of reading from this source or
    *     writing to {@code output}
    */
+  @Impure
   public long copyTo(OutputStream output) throws IOException {
     checkNotNull(output);
 
@@ -245,6 +260,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    * @throws IOException if an I/O error occurs in the process of reading from this source or
    *     writing to {@code sink}
    */
+  @Impure
   public long copyTo(ByteSink sink) throws IOException {
     checkNotNull(sink);
 
@@ -265,6 +281,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    *
    * @throws IOException if an I/O error occurs in the process of reading from this source
    */
+  @Impure
   public byte[] read() throws IOException {
     Closer closer = Closer.create();
     try {
@@ -286,6 +303,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    *     {@code processor} throws an {@code IOException}
    * @since 16.0
    */
+  @Impure
   @Beta
   public <T> T read(ByteProcessor<T> processor) throws IOException {
     checkNotNull(processor);
@@ -306,6 +324,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    *
    * @throws IOException if an I/O error occurs in the process of reading from this source
    */
+  @Impure
   public HashCode hash(HashFunction hashFunction) throws IOException {
     Hasher hasher = hashFunction.newHasher();
     copyTo(Funnels.asOutputStream(hasher));
@@ -319,6 +338,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    * @throws IOException if an I/O error occurs in the process of reading from this source or
    *     {@code other}
    */
+  @Impure
   public boolean contentEquals(ByteSource other) throws IOException {
     checkNotNull(other);
 
@@ -356,6 +376,8 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    * @return a {@code ByteSource} containing the concatenated data
    * @since 15.0
    */
+  @SideEffectFree
+  @Impure
   public static ByteSource concat(Iterable<? extends ByteSource> sources) {
     return new ConcatenatedByteSource(sources);
   }
@@ -378,6 +400,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    * @throws NullPointerException if any of {@code sources} is {@code null}
    * @since 15.0
    */
+  @Impure
   public static ByteSource concat(Iterator<? extends ByteSource> sources) {
     return concat(ImmutableList.copyOf(sources));
   }
@@ -394,6 +417,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    * @throws NullPointerException if any of {@code sources} is {@code null}
    * @since 15.0
    */
+  @Impure
   public static ByteSource concat(ByteSource... sources) {
     return concat(ImmutableList.copyOf(sources));
   }
@@ -404,6 +428,8 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    *
    * @since 15.0 (since 14.0 as {@code ByteStreams.asByteSource(byte[])}).
    */
+  @SideEffectFree
+  @Impure
   public static ByteSource wrap(byte[] b) {
     return new ByteArrayByteSource(b);
   }
@@ -413,6 +439,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
    *
    * @since 15.0
    */
+  @Pure
   public static ByteSource empty() {
     return EmptyByteSource.INSTANCE;
   }
@@ -425,15 +452,19 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
 
     private final Charset charset;
 
+    @SideEffectFree
+    @Impure
     private AsCharSource(Charset charset) {
       this.charset = checkNotNull(charset);
     }
 
+    @Impure
     @Override
     public Reader openStream() throws IOException {
       return new InputStreamReader(ByteSource.this.openStream(), charset);
     }
 
+    @SideEffectFree
     @Override
     public String toString() {
       return ByteSource.this.toString() + ".asCharSource(" + charset + ")";
@@ -448,6 +479,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
     private final long offset;
     private final long length;
 
+    @Impure
     private SlicedByteSource(long offset, long length) {
       checkArgument(offset >= 0, "offset (%s) may not be negative", offset);
       checkArgument(length >= 0, "length (%s) may not be negative", length);
@@ -455,16 +487,19 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
       this.length = length;
     }
 
+    @Impure
     @Override
     public InputStream openStream() throws IOException {
       return sliceStream(ByteSource.this.openStream());
     }
 
+    @Impure
     @Override
     public InputStream openBufferedStream() throws IOException {
       return sliceStream(ByteSource.this.openBufferedStream());
     }
 
+    @Impure
     private InputStream sliceStream(InputStream in) throws IOException {
       if (offset > 0) {
         try {
@@ -482,6 +517,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
       return ByteStreams.limit(in, length);
     }
 
+    @Impure
     @Override
     public ByteSource slice(long offset, long length) {
       checkArgument(offset >= 0, "offset (%s) may not be negative", offset);
@@ -490,11 +526,13 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
       return ByteSource.this.slice(this.offset + offset, Math.min(length, maxLength));
     }
 
+    @Impure
     @Override
     public boolean isEmpty() throws IOException {
       return length == 0 || super.isEmpty();
     }
 
+    @SideEffectFree
     @Override
     public String toString() {
       return ByteSource.this.toString() + ".slice(" + offset + ", " + length + ")";
@@ -505,47 +543,59 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
 
     protected final byte[] bytes;
 
+    @SideEffectFree
+    @Impure
     protected ByteArrayByteSource(byte[] bytes) {
       this.bytes = checkNotNull(bytes);
     }
 
+    @Impure
     @Override
     public InputStream openStream() {
       return new ByteArrayInputStream(bytes);
     }
 
+    @Impure
     @Override
     public InputStream openBufferedStream() throws IOException {
       return openStream();
     }
 
+    @Pure
     @Override
     public boolean isEmpty() {
       return bytes.length == 0;
     }
 
+    @Pure
     @Override
     public long size() {
       return bytes.length;
     }
 
+    @SideEffectFree
     @Override
     public byte[] read() {
       return bytes.clone();
     }
 
+    @Impure
     @Override
     public long copyTo(OutputStream output) throws IOException {
       output.write(bytes);
       return bytes.length;
     }
 
+    @Pure
+    @Impure
     @Override
     public <T> T read(ByteProcessor<T> processor) throws IOException {
       processor.processBytes(bytes, 0, bytes.length);
       return processor.getResult();
     }
 
+    @Pure
+    @Impure
     @Override
     public HashCode hash(HashFunction hashFunction) throws IOException {
       return hashFunction.hashBytes(bytes);
@@ -553,6 +603,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
 
     // TODO(user): Possibly override slice()
 
+    @Impure
     @Override
     public String toString() {
       return "ByteSource.wrap(" + BaseEncoding.base16().encode(bytes) + ")";
@@ -563,21 +614,27 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
 
     private static final EmptyByteSource INSTANCE = new EmptyByteSource();
 
+    @SideEffectFree
+    @Impure
     private EmptyByteSource() {
       super(new byte[0]);
     }
 
+    @Pure
+    @Impure
     @Override
     public CharSource asCharSource(Charset charset) {
       checkNotNull(charset);
       return CharSource.empty();
     }
 
+    @Pure
     @Override
     public byte[] read() {
       return bytes; // length is 0, no need to clone
     }
 
+    @Pure
     @Override
     public String toString() {
       return "ByteSource.empty()";
@@ -588,15 +645,19 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
 
     private final Iterable<? extends ByteSource> sources;
 
+    @SideEffectFree
+    @Impure
     ConcatenatedByteSource(Iterable<? extends ByteSource> sources) {
       this.sources = checkNotNull(sources);
     }
 
+    @Impure
     @Override
     public InputStream openStream() throws IOException {
       return new MultiInputStream(sources.iterator());
     }
 
+    @Impure
     @Override
     public boolean isEmpty() throws IOException {
       for (ByteSource source : sources) {
@@ -607,6 +668,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
       return true;
     }
 
+    @Impure
     @Override
     public long size() throws IOException {
       long result = 0L;
@@ -616,6 +678,7 @@ public abstract class ByteSource implements InputSupplier<InputStream> {
       return result;
     }
 
+    @Pure
     @Override
     public String toString() {
       return "ByteSource.concat(" + sources + ")";

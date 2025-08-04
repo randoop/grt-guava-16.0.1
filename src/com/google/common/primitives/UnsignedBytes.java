@@ -16,6 +16,10 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Deterministic;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,6 +49,7 @@ import java.util.Comparator;
  * @since 1.0
  */
 public final class UnsignedBytes {
+  @SideEffectFree
   private UnsignedBytes() {}
 
   /**
@@ -71,6 +76,7 @@ public final class UnsignedBytes {
    *
    * @since 6.0
    */
+  @Pure
   public static int toInt(byte value) {
     return value & UNSIGNED_MASK;
   }
@@ -85,6 +91,7 @@ public final class UnsignedBytes {
    * @throws IllegalArgumentException if {@code value} is negative or greater
    *     than 255
    */
+  @Pure
   public static byte checkedCast(long value) {
     if ((value >> Byte.SIZE) != 0) {
       // don't use checkArgument here, to avoid boxing
@@ -101,6 +108,8 @@ public final class UnsignedBytes {
    * @return {@code (byte) 255} if {@code value >= 255}, {@code (byte) 0} if
    *     {@code value <= 0}, and {@code value} cast to {@code byte} otherwise
    */
+  @Pure
+  @Impure
   public static byte saturatedCast(long value) {
     if (value > toInt(MAX_VALUE)) {
       return MAX_VALUE; // -1
@@ -122,6 +131,8 @@ public final class UnsignedBytes {
    * @return a negative value if {@code a} is less than {@code b}; a positive
    *     value if {@code a} is greater than {@code b}; or zero if they are equal
    */
+  @Pure
+  @Impure
   public static int compare(byte a, byte b) {
     return toInt(a) - toInt(b);
   }
@@ -134,6 +145,7 @@ public final class UnsignedBytes {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
   public static byte min(byte... array) {
     checkArgument(array.length > 0);
     int min = toInt(array[0]);
@@ -154,6 +166,7 @@ public final class UnsignedBytes {
    *     to every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
   public static byte max(byte... array) {
     checkArgument(array.length > 0);
     int max = toInt(array[0]);
@@ -171,6 +184,7 @@ public final class UnsignedBytes {
    *
    * @since 13.0
    */
+  @Impure
   @Beta
   public static String toString(byte x) {
     return toString(x, 10);
@@ -186,6 +200,7 @@ public final class UnsignedBytes {
    *         and {@link Character#MAX_RADIX}.
    * @since 13.0
    */
+  @Impure
   @Beta
   public static String toString(byte x, int radix) {
     checkArgument(radix >= Character.MIN_RADIX && radix <= Character.MAX_RADIX,
@@ -203,6 +218,8 @@ public final class UnsignedBytes {
    *         (in contrast to {@link Byte#parseByte(String)})
    * @since 13.0
    */
+  @Deterministic
+  @Impure
   @Beta
   public static byte parseUnsignedByte(String string) {
     return parseUnsignedByte(string, 10);
@@ -220,6 +237,8 @@ public final class UnsignedBytes {
    *         (in contrast to {@link Byte#parseByte(String)})
    * @since 13.0
    */
+  @Impure
+  @Deterministic
   @Beta
   public static byte parseUnsignedByte(String string, int radix) {
     int parse = Integer.parseInt(checkNotNull(string), radix);
@@ -240,6 +259,7 @@ public final class UnsignedBytes {
    *     the resulting string (but not at the start or end)
    * @param array an array of {@code byte} values, possibly empty
    */
+  @Impure
   public static String join(String separator, byte... array) {
     checkNotNull(separator);
     if (array.length == 0) {
@@ -271,10 +291,12 @@ public final class UnsignedBytes {
    *     Lexicographical order article at Wikipedia</a>
    * @since 2.0
    */
+  @Pure
   public static Comparator<byte[]> lexicographicalComparator() {
     return LexicographicalComparatorHolder.BEST_COMPARATOR;
   }
 
+  @Pure
   @VisibleForTesting
   static Comparator<byte[]> lexicographicalComparatorJavaImpl() {
     return LexicographicalComparatorHolder.PureJavaComparator.INSTANCE;
@@ -343,6 +365,7 @@ public final class UnsignedBytes {
        *
        * @return a sun.misc.Unsafe
        */
+      @Impure
       private static sun.misc.Unsafe getUnsafe() {
           try {
               return sun.misc.Unsafe.getUnsafe();
@@ -350,6 +373,7 @@ public final class UnsignedBytes {
           try {
               return java.security.AccessController.doPrivileged
               (new java.security.PrivilegedExceptionAction<sun.misc.Unsafe>() {
+                  @Impure
                   public sun.misc.Unsafe run() throws Exception {
                       Class<sun.misc.Unsafe> k = sun.misc.Unsafe.class;
                       for (java.lang.reflect.Field f : k.getDeclaredFields()) {
@@ -366,6 +390,7 @@ public final class UnsignedBytes {
           }
       }
 
+      @Impure
       @Override public int compare(byte[] left, byte[] right) {
         int minLength = Math.min(left.length, right.length);
         int minWords = minLength / Longs.BYTES;
@@ -409,6 +434,7 @@ public final class UnsignedBytes {
     enum PureJavaComparator implements Comparator<byte[]> {
       INSTANCE;
 
+      @Impure
       @Override public int compare(byte[] left, byte[] right) {
         int minLength = Math.min(left.length, right.length);
         for (int i = 0; i < minLength; i++) {
@@ -425,6 +451,7 @@ public final class UnsignedBytes {
      * Returns the Unsafe-using Comparator, or falls back to the pure-Java
      * implementation if unable to do so.
      */
+    @Impure
     static Comparator<byte[]> getBestComparator() {
       try {
         Class<?> theClass = Class.forName(UNSAFE_COMPARATOR_NAME);

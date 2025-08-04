@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Iterator;
@@ -29,6 +30,7 @@ import java.util.Iterator;
 @GwtCompatible
 public abstract class UnmodifiableIterator<E> implements Iterator<E> {
   /** Constructor for use by subclasses. */
+  @SideEffectFree
   protected UnmodifiableIterator() {}
 
   /**
@@ -37,6 +39,7 @@ public abstract class UnmodifiableIterator<E> implements Iterator<E> {
    * @throws UnsupportedOperationException always
    * @deprecated Unsupported operation.
    */
+  @SideEffectFree
   @Deprecated
   @Override
   public final void remove() {

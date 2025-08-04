@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Comparator;
@@ -31,12 +33,15 @@ interface SortedIterable<T> extends Iterable<T> {
    * Returns the {@code Comparator} by which the elements of this iterable are ordered, or {@code
    * Ordering.natural()} if the elements are ordered by their natural ordering.
    */
+  @Impure
+  @Pure
   Comparator<? super T> comparator();
 
   /**
    * Returns an iterator over elements of type {@code T}. The elements are returned in
    * nondecreasing order according to the associated {@link #comparator}.
    */
+  @Pure
   @Override
   Iterator<T> iterator();
 }

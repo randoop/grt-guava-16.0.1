@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Collection;
@@ -32,43 +34,53 @@ import javax.annotation.Nullable;
 final class EmptyImmutableSet extends ImmutableSet<Object> {
   static final EmptyImmutableSet INSTANCE = new EmptyImmutableSet();
 
+  @Impure
   private EmptyImmutableSet() {}
 
+  @Pure
   @Override
   public int size() {
     return 0;
   }
 
+  @Pure
   @Override public boolean isEmpty() {
     return true;
   }
 
+  @Pure
   @Override public boolean contains(@Nullable Object target) {
     return false;
   }
 
+  @Pure
   @Override public boolean containsAll(Collection<?> targets) {
     return targets.isEmpty();
   }
 
+  @Impure
   @Override public UnmodifiableIterator<Object> iterator() {
     return Iterators.emptyIterator();
   }
 
+  @Pure
   @Override boolean isPartialView() {
     return false;
   }
 
+  @Pure
   @Override
   int copyIntoArray(Object[] dst, int offset) {
     return offset;
   }
 
+  @Impure
   @Override
   public ImmutableList<Object> asList() {
     return ImmutableList.of();
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object object) {
     if (object instanceof Set) {
       Set<?> that = (Set<?>) object;
@@ -77,18 +89,22 @@ final class EmptyImmutableSet extends ImmutableSet<Object> {
     return false;
   }
 
+  @Pure
   @Override public final int hashCode() {
     return 0;
   }
 
+  @Pure
   @Override boolean isHashCodeFast() {
     return true;
   }
 
+  @Pure
   @Override public String toString() {
     return "[]";
   }
 
+  @Pure
   Object readResolve() {
     return INSTANCE; // preserve singleton property
   }

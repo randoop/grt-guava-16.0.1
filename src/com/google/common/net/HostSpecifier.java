@@ -16,6 +16,9 @@
 
 package com.google.common.net;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 
@@ -53,6 +56,7 @@ public final class HostSpecifier {
 
   private final String canonicalForm;
 
+  @SideEffectFree
   private HostSpecifier(String canonicalForm) {
     this.canonicalForm = canonicalForm;
   }
@@ -72,6 +76,7 @@ public final class HostSpecifier {
    *
    * @throws IllegalArgumentException if the specifier is not valid.
    */
+  @Impure
   public static HostSpecifier fromValid(String specifier) {
     // Verify that no port was specified, and strip optional brackets from
     // IPv6 literals.
@@ -115,6 +120,7 @@ public final class HostSpecifier {
    *
    * @throws ParseException if the specifier is not valid.
    */
+  @Impure
   public static HostSpecifier from(String specifier)
       throws ParseException {
     try {
@@ -136,6 +142,7 @@ public final class HostSpecifier {
    * {@link HostSpecifier} as described in the documentation for
    * {@link #fromValid(String)}.
    */
+  @Impure
   public static boolean isValid(String specifier) {
     try {
       fromValid(specifier);
@@ -145,6 +152,7 @@ public final class HostSpecifier {
     }
   }
 
+  @Pure
   @Override
   public boolean equals(@Nullable Object other) {
     if (this == other) {
@@ -159,6 +167,7 @@ public final class HostSpecifier {
     return false;
   }
 
+  @Pure
   @Override
   public int hashCode() {
     return canonicalForm.hashCode();
@@ -171,6 +180,7 @@ public final class HostSpecifier {
    * an IPv6 address without brackets, brackets are added so that the
    * result will be usable in the host part of a URI.
    */
+  @Pure
   @Override
   public String toString() {
     return canonicalForm;

@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.collect.CollectPreconditions.checkEntryNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -40,6 +43,7 @@ final class RegularImmutableMap<K, V> extends ImmutableMap<K, V> {
   // 'and' with an int to get a table index
   private final transient int mask;
   
+  @Impure
   RegularImmutableMap(TerminalEntry<?, ?>... theEntries) {
     this(theEntries.length, theEntries);
   }
@@ -50,6 +54,7 @@ final class RegularImmutableMap<K, V> extends ImmutableMap<K, V> {
    * 
    * <p>This allows reuse of the entry objects from the array in the actual implementation.
    */
+  @Impure
   RegularImmutableMap(int size, TerminalEntry<?, ?>[] theEntries) {
     entries = createEntryArray(size);
     int tableSize = Hashing.closedTableSize(size, MAX_LOAD_FACTOR);
@@ -74,6 +79,7 @@ final class RegularImmutableMap<K, V> extends ImmutableMap<K, V> {
   /**
    * Constructor for RegularImmutableMap that makes no assumptions about the input entries.
    */
+  @Impure
   RegularImmutableMap(Entry<?, ?>[] theEntries) {
     int size = theEntries.length;
     entries = createEntryArray(size);
@@ -98,6 +104,7 @@ final class RegularImmutableMap<K, V> extends ImmutableMap<K, V> {
     }
   }
 
+  @SideEffectFree
   private void checkNoConflictInBucket(
       K key, ImmutableMapEntry<K, V> entry, ImmutableMapEntry<K, V> bucketHead) {
     for (; bucketHead != null; bucketHead = bucketHead.getNextInKeyBucket()) {
@@ -108,21 +115,25 @@ final class RegularImmutableMap<K, V> extends ImmutableMap<K, V> {
   private static final class NonTerminalMapEntry<K, V> extends ImmutableMapEntry<K, V> {
     private final ImmutableMapEntry<K, V> nextInKeyBucket;
 
+    @Impure
     NonTerminalMapEntry(K key, V value, ImmutableMapEntry<K, V> nextInKeyBucket) {
       super(key, value);
       this.nextInKeyBucket = nextInKeyBucket;
     }
 
+    @Impure
     NonTerminalMapEntry(ImmutableMapEntry<K, V> contents, ImmutableMapEntry<K, V> nextInKeyBucket) {
       super(contents);
       this.nextInKeyBucket = nextInKeyBucket;
     }
 
+    @Pure
     @Override
     ImmutableMapEntry<K, V> getNextInKeyBucket() {
       return nextInKeyBucket;
     }
 
+    @Pure
     @Override
     @Nullable
     ImmutableMapEntry<K, V> getNextInValueBucket() {
@@ -143,11 +154,14 @@ final class RegularImmutableMap<K, V> extends ImmutableMap<K, V> {
    * result must never be upcast back to ImmutableMapEntry[] (or Object[], etc.), or
    * allowed to escape the class.
    */
+  @Pure
   @SuppressWarnings("unchecked") // Safe as long as the javadocs are followed
   private ImmutableMapEntry<K, V>[] createEntryArray(int size) {
     return new ImmutableMapEntry[size];
   }
 
+  @Pure
+  @Impure
   @Override public V get(@Nullable Object key) {
     if (key == null) {
       return null;
@@ -171,15 +185,18 @@ final class RegularImmutableMap<K, V> extends ImmutableMap<K, V> {
     return null;
   }
 
+  @Pure
   @Override
   public int size() {
     return entries.length;
   }
   
+  @Pure
   @Override boolean isPartialView() {
     return false;
   }
 
+  @Impure
   @Override
   ImmutableSet<Entry<K, V>> createEntrySet() {
     return new EntrySet();
@@ -187,15 +204,18 @@ final class RegularImmutableMap<K, V> extends ImmutableMap<K, V> {
 
   @SuppressWarnings("serial") // uses writeReplace(), not default serialization
   private class EntrySet extends ImmutableMapEntrySet<K, V> {
+    @Pure
     @Override ImmutableMap<K, V> map() {
       return RegularImmutableMap.this;
     }
 
+    @Impure
     @Override
     public UnmodifiableIterator<Entry<K, V>> iterator() {
       return asList().iterator();
     }
 
+    @Impure
     @Override
     ImmutableList<Entry<K, V>> createAsList() {
       return new RegularImmutableAsList<Entry<K, V>>(this, entries);

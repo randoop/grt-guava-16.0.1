@@ -16,6 +16,8 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.annotations.Beta;
@@ -74,6 +76,7 @@ public final class CacheStats {
    * <p>Five parameters of the same type in a row is a bad thing, but this class is not constructed
    * by end users and is too fine-grained for a builder.
    */
+  @Impure
   public CacheStats(long hitCount, long missCount, long loadSuccessCount,
       long loadExceptionCount, long totalLoadTime, long evictionCount) {
     checkArgument(hitCount >= 0);
@@ -95,6 +98,7 @@ public final class CacheStats {
    * Returns the number of times {@link Cache} lookup methods have returned either a cached or
    * uncached value. This is defined as {@code hitCount + missCount}.
    */
+  @Pure
   public long requestCount() {
     return hitCount + missCount;
   }
@@ -102,6 +106,7 @@ public final class CacheStats {
   /**
    * Returns the number of times {@link Cache} lookup methods have returned a cached value.
    */
+  @Pure
   public long hitCount() {
     return hitCount;
   }
@@ -111,6 +116,8 @@ public final class CacheStats {
    * {@code hitCount / requestCount}, or {@code 1.0} when {@code requestCount == 0}.
    * Note that {@code hitRate + missRate =~ 1.0}.
    */
+  @Pure
+  @Impure
   public double hitRate() {
     long requestCount = requestCount();
     return (requestCount == 0) ? 1.0 : (double) hitCount / requestCount;
@@ -122,6 +129,7 @@ public final class CacheStats {
    * value can result in multiple misses, all returning the results of a single cache load
    * operation.
    */
+  @Pure
   public long missCount() {
     return missCount;
   }
@@ -135,6 +143,8 @@ public final class CacheStats {
    * that {@code missCount &gt;= loadSuccessCount + loadExceptionCount}. Multiple
    * concurrent misses for the same key will result in a single load operation.
    */
+  @Pure
+  @Impure
   public double missRate() {
     long requestCount = requestCount();
     return (requestCount == 0) ? 0.0 : (double) missCount / requestCount;
@@ -145,6 +155,7 @@ public final class CacheStats {
    * values. This includes both successful load operations, as well as those that threw
    * exceptions. This is defined as {@code loadSuccessCount + loadExceptionCount}.
    */
+  @Pure
   public long loadCount() {
     return loadSuccessCount + loadExceptionCount;
   }
@@ -156,6 +167,7 @@ public final class CacheStats {
    * {@link #loadExceptionCount}). Multiple concurrent misses for the same key will result in a
    * single load operation.
    */
+  @Pure
   public long loadSuccessCount() {
     return loadSuccessCount;
   }
@@ -167,6 +179,7 @@ public final class CacheStats {
    * {@link #loadSuccessCount}). Multiple concurrent misses for the same key will result in a
    * single load operation.
    */
+  @Pure
   public long loadExceptionCount() {
     return loadExceptionCount;
   }
@@ -176,6 +189,7 @@ public final class CacheStats {
    * {@code loadExceptionCount / (loadSuccessCount + loadExceptionCount)}, or
    * {@code 0.0} when {@code loadSuccessCount + loadExceptionCount == 0}.
    */
+  @Pure
   public double loadExceptionRate() {
     long totalLoadCount = loadSuccessCount + loadExceptionCount;
     return (totalLoadCount == 0)
@@ -188,6 +202,7 @@ public final class CacheStats {
    * used to calculate the miss penalty. This value is increased every time
    * {@code loadSuccessCount} or {@code loadExceptionCount} is incremented.
    */
+  @Pure
   public long totalLoadTime() {
     return totalLoadTime;
   }
@@ -196,6 +211,7 @@ public final class CacheStats {
    * Returns the average time spent loading new values. This is defined as
    * {@code totalLoadTime / (loadSuccessCount + loadExceptionCount)}.
    */
+  @Pure
   public double averageLoadPenalty() {
     long totalLoadCount = loadSuccessCount + loadExceptionCount;
     return (totalLoadCount == 0)
@@ -207,6 +223,7 @@ public final class CacheStats {
    * Returns the number of times an entry has been evicted. This count does not include manual
    * {@linkplain Cache#invalidate invalidations}.
    */
+  @Pure
   public long evictionCount() {
     return evictionCount;
   }
@@ -216,6 +233,7 @@ public final class CacheStats {
    * and {@code other}. Negative values, which aren't supported by {@code CacheStats} will be
    * rounded up to zero.
    */
+  @Impure
   public CacheStats minus(CacheStats other) {
     return new CacheStats(
         Math.max(0, hitCount - other.hitCount),
@@ -232,6 +250,7 @@ public final class CacheStats {
    *
    * @since 11.0
    */
+  @Impure
   public CacheStats plus(CacheStats other) {
     return new CacheStats(
         hitCount + other.hitCount,
@@ -242,12 +261,14 @@ public final class CacheStats {
         evictionCount + other.evictionCount);
   }
 
+  @Impure
   @Override
   public int hashCode() {
     return Objects.hashCode(hitCount, missCount, loadSuccessCount, loadExceptionCount,
         totalLoadTime, evictionCount);
   }
 
+  @Pure
   @Override
   public boolean equals(@Nullable Object object) {
     if (object instanceof CacheStats) {
@@ -262,6 +283,7 @@ public final class CacheStats {
     return false;
   }
 
+  @Impure
   @Override
   public String toString() {
     return Objects.toStringHelper(this)

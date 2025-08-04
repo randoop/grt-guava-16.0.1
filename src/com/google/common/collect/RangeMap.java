@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 
 import java.util.Map;
@@ -41,6 +44,8 @@ public interface RangeMap<K extends Comparable, V> {
    * <p>Specifically, if any range in this range map contains the specified key, the value
    * associated with that range is returned.
    */
+  @Pure
+  @Impure
   @Nullable
   V get(K key);
 
@@ -48,6 +53,8 @@ public interface RangeMap<K extends Comparable, V> {
    * Returns the range containing this key and its associated value, if such a range is present
    * in the range map, or {@code null} otherwise.
    */
+  @Pure
+  @Impure
   @Nullable
   Map.Entry<Range<K>, V> getEntry(K key);
 
@@ -57,6 +64,8 @@ public interface RangeMap<K extends Comparable, V> {
    *
    * @throws NoSuchElementException if this range map is empty
    */
+  @Pure
+  @Impure
   Range<K> span();
 
   /**
@@ -68,16 +77,19 @@ public interface RangeMap<K extends Comparable, V> {
    *
    * <p>If {@code range} {@linkplain Range#isEmpty() is empty}, then this is a no-op.
    */
+  @SideEffectFree
   void put(Range<K> range, V value);
 
   /**
    * Puts all the associations from {@code rangeMap} into this range map (optional operation).
    */
+  @SideEffectFree
   void putAll(RangeMap<K, V> rangeMap);
 
   /**
    * Removes all associations from this range map (optional operation).
    */
+  @SideEffectFree
   void clear();
 
   /**
@@ -87,6 +99,7 @@ public interface RangeMap<K extends Comparable, V> {
    * before and after a call to {@code remove(range)}.  If {@code range.contains(k)}, then
    * after a call to {@code remove(range)}, {@code get(k)} will return {@code null}.
    */
+  @SideEffectFree
   void remove(Range<K> range);
 
   /**
@@ -95,6 +108,8 @@ public interface RangeMap<K extends Comparable, V> {
    *
    * <p>It is guaranteed that no empty ranges will be in the returned {@code Map}.
    */
+  @Pure
+  @Impure
   Map<Range<K>, V> asMapOfRanges();
   
   /**
@@ -111,24 +126,32 @@ public interface RangeMap<K extends Comparable, V> {
    * <p>The returned range map will throw an {@link IllegalArgumentException} on an attempt to 
    * insert a range not {@linkplain Range#encloses(Range) enclosed} by {@code range}. 
    */
+  @Pure
+  @Impure
   RangeMap<K, V> subRangeMap(Range<K> range);
 
   /**
    * Returns {@code true} if {@code obj} is another {@code RangeMap} that has an equivalent
    * {@link #asMapOfRanges()}.
    */
+  @Pure
+  @Impure
   @Override
   boolean equals(@Nullable Object o);
 
   /**
    * Returns {@code asMapOfRanges().hashCode()}.
    */
+  @Pure
+  @Impure
   @Override
   int hashCode();
 
   /**
    * Returns a readable string representation of this range map.
    */
+  @Pure
+  @Impure
   @Override
   String toString();
 }

@@ -16,6 +16,8 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkPositionIndexes;
 
@@ -40,11 +42,13 @@ abstract class AbstractByteHasher extends AbstractHasher {
   /**
    * Updates this hasher with the given byte.
    */
+  @Impure
   protected abstract void update(byte b);
 
   /**
    * Updates this hasher with the given bytes.
    */
+  @Impure
   protected void update(byte[] b) {
     update(b, 0, b.length);
   }
@@ -52,18 +56,21 @@ abstract class AbstractByteHasher extends AbstractHasher {
   /**
    * Updates this hasher with {@code len} bytes starting at {@code off} in the given buffer.
    */
+  @Impure
   protected void update(byte[] b, int off, int len) {
     for (int i = off; i < off + len; i++) {
       update(b[i]);
     }
   }
 
+  @Impure
   @Override
   public Hasher putByte(byte b) {
     update(b);
     return this;
   }
 
+  @Impure
   @Override
   public Hasher putBytes(byte[] bytes) {
     checkNotNull(bytes);
@@ -71,6 +78,7 @@ abstract class AbstractByteHasher extends AbstractHasher {
     return this;
   }
 
+  @Impure
   @Override
   public Hasher putBytes(byte[] bytes, int off, int len) {
     checkPositionIndexes(off, off + len, bytes.length);
@@ -81,6 +89,7 @@ abstract class AbstractByteHasher extends AbstractHasher {
   /**
    * Updates the sink with the given number of bytes from the buffer.
    */
+  @Impure
   private Hasher update(int bytes) {
     try {
       update(scratch.array(), 0, bytes);
@@ -90,30 +99,35 @@ abstract class AbstractByteHasher extends AbstractHasher {
     return this;
   }
 
+  @Impure
   @Override
   public Hasher putShort(short s) {
     scratch.putShort(s);
     return update(Shorts.BYTES);
   }
 
+  @Impure
   @Override
   public Hasher putInt(int i) {
     scratch.putInt(i);
     return update(Ints.BYTES);
   }
 
+  @Impure
   @Override
   public Hasher putLong(long l) {
     scratch.putLong(l);
     return update(Longs.BYTES);
   }
 
+  @Impure
   @Override
   public Hasher putChar(char c) {
     scratch.putChar(c);
     return update(Chars.BYTES);
   }
 
+  @SideEffectFree
   @Override
   public <T> Hasher putObject(T instance, Funnel<? super T> funnel) {
     funnel.funnel(instance, this);

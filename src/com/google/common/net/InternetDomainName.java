@@ -16,6 +16,9 @@
 
 package com.google.common.net;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -134,6 +137,7 @@ public final class InternetDomainName {
   /**
    * Constructor used to implement {@link #from(String)}, and from subclasses.
    */
+  @Impure
   InternetDomainName(String name) {
     // Normalize:
     // * ASCII characters to lowercase
@@ -164,6 +168,7 @@ public final class InternetDomainName {
    * public suffix according to {@link #isPublicSuffix()} if the domain ends
    * with an excluded domain pattern such as {@code "nhs.uk"}.
    */
+  @Impure
   private int findPublicSuffix() {
     final int partsSize = parts.size();
 
@@ -209,6 +214,7 @@ public final class InternetDomainName {
    *     according to {@link #isValid}
    * @since 10.0 (previously named {@code fromLenient})
    */
+  @Impure
   public static InternetDomainName from(String domain) {
     return new InternetDomainName(checkNotNull(domain));
   }
@@ -219,6 +225,7 @@ public final class InternetDomainName {
    *
    * @return Is the domain name syntactically valid?
    */
+  @Impure
   private static boolean validateSyntax(List<String> parts) {
     final int lastIndex = parts.size() - 1;
 
@@ -251,6 +258,7 @@ public final class InternetDomainName {
    * @param isFinalPart Is this the final (rightmost) domain part?
    * @return Whether the part is valid
    */
+  @Impure
   private static boolean validatePart(String part, boolean isFinalPart) {
 
     // These tests could be collapsed into one big boolean expression, but
@@ -303,6 +311,7 @@ public final class InternetDomainName {
    * lower case. For example, for the domain name {@code mail.google.com}, this
    * method returns the list {@code ["mail", "google", "com"]}.
    */
+  @Pure
   public ImmutableList<String> parts() {
     return parts;
   }
@@ -320,6 +329,7 @@ public final class InternetDomainName {
    *     suffix list
    * @since 6.0
    */
+  @Pure
   public boolean isPublicSuffix() {
     return publicSuffixIndex == 0;
   }
@@ -334,6 +344,7 @@ public final class InternetDomainName {
    *
    * @since 6.0
    */
+  @Pure
   public boolean hasPublicSuffix() {
     return publicSuffixIndex != NO_PUBLIC_SUFFIX_FOUND;
   }
@@ -344,6 +355,7 @@ public final class InternetDomainName {
    *
    * @since 6.0
    */
+  @Impure
   public InternetDomainName publicSuffix() {
     return hasPublicSuffix() ? ancestor(publicSuffixIndex) : null;
   }
@@ -367,6 +379,7 @@ public final class InternetDomainName {
    *
    * @since 6.0
    */
+  @Pure
   public boolean isUnderPublicSuffix() {
     return publicSuffixIndex > 0;
   }
@@ -391,6 +404,7 @@ public final class InternetDomainName {
    *
    * @since 6.0
    */
+  @Pure
   public boolean isTopPrivateDomain() {
     return publicSuffixIndex == 1;
   }
@@ -417,6 +431,7 @@ public final class InternetDomainName {
    *     public suffix
    * @since 6.0
    */
+  @Impure
   public InternetDomainName topPrivateDomain() {
     if (isTopPrivateDomain()) {
       return this;
@@ -428,6 +443,7 @@ public final class InternetDomainName {
   /**
    * Indicates whether this domain is composed of two or more parts.
    */
+  @Pure
   public boolean hasParent() {
     return parts.size() > 1;
   }
@@ -440,6 +456,7 @@ public final class InternetDomainName {
    * @throws IllegalStateException if the domain has no parent, as determined
    *     by {@link #hasParent}
    */
+  @Impure
   public InternetDomainName parent() {
     checkState(hasParent(), "Domain '%s' has no parent", name);
     return ancestor(1);
@@ -453,6 +470,7 @@ public final class InternetDomainName {
    *
    * <p>TODO: Reasonable candidate for addition to public API.
    */
+  @Impure
   private InternetDomainName ancestor(int levels) {
     return from(DOT_JOINER.join(parts.subList(levels, parts.size())));
   }
@@ -467,6 +485,7 @@ public final class InternetDomainName {
    * @throws NullPointerException if leftParts is null
    * @throws IllegalArgumentException if the resulting name is not valid
    */
+  @Impure
   public InternetDomainName child(String leftParts) {
     return from(checkNotNull(leftParts) + "." + name);
   }
@@ -493,6 +512,7 @@ public final class InternetDomainName {
    *
    * @since 8.0 (previously named {@code isValidLenient})
    */
+  @Impure
   public static boolean isValid(String name) {
     try {
       from(name);
@@ -506,6 +526,7 @@ public final class InternetDomainName {
    * Does the domain name match one of the "wildcard" patterns (e.g.
    * {@code "*.ar"})?
    */
+  @SideEffectFree
   private static boolean matchesWildcardPublicSuffix(String domain) {
     final String[] pieces = domain.split(DOT_REGEX, 2);
     return pieces.length == 2 && PublicSuffixPatterns.UNDER.containsKey(pieces[1]);
@@ -514,6 +535,7 @@ public final class InternetDomainName {
   /**
    * Returns the domain name, normalized to all lower case.
    */
+  @Pure
   @Override
   public String toString() {
     return name;
@@ -526,6 +548,7 @@ public final class InternetDomainName {
    * of the same domain name would not be considered equal.
    *
    */
+  @Pure
   @Override
   public boolean equals(@Nullable Object object) {
     if (object == this) {
@@ -540,6 +563,7 @@ public final class InternetDomainName {
     return false;
   }
 
+  @Pure
   @Override
   public int hashCode() {
     return name.hashCode();

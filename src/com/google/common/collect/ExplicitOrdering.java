@@ -16,6 +16,10 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Deterministic;
 import com.google.common.annotations.GwtCompatible;
 
 import java.io.Serializable;
@@ -28,18 +32,23 @@ import javax.annotation.Nullable;
 final class ExplicitOrdering<T> extends Ordering<T> implements Serializable {
   final ImmutableMap<T, Integer> rankMap;
 
+  @Impure
   ExplicitOrdering(List<T> valuesInOrder) {
     this(buildRankMap(valuesInOrder));
   }
 
+  @Impure
   ExplicitOrdering(ImmutableMap<T, Integer> rankMap) {
     this.rankMap = rankMap;
   }
 
+  @Deterministic
+  @Impure
   @Override public int compare(T left, T right) {
     return rank(left) - rank(right); // safe because both are nonnegative
   }
 
+  @Deterministic
   private int rank(T value) {
     Integer rank = rankMap.get(value);
     if (rank == null) {
@@ -48,6 +57,7 @@ final class ExplicitOrdering<T> extends Ordering<T> implements Serializable {
     return rank;
   }
 
+  @Impure
   private static <T> ImmutableMap<T, Integer> buildRankMap(
       List<T> valuesInOrder) {
     ImmutableMap.Builder<T, Integer> builder = ImmutableMap.builder();
@@ -58,6 +68,7 @@ final class ExplicitOrdering<T> extends Ordering<T> implements Serializable {
     return builder.build();
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object object) {
     if (object instanceof ExplicitOrdering) {
       ExplicitOrdering<?> that = (ExplicitOrdering<?>) object;
@@ -66,10 +77,12 @@ final class ExplicitOrdering<T> extends Ordering<T> implements Serializable {
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     return rankMap.hashCode();
   }
 
+  @SideEffectFree
   @Override public String toString() {
     return "Ordering.explicit(" + rankMap.keySet() + ")";
   }

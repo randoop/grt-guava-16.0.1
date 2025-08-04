@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -38,6 +41,7 @@ import javax.annotation.Nullable;
 @Beta
 public final class Enums {
 
+  @SideEffectFree
   private Enums() {}
 
   /**
@@ -47,6 +51,7 @@ public final class Enums {
    *
    * @since 12.0
    */
+  @Impure
   @GwtIncompatible("reflection")
   public static Field getField(Enum<?> enumValue) {
     Class<?> clazz = enumValue.getDeclaringClass();
@@ -69,6 +74,7 @@ public final class Enums {
    *     to {@code null} rather than throwing {@link NullPointerException}. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <T extends Enum<T>> Function<String, T> valueOfFunction(Class<T> enumClass) {
     return new ValueOfFunction<T>(enumClass);
@@ -83,10 +89,12 @@ public final class Enums {
 
     private final Class<T> enumClass;
 
+    @SideEffectFree
     private ValueOfFunction(Class<T> enumClass) {
       this.enumClass = checkNotNull(enumClass);
     }
 
+    @Impure
     @Override
     public T apply(String value) {
       try {
@@ -96,14 +104,17 @@ public final class Enums {
       }
     }
 
+    @Pure
     @Override public boolean equals(@Nullable Object obj) {
       return obj instanceof ValueOfFunction && enumClass.equals(((ValueOfFunction) obj).enumClass);
     }
 
+    @Pure
     @Override public int hashCode() {
       return enumClass.hashCode();
     }
 
+    @Pure
     @Override public String toString() {
       return "Enums.valueOf(" + enumClass + ")";
     }
@@ -119,6 +130,7 @@ public final class Enums {
    *
    * @since 12.0
    */
+  @Impure
   public static <T extends Enum<T>> Optional<T> getIfPresent(Class<T> enumClass, String value) {
     checkNotNull(enumClass);
     checkNotNull(value);
@@ -137,6 +149,7 @@ public final class Enums {
    *
    * @since 16.0
    */
+  @Impure
   public static <T extends Enum<T>> Converter<String, T> stringConverter(final Class<T> enumClass) {
     return new StringConverter<T>(enumClass);
   }
@@ -146,20 +159,24 @@ public final class Enums {
 
     private final Class<T> enumClass;
 
+    @Impure
     StringConverter(Class<T> enumClass) {
       this.enumClass = checkNotNull(enumClass);
     }
 
+    @Impure
     @Override
     protected T doForward(String value) {
       return Enum.valueOf(enumClass, value);
     }
 
+    @Pure
     @Override
     protected String doBackward(T enumValue) {
       return enumValue.name();
     }
 
+    @Pure
     @Override
     public boolean equals(@Nullable Object object) {
       if (object instanceof StringConverter) {
@@ -169,11 +186,13 @@ public final class Enums {
       return false;
     }
 
+    @Pure
     @Override
     public int hashCode() {
       return enumClass.hashCode();
     }
 
+    @Pure
     @Override
     public String toString() {
       return "Enums.stringConverter(" + enumClass.getName() + ".class)";

@@ -15,6 +15,8 @@
  */
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -32,11 +34,13 @@ final class RegularImmutableSortedMap<K, V> extends ImmutableSortedMap<K, V> {
   private final transient RegularImmutableSortedSet<K> keySet;
   private final transient ImmutableList<V> valueList;
 
+  @Impure
   RegularImmutableSortedMap(RegularImmutableSortedSet<K> keySet, ImmutableList<V> valueList) {
     this.keySet = keySet;
     this.valueList = valueList;
   }
 
+  @Impure
   RegularImmutableSortedMap(
       RegularImmutableSortedSet<K> keySet,
       ImmutableList<V> valueList,
@@ -46,28 +50,33 @@ final class RegularImmutableSortedMap<K, V> extends ImmutableSortedMap<K, V> {
     this.valueList = valueList;
   }
 
+  @Impure
   @Override
   ImmutableSet<Entry<K, V>> createEntrySet() {
     return new EntrySet();
   }
 
   private class EntrySet extends ImmutableMapEntrySet<K, V> {
+    @Impure
     @Override
     public UnmodifiableIterator<Entry<K, V>> iterator() {
       return asList().iterator();
     }
 
+    @Impure
     @Override
     ImmutableList<Entry<K, V>> createAsList() {
       return new ImmutableAsList<Entry<K, V>>() {
         // avoid additional indirection
         private final ImmutableList<K> keyList = keySet().asList();
 
+        @Impure
         @Override
         public Entry<K, V> get(int index) {
           return Maps.immutableEntry(keyList.get(index), valueList.get(index));
         }
 
+        @Pure
         @Override
         ImmutableCollection<Entry<K, V>> delegateCollection() {
           return EntrySet.this;
@@ -75,28 +84,33 @@ final class RegularImmutableSortedMap<K, V> extends ImmutableSortedMap<K, V> {
       };
     }
 
+    @Pure
     @Override
     ImmutableMap<K, V> map() {
       return RegularImmutableSortedMap.this;
     }
   }
 
+  @Pure
   @Override
   public ImmutableSortedSet<K> keySet() {
     return keySet;
   }
 
+  @Pure
   @Override
   public ImmutableCollection<V> values() {
     return valueList;
   }
 
+  @Pure
   @Override
   public V get(@Nullable Object key) {
     int index = keySet.indexOf(key);
     return (index == -1) ? null : valueList.get(index);
   }
 
+  @Impure
   private ImmutableSortedMap<K, V> getSubMap(int fromIndex, int toIndex) {
     if (fromIndex == 0 && toIndex == size()) {
       return this;
@@ -109,16 +123,19 @@ final class RegularImmutableSortedMap<K, V> extends ImmutableSortedMap<K, V> {
     }
   }
 
+  @Impure
   @Override
   public ImmutableSortedMap<K, V> headMap(K toKey, boolean inclusive) {
     return getSubMap(0, keySet.headIndex(checkNotNull(toKey), inclusive));
   }
 
+  @Impure
   @Override
   public ImmutableSortedMap<K, V> tailMap(K fromKey, boolean inclusive) {
     return getSubMap(keySet.tailIndex(checkNotNull(fromKey), inclusive), size());
   }
 
+  @Impure
   @Override
   ImmutableSortedMap<K, V> createDescendingMap() {
     return new RegularImmutableSortedMap<K, V>(

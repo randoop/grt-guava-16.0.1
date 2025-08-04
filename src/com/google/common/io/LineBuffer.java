@@ -16,6 +16,7 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.io.IOException;
 
 /**
@@ -47,6 +48,7 @@ abstract class LineBuffer {
    * @throws IOException if an I/O error occurs
    * @see #finish
    */
+  @Impure
   protected void add(char[] cbuf, int off, int len) throws IOException {
     int pos = off;
     if (sawReturn && len > 0) {
@@ -84,6 +86,7 @@ abstract class LineBuffer {
   }
 
   /** Called when a line is complete. */
+  @Impure
   private boolean finishLine(boolean sawNewline) throws IOException {
     handleLine(line.toString(), sawReturn
         ? (sawNewline ? "\r\n" : "\r")
@@ -100,6 +103,7 @@ abstract class LineBuffer {
    *
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   protected void finish() throws IOException {
     if (sawReturn || line.length() > 0) {
       finishLine(false);
@@ -115,6 +119,7 @@ abstract class LineBuffer {
    *     {@code "\r\n"}, or {@code ""}
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   protected abstract void handleLine(String line, String end)
       throws IOException;
 }

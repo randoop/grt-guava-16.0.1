@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -52,6 +54,7 @@ public final class ThreadFactoryBuilder {
   /**
    * Creates a new {@link ThreadFactory} builder.
    */
+  @SideEffectFree
   public ThreadFactoryBuilder() {}
 
   /**
@@ -66,6 +69,7 @@ public final class ThreadFactoryBuilder {
    *     {@code "rpc-pool-0"}, {@code "rpc-pool-1"}, {@code "rpc-pool-2"}, etc.
    * @return this for the builder pattern
    */
+  @Impure
   @SuppressWarnings("ReturnValueIgnored")
   public ThreadFactoryBuilder setNameFormat(String nameFormat) {
     String.format(nameFormat, 0); // fail fast if the format is bad or null
@@ -80,6 +84,7 @@ public final class ThreadFactoryBuilder {
    *     will be daemon threads
    * @return this for the builder pattern
    */
+  @Impure
   public ThreadFactoryBuilder setDaemon(boolean daemon) {
     this.daemon = daemon;
     return this;
@@ -92,6 +97,7 @@ public final class ThreadFactoryBuilder {
    *     ThreadFactory
    * @return this for the builder pattern
    */
+  @Impure
   public ThreadFactoryBuilder setPriority(int priority) {
     // Thread#setPriority() already checks for validity. These error messages
     // are nicer though and will fail-fast.
@@ -111,6 +117,7 @@ public final class ThreadFactoryBuilder {
    *     Threads created with this ThreadFactory
    * @return this for the builder pattern
    */
+  @Impure
   public ThreadFactoryBuilder setUncaughtExceptionHandler(
       UncaughtExceptionHandler uncaughtExceptionHandler) {
     this.uncaughtExceptionHandler = checkNotNull(uncaughtExceptionHandler);
@@ -128,6 +135,7 @@ public final class ThreadFactoryBuilder {
    *
    * @see MoreExecutors
    */
+  @Impure
   public ThreadFactoryBuilder setThreadFactory(
       ThreadFactory backingThreadFactory) {
     this.backingThreadFactory = checkNotNull(backingThreadFactory);
@@ -142,10 +150,12 @@ public final class ThreadFactoryBuilder {
    *
    * @return the fully constructed {@link ThreadFactory}
    */
+  @Impure
   public ThreadFactory build() {
     return build(this);
   }
 
+  @Impure
   private static ThreadFactory build(ThreadFactoryBuilder builder) {
     final String nameFormat = builder.nameFormat;
     final Boolean daemon = builder.daemon;
@@ -158,6 +168,7 @@ public final class ThreadFactoryBuilder {
         : Executors.defaultThreadFactory();
     final AtomicLong count = (nameFormat != null) ? new AtomicLong(0) : null;
     return new ThreadFactory() {
+      @Impure
       @Override public Thread newThread(Runnable runnable) {
         Thread thread = backingThreadFactory.newThread(runnable);
         if (nameFormat != null) {

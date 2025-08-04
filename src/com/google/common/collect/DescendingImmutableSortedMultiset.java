@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import javax.annotation.Nullable;
 
 /**
@@ -25,55 +27,66 @@ import javax.annotation.Nullable;
 final class DescendingImmutableSortedMultiset<E> extends ImmutableSortedMultiset<E> {
   private final transient ImmutableSortedMultiset<E> forward;
 
+  @Impure
   DescendingImmutableSortedMultiset(ImmutableSortedMultiset<E> forward) {
     this.forward = forward;
   }
 
+  @Impure
   @Override
   public int count(@Nullable Object element) {
     return forward.count(element);
   }
 
+  @Impure
   @Override
   public Entry<E> firstEntry() {
     return forward.lastEntry();
   }
 
+  @Impure
   @Override
   public Entry<E> lastEntry() {
     return forward.firstEntry();
   }
 
+  @Pure
   @Override
   public int size() {
     return forward.size();
   }
 
+  @Impure
   @Override
   public ImmutableSortedSet<E> elementSet() {
     return forward.elementSet().descendingSet();
   }
 
+  @Impure
   @Override
   Entry<E> getEntry(int index) {
     return forward.entrySet().asList().reverse().get(index);
   }
 
+  @Pure
   @Override
   public ImmutableSortedMultiset<E> descendingMultiset() {
     return forward;
   }
 
+  @Impure
   @Override
   public ImmutableSortedMultiset<E> headMultiset(E upperBound, BoundType boundType) {
     return forward.tailMultiset(upperBound, boundType).descendingMultiset();
   }
 
+  @Impure
   @Override
   public ImmutableSortedMultiset<E> tailMultiset(E lowerBound, BoundType boundType) {
     return forward.headMultiset(lowerBound, boundType).descendingMultiset();
   }
 
+  @Impure
   @Override
   boolean isPartialView() {
     return forward.isPartialView();

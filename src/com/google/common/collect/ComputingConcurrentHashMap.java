@@ -14,6 +14,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -46,22 +49,26 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
    * Creates a new, empty map with the specified strategy, initial capacity, load factor and
    * concurrency level.
    */
+  @Impure
   ComputingConcurrentHashMap(MapMaker builder,
       Function<? super K, ? extends V> computingFunction) {
     super(builder);
     this.computingFunction = checkNotNull(computingFunction);
   }
 
+  @Impure
   @Override
   Segment<K, V> createSegment(int initialCapacity, int maxSegmentSize) {
     return new ComputingSegment<K, V>(this, initialCapacity, maxSegmentSize);
   }
 
+  @Impure
   @Override
   ComputingSegment<K, V> segmentFor(int hash) {
     return (ComputingSegment<K, V>) super.segmentFor(hash);
   }
 
+  @Impure
   V getOrCompute(K key) throws ExecutionException {
     int hash = hash(checkNotNull(key));
     return segmentFor(hash).getOrCompute(key, hash, computingFunction);
@@ -69,10 +76,12 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
 
   @SuppressWarnings("serial") // This class is never serialized.
   static final class ComputingSegment<K, V> extends Segment<K, V> {
+    @Impure
     ComputingSegment(MapMakerInternalMap<K, V> map, int initialCapacity, int maxSegmentSize) {
       super(map, initialCapacity, maxSegmentSize);
     }
 
+    @Impure
     V getOrCompute(K key, int hash, Function<? super K, ? extends V> computingFunction)
         throws ExecutionException {
       try {
@@ -168,6 +177,7 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
       }
     }
 
+    @Impure
     V compute(K key, int hash, ReferenceEntry<K, V> e,
         ComputingValueReference<K, V> computingValueReference)
         throws ExecutionException {
@@ -208,36 +218,43 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
   private static final class ComputationExceptionReference<K, V> implements ValueReference<K, V> {
     final Throwable t;
 
+    @SideEffectFree
     ComputationExceptionReference(Throwable t) {
       this.t = t;
     }
 
+    @Pure
     @Override
     public V get() {
       return null;
     }
 
+    @Pure
     @Override
     public ReferenceEntry<K, V> getEntry() {
       return null;
     }
 
+    @Pure
     @Override
     public ValueReference<K, V> copyFor(
         ReferenceQueue<V> queue, V value, ReferenceEntry<K, V> entry) {
       return this;
     }
 
+    @Pure
     @Override
     public boolean isComputingReference() {
       return false;
     }
 
+    @Pure
     @Override
     public V waitForValue() throws ExecutionException {
       throw new ExecutionException(t);
     }
 
+    @SideEffectFree
     @Override
     public void clear(ValueReference<K, V> newValue) {}
   }
@@ -248,36 +265,44 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
   private static final class ComputedReference<K, V> implements ValueReference<K, V> {
     final V value;
 
+    @SideEffectFree
     ComputedReference(@Nullable V value) {
       this.value = value;
     }
 
+    @Pure
     @Override
     public V get() {
       return value;
     }
 
+    @Pure
     @Override
     public ReferenceEntry<K, V> getEntry() {
       return null;
     }
 
+    @Pure
     @Override
     public ValueReference<K, V> copyFor(
         ReferenceQueue<V> queue, V value, ReferenceEntry<K, V> entry) {
       return this;
     }
 
+    @Pure
     @Override
     public boolean isComputingReference() {
       return false;
     }
 
+    @Pure
+    @Impure
     @Override
     public V waitForValue() {
       return get();
     }
 
+    @SideEffectFree
     @Override
     public void clear(ValueReference<K, V> newValue) {}
   }
@@ -288,10 +313,12 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
     @GuardedBy("ComputingValueReference.this") // writes
     volatile ValueReference<K, V> computedReference = unset();
 
+    @SideEffectFree
     public ComputingValueReference(Function<? super K, ? extends V> computingFunction) {
       this.computingFunction = computingFunction;
     }
 
+    @Pure
     @Override
     public V get() {
       // All computation lookups go through waitForValue. This method thus is
@@ -299,17 +326,20 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
       return null;
     }
 
+    @Pure
     @Override
     public ReferenceEntry<K, V> getEntry() {
       return null;
     }
 
+    @Pure
     @Override
     public ValueReference<K, V> copyFor(
         ReferenceQueue<V> queue, @Nullable V value, ReferenceEntry<K, V> entry) {
       return this;
     }
 
+    @Pure
     @Override
     public boolean isComputingReference() {
       return true;
@@ -318,6 +348,7 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
     /**
      * Waits for a computation to complete. Returns the result of the computation.
      */
+    @Impure
     @Override
     public V waitForValue() throws ExecutionException {
       if (computedReference == UNSET) {
@@ -341,6 +372,7 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
       return computedReference.waitForValue();
     }
 
+    @Impure
     @Override
     public void clear(ValueReference<K, V> newValue) {
       // The pending computation was clobbered by a manual write. Unblock all
@@ -350,6 +382,7 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
       // TODO(fry): could also cancel computation if we had a thread handle
     }
 
+    @Impure
     V compute(K key, int hash) throws ExecutionException {
       V value;
       try {
@@ -363,6 +396,7 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
       return value;
     }
 
+    @Impure
     void setValueReference(ValueReference<K, V> valueReference) {
       synchronized (this) {
         if (computedReference == UNSET) {
@@ -377,6 +411,7 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
 
   private static final long serialVersionUID = 4;
 
+  @Impure
   @Override
   Object writeReplace() {
     return new ComputingSerializationProxy<K, V>(keyStrength, valueStrength, keyEquivalence,
@@ -388,6 +423,7 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
 
     final Function<? super K, ? extends V> computingFunction;
 
+    @Impure
     ComputingSerializationProxy(Strength keyStrength, Strength valueStrength,
         Equivalence<Object> keyEquivalence, Equivalence<Object> valueEquivalence,
         long expireAfterWriteNanos, long expireAfterAccessNanos, int maximumSize,
@@ -398,11 +434,13 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
       this.computingFunction = computingFunction;
     }
 
+    @Impure
     private void writeObject(ObjectOutputStream out) throws IOException {
       out.defaultWriteObject();
       writeMapTo(out);
     }
 
+    @Impure
     @SuppressWarnings("deprecation") // self-use
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
       in.defaultReadObject();
@@ -411,6 +449,7 @@ class ComputingConcurrentHashMap<K, V> extends MapMakerInternalMap<K, V> {
       readEntries(in);
     }
 
+    @Pure
     Object readResolve() {
       return delegate;
     }

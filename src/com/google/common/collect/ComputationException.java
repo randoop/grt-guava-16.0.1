@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 
 import javax.annotation.Nullable;
@@ -31,6 +32,7 @@ public class ComputationException extends RuntimeException {
   /**
    * Creates a new instance with the given cause.
    */
+  @SideEffectFree
   public ComputationException(@Nullable Throwable cause) {
     super(cause);
   }

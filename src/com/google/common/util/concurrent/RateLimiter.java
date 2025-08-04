@@ -16,6 +16,9 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
@@ -225,6 +228,7 @@ public abstract class RateLimiter {
    */
   // TODO(user): "This is equivalent to
   //                 {@code createWithCapacity(permitsPerSecond, 1, TimeUnit.SECONDS)}".
+  @Impure
   public static RateLimiter create(double permitsPerSecond) {
     /*
        * The default RateLimiter configuration can save the unused permits of up to one second.
@@ -242,6 +246,7 @@ public abstract class RateLimiter {
     return create(SleepingTicker.SYSTEM_TICKER, permitsPerSecond);
   }
 
+  @Impure
   @VisibleForTesting
   static RateLimiter create(SleepingTicker ticker, double permitsPerSecond) {
     RateLimiter rateLimiter = new Bursty(ticker, 1.0 /* maxBurstSeconds */);
@@ -271,10 +276,12 @@ public abstract class RateLimiter {
    *        rate, before reaching its stable (maximum) rate
    * @param unit the time unit of the warmupPeriod argument
    */
+  @Impure
   public static RateLimiter create(double permitsPerSecond, long warmupPeriod, TimeUnit unit) {
     return create(SleepingTicker.SYSTEM_TICKER, permitsPerSecond, warmupPeriod, unit);
   }
 
+  @Impure
   @VisibleForTesting
   static RateLimiter create(
       SleepingTicker ticker, double permitsPerSecond, long warmupPeriod, TimeUnit unit) {
@@ -283,6 +290,7 @@ public abstract class RateLimiter {
     return rateLimiter;
   }
 
+  @Impure
   @VisibleForTesting
   static RateLimiter createWithCapacity(
       SleepingTicker ticker, double permitsPerSecond, long maxBurstBuildup, TimeUnit unit) {
@@ -328,6 +336,7 @@ public abstract class RateLimiter {
    */
   private long nextFreeTicketMicros = 0L; // could be either in the past or future
 
+  @Impure
   private RateLimiter(SleepingTicker ticker) {
     this.ticker = ticker;
     this.offsetNanos = ticker.read();
@@ -351,6 +360,7 @@ public abstract class RateLimiter {
    *
    * @param permitsPerSecond the new stable rate of this {@code RateLimiter}. Must be positive
    */
+  @Impure
   public final void setRate(double permitsPerSecond) {
     Preconditions.checkArgument(permitsPerSecond > 0.0
         && !Double.isNaN(permitsPerSecond), "rate must be positive");
@@ -362,6 +372,7 @@ public abstract class RateLimiter {
     }
   }
 
+  @Impure
   abstract void doSetRate(double permitsPerSecond, double stableIntervalMicros);
 
   /**
@@ -371,6 +382,7 @@ public abstract class RateLimiter {
    * this {@code RateLimiter}, and it is only updated after invocations
    * to {@linkplain #setRate}.
    */
+  @Impure
   public final double getRate() {
     return TimeUnit.SECONDS.toMicros(1L) / stableIntervalMicros;
   }
@@ -384,6 +396,7 @@ public abstract class RateLimiter {
    * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
    * @since 16.0 (present in 13.0 with {@code void} return type})
    */
+  @Impure
   public double acquire() {
     return acquire(1);
   }
@@ -396,6 +409,7 @@ public abstract class RateLimiter {
    * @return time spent sleeping to enforce rate, in seconds; 0.0 if not rate-limited
    * @since 16.0 (present in 13.0 with {@code void} return type})
    */
+  @Impure
   public double acquire(int permits) {
     checkPermits(permits);
     long microsToWait;
@@ -418,6 +432,7 @@ public abstract class RateLimiter {
    * @param unit the time unit of the timeout argument
    * @return {@code true} if the permit was acquired, {@code false} otherwise
    */
+  @Impure
   public boolean tryAcquire(long timeout, TimeUnit unit) {
     return tryAcquire(1, timeout, unit);
   }
@@ -432,6 +447,7 @@ public abstract class RateLimiter {
    * @return {@code true} if the permits were acquired, {@code false} otherwise
    * @since 14.0
    */
+  @Impure
   public boolean tryAcquire(int permits) {
     return tryAcquire(permits, 0, TimeUnit.MICROSECONDS);
   }
@@ -446,6 +462,7 @@ public abstract class RateLimiter {
    * @return {@code true} if the permit was acquired, {@code false} otherwise
    * @since 14.0
    */
+  @Impure
   public boolean tryAcquire() {
     return tryAcquire(1, 0, TimeUnit.MICROSECONDS);
   }
@@ -461,6 +478,7 @@ public abstract class RateLimiter {
    * @param unit the time unit of the timeout argument
    * @return {@code true} if the permits were acquired, {@code false} otherwise
    */
+  @Impure
   public boolean tryAcquire(int permits, long timeout, TimeUnit unit) {
     long timeoutMicros = unit.toMicros(timeout);
     checkPermits(permits);
@@ -477,6 +495,7 @@ public abstract class RateLimiter {
     return true;
   }
 
+  @Impure
   private static void checkPermits(int permits) {
     Preconditions.checkArgument(permits > 0, "Requested permits must be positive");
   }
@@ -484,6 +503,7 @@ public abstract class RateLimiter {
   /**
    * Reserves next ticket and returns the wait time that the caller must wait for.
    */
+  @Impure
   private long reserveNextTicket(double requiredPermits, long nowMicros) {
     resync(nowMicros);
     long microsToNextFreeTicket = nextFreeTicketMicros - nowMicros;
@@ -506,8 +526,10 @@ public abstract class RateLimiter {
    *
    * This always holds: {@code 0 <= permitsToTake <= storedPermits}
    */
+  @Impure
   abstract long storedPermitsToWaitTime(double storedPermits, double permitsToTake);
 
+  @Impure
   private void resync(long nowMicros) {
     // if nextFreeTicket is in the past, resync to now
     if (nowMicros > nextFreeTicketMicros) {
@@ -517,10 +539,12 @@ public abstract class RateLimiter {
     }
   }
 
+  @Impure
   private long readSafeMicros() {
     return TimeUnit.NANOSECONDS.toMicros(ticker.read() - offsetNanos);
   }
 
+  @SideEffectFree
   @Override
   public String toString() {
     return String.format("RateLimiter[stableRate=%3.1fqps]", 1000000.0 / stableIntervalMicros);
@@ -611,11 +635,13 @@ public abstract class RateLimiter {
     private double slope;
     private double halfPermits;
 
+    @Impure
     WarmingUp(SleepingTicker ticker, long warmupPeriod, TimeUnit timeUnit) {
       super(ticker);
       this.warmupPeriodMicros = timeUnit.toMicros(warmupPeriod);
     }
 
+    @Impure
     @Override
     void doSetRate(double permitsPerSecond, double stableIntervalMicros) {
       double oldMaxPermits = maxPermits;
@@ -634,6 +660,7 @@ public abstract class RateLimiter {
       }
     }
 
+    @Impure
     @Override
     long storedPermitsToWaitTime(double storedPermits, double permitsToTake) {
       double availablePermitsAboveHalf = storedPermits - halfPermits;
@@ -650,6 +677,7 @@ public abstract class RateLimiter {
       return micros;
     }
 
+    @Pure
     private double permitsToTime(double permits) {
       return stableIntervalMicros + permits * slope;
     }
@@ -665,11 +693,13 @@ public abstract class RateLimiter {
     /** The work (permits) of how many seconds can be saved up if this RateLimiter is unused? */
     final double maxBurstSeconds;
 
+    @Impure
     Bursty(SleepingTicker ticker, double maxBurstSeconds) {
       super(ticker);
       this.maxBurstSeconds = maxBurstSeconds;
     }
 
+    @Impure
     @Override
     void doSetRate(double permitsPerSecond, double stableIntervalMicros) {
       double oldMaxPermits = this.maxPermits;
@@ -679,6 +709,7 @@ public abstract class RateLimiter {
           : storedPermits * maxPermits / oldMaxPermits;
     }
 
+    @Pure
     @Override
     long storedPermitsToWaitTime(double storedPermits, double permitsToTake) {
       return 0L;
@@ -687,14 +718,17 @@ public abstract class RateLimiter {
 
   @VisibleForTesting
   static abstract class SleepingTicker extends Ticker {
+    @Impure
     abstract void sleepMicrosUninterruptibly(long micros);
 
     static final SleepingTicker SYSTEM_TICKER = new SleepingTicker() {
+      @Impure
       @Override
       public long read() {
         return systemTicker().read();
       }
 
+      @Impure
       @Override
       public void sleepMicrosUninterruptibly(long micros) {
         if (micros > 0) {

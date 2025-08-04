@@ -16,6 +16,9 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -46,6 +49,7 @@ import java.util.List;
  */
 @Beta
 public final class Resources {
+  @SideEffectFree
   private Resources() {}
 
   /**
@@ -57,6 +61,8 @@ public final class Resources {
    * @deprecated Use {@link #asByteSource(URL)} instead. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @SideEffectFree
+  @Impure
   @Deprecated
   public static InputSupplier<InputStream> newInputStreamSupplier(URL url) {
     return ByteStreams.asInputSupplier(asByteSource(url));
@@ -67,6 +73,8 @@ public final class Resources {
    *
    * @since 14.0
    */
+  @SideEffectFree
+  @Impure
   public static ByteSource asByteSource(URL url) {
     return new UrlByteSource(url);
   }
@@ -78,15 +86,19 @@ public final class Resources {
 
     private final URL url;
 
+    @SideEffectFree
+    @Impure
     private UrlByteSource(URL url) {
       this.url = checkNotNull(url);
     }
 
+    @Impure
     @Override
     public InputStream openStream() throws IOException {
       return url.openStream();
     }
 
+    @Pure
     @Override
     public String toString() {
       return "Resources.asByteSource(" + url + ")";
@@ -104,6 +116,7 @@ public final class Resources {
    * @deprecated Use {@link #asCharSource(URL, Charset)} instead. This method
    *     is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static InputSupplier<InputStreamReader> newReaderSupplier(
       URL url, Charset charset) {
@@ -116,6 +129,8 @@ public final class Resources {
    *
    * @since 14.0
    */
+  @SideEffectFree
+  @Impure
   public static CharSource asCharSource(URL url, Charset charset) {
     return asByteSource(url).asCharSource(charset);
   }
@@ -127,6 +142,7 @@ public final class Resources {
    * @return a byte array containing all the bytes from the URL
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static byte[] toByteArray(URL url) throws IOException {
     return asByteSource(url).read();
   }
@@ -141,6 +157,7 @@ public final class Resources {
    * @return a string containing all the characters from the URL
    * @throws IOException if an I/O error occurs.
    */
+  @Impure
   public static String toString(URL url, Charset charset) throws IOException {
     return asCharSource(url, charset).read();
   }
@@ -156,6 +173,7 @@ public final class Resources {
    * @return the output of processing the lines
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static <T> T readLines(URL url, Charset charset,
       LineProcessor<T> callback) throws IOException {
     return CharStreams.readLines(newReaderSupplier(url, charset), callback);
@@ -176,6 +194,7 @@ public final class Resources {
    * @return a mutable {@link List} containing all the lines
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static List<String> readLines(URL url, Charset charset)
       throws IOException {
     // don't use asCharSource(url, charset).readLines() because that returns
@@ -183,12 +202,14 @@ public final class Resources {
     return readLines(url, charset, new LineProcessor<List<String>>() {
       final List<String> result = Lists.newArrayList();
 
+      @Impure
       @Override
       public boolean processLine(String line) {
         result.add(line);
         return true;
       }
 
+      @Pure
       @Override
       public List<String> getResult() {
         return result;
@@ -203,6 +224,7 @@ public final class Resources {
    * @param to the output stream
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static void copy(URL from, OutputStream to) throws IOException {
     asByteSource(from).copyTo(to);
   }
@@ -221,6 +243,7 @@ public final class Resources {
    * 
    * @throws IllegalArgumentException if the resource is not found
    */
+  @Impure
   public static URL getResource(String resourceName) {
     ClassLoader loader = Objects.firstNonNull(
         Thread.currentThread().getContextClassLoader(),
@@ -236,6 +259,7 @@ public final class Resources {
    * 
    * @throws IllegalArgumentException if the resource is not found
    */
+  @Impure
   public static URL getResource(Class<?> contextClass, String resourceName) {
     URL url = contextClass.getResource(resourceName);
     checkArgument(url != null, "resource %s relative to %s not found.",

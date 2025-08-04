@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.ListIterator;
@@ -34,35 +36,46 @@ public abstract class ForwardingListIterator<E> extends ForwardingIterator<E>
     implements ListIterator<E> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingListIterator() {}
 
+  @Pure
   @Override protected abstract ListIterator<E> delegate();
 
+  @Impure
   @Override
   public void add(E element) {
     delegate().add(element);
   }
 
+  @Pure
+  @Impure
   @Override
   public boolean hasPrevious() {
     return delegate().hasPrevious();
   }
 
+  @Pure
+  @Impure
   @Override
   public int nextIndex() {
     return delegate().nextIndex();
   }
 
+  @Impure
   @Override
   public E previous() {
     return delegate().previous();
   }
 
+  @Pure
+  @Impure
   @Override
   public int previousIndex() {
     return delegate().previousIndex();
   }
 
+  @Impure
   @Override
   public void set(E element) {
     delegate().set(element);

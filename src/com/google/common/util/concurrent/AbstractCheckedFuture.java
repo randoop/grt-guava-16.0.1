@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 
 import java.util.concurrent.CancellationException;
@@ -37,6 +38,7 @@ public abstract class AbstractCheckedFuture<V, X extends Exception>
   /**
    * Constructs an {@code AbstractCheckedFuture} that wraps a delegate.
    */
+  @Impure
   protected AbstractCheckedFuture(ListenableFuture<V> delegate) {
     super(delegate);
   }
@@ -57,6 +59,7 @@ public abstract class AbstractCheckedFuture<V, X extends Exception>
    * {@code RuntimeException} to allow creating a CheckedFuture that throws
    * both checked and unchecked exceptions.
    */
+  @Impure
   protected abstract X mapException(Exception e);
 
   /**
@@ -72,6 +75,7 @@ public abstract class AbstractCheckedFuture<V, X extends Exception>
    * @throws X if {@link #get()} throws an {@link InterruptedException},
    *         {@link CancellationException}, or {@link ExecutionException}
    */
+  @Impure
   @Override
   public V checkedGet() throws X {
     try {
@@ -101,6 +105,7 @@ public abstract class AbstractCheckedFuture<V, X extends Exception>
    *         {@link CancellationException}, or {@link ExecutionException}
    * @throws TimeoutException {@inheritDoc}
    */
+  @Impure
   @Override
   public V checkedGet(long timeout, TimeUnit unit) throws TimeoutException, X {
     try {

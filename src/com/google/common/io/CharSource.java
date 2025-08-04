@@ -16,6 +16,9 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -66,6 +69,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
   /**
    * Constructor for use by subclasses.
    */
+  @SideEffectFree
   protected CharSource() {}
 
   /**
@@ -76,6 +80,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    *
    * @throws IOException if an I/O error occurs in the process of opening the reader
    */
+  @Impure
   public abstract Reader openStream() throws IOException;
 
   /**
@@ -87,6 +92,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    *     {@link InputSupplier} interface and should not be called directly. Use {@link #openStream}
    *     instead. This method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Override
   @Deprecated
   public final Reader getInput() throws IOException {
@@ -101,6 +107,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    *
    * @throws IOException if an I/O error occurs in the process of opening the reader
    */
+  @Impure
   public BufferedReader openBufferedStream() throws IOException {
     Reader reader = openStream();
     return (reader instanceof BufferedReader)
@@ -115,6 +122,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    * @throws IOException if an I/O error occurs in the process of reading from this source or
    *     writing to {@code appendable}
    */
+  @Impure
   public long copyTo(Appendable appendable) throws IOException {
     checkNotNull(appendable);
 
@@ -135,6 +143,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    * @throws IOException if an I/O error occurs in the process of reading from this source or
    *     writing to {@code sink}
    */
+  @Impure
   public long copyTo(CharSink sink) throws IOException {
     checkNotNull(sink);
 
@@ -155,6 +164,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    *
    * @throws IOException if an I/O error occurs in the process of reading from this source
    */
+  @Impure
   public String read() throws IOException {
     Closer closer = Closer.create();
     try {
@@ -176,6 +186,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    *
    * @throws IOException if an I/O error occurs in the process of reading from this source
    */
+  @Impure
   public @Nullable String readFirstLine() throws IOException {
     Closer closer = Closer.create();
     try {
@@ -198,6 +209,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    *
    * @throws IOException if an I/O error occurs in the process of reading from this source
    */
+  @Impure
   public ImmutableList<String> readLines() throws IOException {
     Closer closer = Closer.create();
     try {
@@ -229,6 +241,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    *     {@code processor} throws an {@code IOException}
    * @since 16.0
    */
+  @Impure
   @Beta
   public <T> T readLines(LineProcessor<T> processor) throws IOException {
     checkNotNull(processor);
@@ -251,6 +264,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    * @throws IOException if an I/O error occurs
    * @since 15.0
    */
+  @Impure
   public boolean isEmpty() throws IOException {
     Closer closer = Closer.create();
     try {
@@ -274,6 +288,8 @@ public abstract class CharSource implements InputSupplier<Reader> {
    * @return a {@code CharSource} containing the concatenated data
    * @since 15.0
    */
+  @SideEffectFree
+  @Impure
   public static CharSource concat(Iterable<? extends CharSource> sources) {
     return new ConcatenatedCharSource(sources);
   }
@@ -296,6 +312,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    * @throws NullPointerException if any of {@code sources} is {@code null}
    * @since 15.0
    */
+  @Impure
   public static CharSource concat(Iterator<? extends CharSource> sources) {
     return concat(ImmutableList.copyOf(sources));
   }
@@ -312,6 +329,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    * @throws NullPointerException if any of {@code sources} is {@code null}
    * @since 15.0
    */
+  @Impure
   public static CharSource concat(CharSource... sources) {
     return concat(ImmutableList.copyOf(sources));
   }
@@ -323,6 +341,8 @@ public abstract class CharSource implements InputSupplier<Reader> {
    *
    * @since 15.0 (since 14.0 as {@code CharStreams.asCharSource(String)})
    */
+  @SideEffectFree
+  @Impure
   public static CharSource wrap(CharSequence charSequence) {
     return new CharSequenceCharSource(charSequence);
   }
@@ -332,6 +352,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
    *
    * @since 15.0
    */
+  @Pure
   public static CharSource empty() {
     return EmptyCharSource.INSTANCE;
   }
@@ -343,20 +364,25 @@ public abstract class CharSource implements InputSupplier<Reader> {
 
     private final CharSequence seq;
 
+    @SideEffectFree
+    @Impure
     protected CharSequenceCharSource(CharSequence seq) {
       this.seq = checkNotNull(seq);
     }
 
+    @Impure
     @Override
     public Reader openStream() {
       return new CharSequenceReader(seq);
     }
 
+    @SideEffectFree
     @Override
     public String read() {
       return seq.toString();
     }
 
+    @Pure
     @Override
     public boolean isEmpty() {
       return seq.length() == 0;
@@ -367,13 +393,16 @@ public abstract class CharSource implements InputSupplier<Reader> {
      * a newline, a final empty string is not included to match the behavior of
      * BufferedReader/LineReader.readLine().
      */
+    @Impure
     private Iterable<String> lines() {
       return new Iterable<String>() {
+        @Impure
         @Override
         public Iterator<String> iterator() {
           return new AbstractIterator<String>() {
             Iterator<String> lines = LINE_SPLITTER.split(seq).iterator();
 
+            @Impure
             @Override
             protected String computeNext() {
               if (lines.hasNext()) {
@@ -390,17 +419,20 @@ public abstract class CharSource implements InputSupplier<Reader> {
       };
     }
 
+    @Impure
     @Override
     public String readFirstLine() {
       Iterator<String> lines = lines().iterator();
       return lines.hasNext() ? lines.next() : null;
     }
 
+    @Impure
     @Override
     public ImmutableList<String> readLines() {
       return ImmutableList.copyOf(lines());
     }
 
+    @Impure
     @Override
     public <T> T readLines(LineProcessor<T> processor) throws IOException {
       for (String line : lines()) {
@@ -411,6 +443,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
       return processor.getResult();
     }
 
+    @SideEffectFree
     @Override
     public String toString() {
       CharSequence shortened = (seq.length() <= 15) ? seq : seq.subSequence(0, 12) + "...";
@@ -422,10 +455,13 @@ public abstract class CharSource implements InputSupplier<Reader> {
 
     private static final EmptyCharSource INSTANCE = new EmptyCharSource();
 
+    @SideEffectFree
+    @Impure
     private EmptyCharSource() {
       super("");
     }
 
+    @Pure
     @Override
     public String toString() {
       return "CharSource.empty()";
@@ -436,15 +472,19 @@ public abstract class CharSource implements InputSupplier<Reader> {
 
     private final Iterable<? extends CharSource> sources;
 
+    @SideEffectFree
+    @Impure
     ConcatenatedCharSource(Iterable<? extends CharSource> sources) {
       this.sources = checkNotNull(sources);
     }
 
+    @Impure
     @Override
     public Reader openStream() throws IOException {
       return new MultiReader(sources.iterator());
     }
 
+    @Impure
     @Override
     public boolean isEmpty() throws IOException {
       for (CharSource source : sources) {
@@ -455,6 +495,7 @@ public abstract class CharSource implements InputSupplier<Reader> {
       return true;
     }
 
+    @Pure
     @Override
     public String toString() {
       return "CharSource.concat(" + sources + ")";

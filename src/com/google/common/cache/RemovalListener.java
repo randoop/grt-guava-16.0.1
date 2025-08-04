@@ -16,6 +16,7 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 
@@ -44,5 +45,6 @@ public interface RemovalListener<K, V> {
    */
   // Technically should accept RemovalNotification<? extends K, ? extends V>, but because
   // RemovalNotification is guaranteed covariant, let's make users' lives simpler.
+  @Impure
   void onRemoval(RemovalNotification<K, V> notification);
 }

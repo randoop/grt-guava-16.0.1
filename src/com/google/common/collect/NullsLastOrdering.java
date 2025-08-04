@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.io.Serializable;
@@ -27,10 +29,12 @@ import javax.annotation.Nullable;
 final class NullsLastOrdering<T> extends Ordering<T> implements Serializable {
   final Ordering<? super T> ordering;
 
+  @Impure
   NullsLastOrdering(Ordering<? super T> ordering) {
     this.ordering = ordering;
   }
 
+  @Impure
   @Override public int compare(@Nullable T left, @Nullable T right) {
     if (left == right) {
       return 0;
@@ -44,20 +48,24 @@ final class NullsLastOrdering<T> extends Ordering<T> implements Serializable {
     return ordering.compare(left, right);
   }
 
+  @Impure
   @Override public <S extends T> Ordering<S> reverse() {
     // ordering.reverse() might be optimized, so let it do its thing
     return ordering.reverse().nullsFirst();
   }
 
+  @Impure
   @Override public <S extends T> Ordering<S> nullsFirst() {
     return ordering.nullsFirst();
   }
 
+  @Pure
   @SuppressWarnings("unchecked") // still need the right way to explain this
   @Override public <S extends T> Ordering<S> nullsLast() {
     return (Ordering<S>) this;
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object object) {
     if (object == this) {
       return true;
@@ -69,10 +77,12 @@ final class NullsLastOrdering<T> extends Ordering<T> implements Serializable {
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     return ordering.hashCode() ^ -921210296; // meaningless
   }
 
+  @Pure
   @Override public String toString() {
     return ordering + ".nullsLast()";
   }

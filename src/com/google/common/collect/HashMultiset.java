@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 
@@ -38,6 +39,7 @@ public final class HashMultiset<E> extends AbstractMapBasedMultiset<E> {
    * Creates a new, empty {@code HashMultiset} using the default initial
    * capacity.
    */
+  @Impure
   public static <E> HashMultiset<E> create() {
     return new HashMultiset<E>();
   }
@@ -49,6 +51,7 @@ public final class HashMultiset<E> extends AbstractMapBasedMultiset<E> {
    * @param distinctElements the expected number of distinct elements
    * @throws IllegalArgumentException if {@code distinctElements} is negative
    */
+  @Impure
   public static <E> HashMultiset<E> create(int distinctElements) {
     return new HashMultiset<E>(distinctElements);
   }
@@ -61,6 +64,7 @@ public final class HashMultiset<E> extends AbstractMapBasedMultiset<E> {
    * 
    * @param elements the elements that the multiset should contain
    */
+  @Impure
   public static <E> HashMultiset<E> create(Iterable<? extends E> elements) {
     HashMultiset<E> multiset =
         create(Multisets.inferDistinctElements(elements));
@@ -68,10 +72,12 @@ public final class HashMultiset<E> extends AbstractMapBasedMultiset<E> {
     return multiset;
   }
 
+  @Impure
   private HashMultiset() {
     super(new HashMap<E, Count>());
   }
 
+  @Impure
   private HashMultiset(int distinctElements) {
     super(Maps.<E, Count>newHashMapWithExpectedSize(distinctElements));
   }
@@ -80,12 +86,14 @@ public final class HashMultiset<E> extends AbstractMapBasedMultiset<E> {
    * @serialData the number of distinct elements, the first element, its count,
    *     the second element, its count, and so on
    */
+  @Impure
   @GwtIncompatible("java.io.ObjectOutputStream")
   private void writeObject(ObjectOutputStream stream) throws IOException {
     stream.defaultWriteObject();
     Serialization.writeMultiset(this, stream);
   }
 
+  @Impure
   @GwtIncompatible("java.io.ObjectInputStream")
   private void readObject(ObjectInputStream stream)
       throws IOException, ClassNotFoundException {

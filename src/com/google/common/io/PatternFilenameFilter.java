@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 
@@ -44,6 +46,8 @@ public final class PatternFilenameFilter implements FilenameFilter {
    *
    * @throws PatternSyntaxException if pattern compilation fails (runtime)
    */
+  @SideEffectFree
+  @Impure
   public PatternFilenameFilter(String patternStr) {
     this(Pattern.compile(patternStr));
   }
@@ -52,10 +56,13 @@ public final class PatternFilenameFilter implements FilenameFilter {
    * Constructs a pattern file name filter object.
    * @param pattern the pattern on which to filter file names
    */
+  @SideEffectFree
+  @Impure
   public PatternFilenameFilter(Pattern pattern) {
     this.pattern = Preconditions.checkNotNull(pattern);
   }
 
+  @SideEffectFree
   @Override public boolean accept(@Nullable File dir, String fileName) {
     return pattern.matcher(fileName).matches();
   }

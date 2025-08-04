@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -43,27 +45,32 @@ public abstract class BinaryTreeTraverser<T> extends TreeTraverser<T> {
    * Returns the left child of the specified node, or {@link Optional#absent()} if the specified
    * node has no left child.
    */
+  @Pure
   public abstract Optional<T> leftChild(T root);
 
   /**
    * Returns the right child of the specified node, or {@link Optional#absent()} if the specified
    * node has no right child.
    */
+  @Pure
   public abstract Optional<T> rightChild(T root);
 
   /**
    * Returns the children of this node, in left-to-right order.
    */
+  @Impure
   @Override
   public final Iterable<T> children(final T root) {
     checkNotNull(root);
     return new FluentIterable<T>() {
+      @Impure
       @Override
       public Iterator<T> iterator() {
         return new AbstractIterator<T>() {
           boolean doneLeft;
           boolean doneRight;
 
+          @Impure
           @Override
           protected T computeNext() {
             if (!doneLeft) {
@@ -87,6 +94,7 @@ public abstract class BinaryTreeTraverser<T> extends TreeTraverser<T> {
     };
   }
 
+  @Impure
   @Override
   UnmodifiableIterator<T> preOrderIterator(T root) {
     return new PreOrderIterator(root);
@@ -99,16 +107,19 @@ public abstract class BinaryTreeTraverser<T> extends TreeTraverser<T> {
       implements PeekingIterator<T> {
     private final Deque<T> stack;
 
+    @Impure
     PreOrderIterator(T root) {
       this.stack = new ArrayDeque<T>();
       stack.addLast(root);
     }
 
+    @Pure
     @Override
     public boolean hasNext() {
       return !stack.isEmpty();
     }
 
+    @Impure
     @Override
     public T next() {
       T result = stack.removeLast();
@@ -117,12 +128,14 @@ public abstract class BinaryTreeTraverser<T> extends TreeTraverser<T> {
       return result;
     }
 
+    @Impure
     @Override
     public T peek() {
       return stack.getLast();
     }
   }
 
+  @Impure
   @Override
   UnmodifiableIterator<T> postOrderIterator(T root) {
     return new PostOrderIterator(root);
@@ -135,17 +148,20 @@ public abstract class BinaryTreeTraverser<T> extends TreeTraverser<T> {
     private final Deque<T> stack;
     private final BitSet hasExpanded;
 
+    @Impure
     PostOrderIterator(T root) {
       this.stack = new ArrayDeque<T>();
       stack.addLast(root);
       this.hasExpanded = new BitSet();
     }
 
+    @Pure
     @Override
     public boolean hasNext() {
       return !stack.isEmpty();
     }
 
+    @Impure
     @Override
     public T next() {
       while (true) {
@@ -166,9 +182,11 @@ public abstract class BinaryTreeTraverser<T> extends TreeTraverser<T> {
 
   // TODO(user): see if any significant optimizations are possible for breadthFirstIterator
 
+  @Impure
   public final FluentIterable<T> inOrderTraversal(final T root) {
     checkNotNull(root);
     return new FluentIterable<T>() {
+      @Impure
       @Override
       public UnmodifiableIterator<T> iterator() {
         return new InOrderIterator(root);
@@ -180,12 +198,14 @@ public abstract class BinaryTreeTraverser<T> extends TreeTraverser<T> {
     private final Deque<T> stack;
     private final BitSet hasExpandedLeft;
 
+    @Impure
     InOrderIterator(T root) {
       this.stack = new ArrayDeque<T>();
       this.hasExpandedLeft = new BitSet();
       stack.addLast(root);
     }
 
+    @Impure
     @Override
     protected T computeNext() {
       while (!stack.isEmpty()) {
@@ -204,6 +224,7 @@ public abstract class BinaryTreeTraverser<T> extends TreeTraverser<T> {
     }
   }
 
+  @Impure
   private static <T> void pushIfPresent(Deque<T> stack, Optional<T> node) {
     if (node.isPresent()) {
       stack.addLast(node.get());

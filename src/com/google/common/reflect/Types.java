@@ -16,6 +16,9 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;
@@ -59,6 +62,7 @@ final class Types {
   /** Class#toString without the "class " and "interface " prefixes */
   private static final Function<Type, String> TYPE_TO_STRING =
       new Function<Type, String>() {
+        @Impure
         @Override public String apply(Type from) {
           return Types.toString(from);
         }
@@ -67,6 +71,7 @@ final class Types {
   private static final Joiner COMMA_JOINER = Joiner.on(", ").useForNull("null");
 
   /** Returns the array type of {@code componentType}. */
+  @Impure
   static Type newArrayType(Type componentType) {
     if (componentType instanceof WildcardType) {
       WildcardType wildcard = (WildcardType) componentType;
@@ -87,6 +92,7 @@ final class Types {
    * Returns a type where {@code rawType} is parameterized by
    * {@code arguments} and is owned by {@code ownerType}.
    */
+  @Impure
   static ParameterizedType newParameterizedTypeWithOwner(
       @Nullable Type ownerType, Class<?> rawType, Type... arguments) {
     if (ownerType == null) {
@@ -102,6 +108,7 @@ final class Types {
    * Returns a type where {@code rawType} is parameterized by
    * {@code arguments}.
    */
+  @Impure
   static ParameterizedType newParameterizedType(Class<?> rawType, Type... arguments) {
       return new ParameterizedTypeImpl(
           ClassOwnership.JVM_BEHAVIOR.getOwnerType(rawType), rawType, arguments);
@@ -111,6 +118,7 @@ final class Types {
   private enum ClassOwnership {
 
     OWNED_BY_ENCLOSING_CLASS {
+      @Pure
       @Nullable
       @Override
       Class<?> getOwnerType(Class<?> rawType) {
@@ -118,6 +126,7 @@ final class Types {
       }
     },
     LOCAL_CLASS_HAS_NO_OWNER {
+      @Pure
       @Nullable
       @Override
       Class<?> getOwnerType(Class<?> rawType) {
@@ -129,10 +138,12 @@ final class Types {
       }
     };
 
+    @Pure
     @Nullable abstract Class<?> getOwnerType(Class<?> rawType);
 
     static final ClassOwnership JVM_BEHAVIOR = detectJvmBehavior();
 
+    @Impure
     private static ClassOwnership detectJvmBehavior() {
       class LocalClass<T> {}
       Class<?> subclass = new LocalClass<String>() {}.getClass();
@@ -151,6 +162,7 @@ final class Types {
    * Returns a new {@link TypeVariable} that belongs to {@code declaration} with
    * {@code name} and {@code bounds}.
    */
+  @Impure
   static <D extends GenericDeclaration> TypeVariable<D> newArtificialTypeVariable(
       D declaration, String name, Type... bounds) {
     return newTypeVariableImpl(
@@ -162,11 +174,13 @@ final class Types {
   }
 
   /** Returns a new {@link WildcardType} with {@code upperBound}. */
+  @Impure
   @VisibleForTesting static WildcardType subtypeOf(Type upperBound) {
     return new WildcardTypeImpl(new Type[0], new Type[] { upperBound });
   }
 
   /** Returns a new {@link WildcardType} with {@code lowerBound}. */
+  @Impure
   @VisibleForTesting static WildcardType supertypeOf(Type lowerBound) {
     return new WildcardTypeImpl(new Type[] { lowerBound }, new Type[] { Object.class });
   }
@@ -180,12 +194,14 @@ final class Types {
    * <li> For all other types, {@code type.toString()} are returned.
    * </ul>
    */
+  @SideEffectFree
   static String toString(Type type) {
     return (type instanceof Class)
         ? ((Class<?>) type).getName()
         : type.toString();
   }
 
+  @Impure
   @Nullable static Type getComponentType(Type type) {
     checkNotNull(type);
     final AtomicReference<Type> result = new AtomicReference<Type>();
@@ -210,6 +226,7 @@ final class Types {
    * Returns {@code ? extends X} if any of {@code bounds} is a subtype of {@code X[]}; or null
    * otherwise.
    */
+  @Impure
   @Nullable private static Type subtypeOfComponentType(Type[] bounds) {
     for (Type bound : bounds) {
       Type componentType = getComponentType(bound);
@@ -233,22 +250,27 @@ final class Types {
 
     private final Type componentType;
 
+    @Impure
     GenericArrayTypeImpl(Type componentType) {
       this.componentType = JavaVersion.CURRENT.usedInGenericType(componentType);
     }
 
+    @Pure
     @Override public Type getGenericComponentType() {
       return componentType;
     }
 
+    @Impure
     @Override public String toString() {
       return Types.toString(componentType) + "[]";
     }
 
+    @Pure
     @Override public int hashCode() {
       return componentType.hashCode();
     }
 
+    @Impure
     @Override public boolean equals(Object obj) {
       if (obj instanceof GenericArrayType) {
         GenericArrayType that = (GenericArrayType) obj;
@@ -268,6 +290,7 @@ final class Types {
     private final ImmutableList<Type> argumentsList;
     private final Class<?> rawType;
 
+    @Impure
     ParameterizedTypeImpl(
         @Nullable Type ownerType, Class<?> rawType, Type[] typeArguments) {
       checkNotNull(rawType);
@@ -278,18 +301,22 @@ final class Types {
       this.argumentsList = JavaVersion.CURRENT.usedInGenericType(typeArguments);
     }
 
+    @Impure
     @Override public Type[] getActualTypeArguments() {
       return toArray(argumentsList);
     }
 
+    @Pure
     @Override public Type getRawType() {
       return rawType;
     }
 
+    @Pure
     @Override public Type getOwnerType() {
       return ownerType;
     }
 
+    @Impure
     @Override public String toString() {
       StringBuilder builder = new StringBuilder();
       if (ownerType != null) {
@@ -302,11 +329,13 @@ final class Types {
       return builder.toString();
     }
 
+    @Pure
     @Override public int hashCode() {
       return (ownerType == null ? 0 : ownerType.hashCode())
           ^ argumentsList.hashCode() ^ rawType.hashCode();
     }
 
+    @Impure
     @Override public boolean equals(Object other) {
       if (!(other instanceof ParameterizedType)) {
         return false;
@@ -321,6 +350,7 @@ final class Types {
     private static final long serialVersionUID = 0;
   }
 
+  @Impure
   private static <D extends GenericDeclaration> TypeVariable<D> newTypeVariableImpl(
       D genericDeclaration, String name, Type[] bounds) {
     TypeVariableImpl<D> typeVariableImpl =
@@ -373,10 +403,12 @@ final class Types {
 
     private final TypeVariableImpl<?> typeVariableImpl;
 
+    @SideEffectFree
     TypeVariableInvocationHandler(TypeVariableImpl<?> typeVariableImpl) {
       this.typeVariableImpl = typeVariableImpl;
     }
 
+    @Impure
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
       String methodName = method.getName();
@@ -399,6 +431,7 @@ final class Types {
     private final String name;
     private final ImmutableList<Type> bounds;
 
+    @Impure
     TypeVariableImpl(D genericDeclaration, String name, Type[] bounds) {
       disallowPrimitiveType(bounds, "bound for type variable");
       this.genericDeclaration = checkNotNull(genericDeclaration);
@@ -406,30 +439,37 @@ final class Types {
       this.bounds = ImmutableList.copyOf(bounds);
     }
 
+    @Impure
     public Type[] getBounds() {
       return toArray(bounds);
     }
 
+    @Pure
     public D getGenericDeclaration() {
       return genericDeclaration;
     }
 
+    @Pure
     public String getName() {
       return name;
     }
 
+    @Pure
     public String getTypeName() {
       return name;
     }
 
+    @Pure
     @Override public String toString() {
       return name;
     }
 
+    @Pure
     @Override public int hashCode() {
       return genericDeclaration.hashCode() ^ name.hashCode();
     }
 
+    @Impure
     @Override public boolean equals(Object obj) {
       if (NativeTypeVariableEquals.NATIVE_TYPE_VARIABLE_ONLY) {
         // equal only to our TypeVariable implementation with identical bounds
@@ -461,6 +501,7 @@ final class Types {
     private final ImmutableList<Type> lowerBounds;
     private final ImmutableList<Type> upperBounds;
 
+    @Impure
     WildcardTypeImpl(Type[] lowerBounds, Type[] upperBounds) {
       disallowPrimitiveType(lowerBounds, "lower bound for wildcard");
       disallowPrimitiveType(upperBounds, "upper bound for wildcard");
@@ -468,14 +509,17 @@ final class Types {
       this.upperBounds = JavaVersion.CURRENT.usedInGenericType(upperBounds);
     }
 
+    @Impure
     @Override public Type[] getLowerBounds() {
       return toArray(lowerBounds);
     }
 
+    @Impure
     @Override public Type[] getUpperBounds() {
       return toArray(upperBounds);
     }
 
+    @Impure
     @Override public boolean equals(Object obj) {
       if (obj instanceof WildcardType) {
         WildcardType that = (WildcardType) obj;
@@ -485,10 +529,12 @@ final class Types {
       return false;
     }
 
+    @Pure
     @Override public int hashCode() {
       return lowerBounds.hashCode() ^ upperBounds.hashCode();
     }
 
+    @Impure
     @Override public String toString() {
       StringBuilder builder = new StringBuilder("?");
       for (Type lowerBound : lowerBounds) {
@@ -503,15 +549,18 @@ final class Types {
     private static final long serialVersionUID = 0;
   }
 
+  @SideEffectFree
   private static Type[] toArray(Collection<Type> types) {
     return types.toArray(new Type[types.size()]);
   }
 
+  @Impure
   private static Iterable<Type> filterUpperBounds(Iterable<Type> bounds) {
     return Iterables.filter(
         bounds, Predicates.not(Predicates.<Type>equalTo(Object.class)));
   }
 
+  @Impure
   private static void disallowPrimitiveType(Type[] types, String usedAs) {
     for (Type type : types) {
       if (type instanceof Class) {
@@ -523,6 +572,7 @@ final class Types {
   }
 
   /** Returns the {@code Class} object of arrays with {@code componentType}. */
+  @SideEffectFree
   static Class<?> getArrayClass(Class<?> componentType) {
     // TODO(user): This is not the most efficient way to handle generic
     // arrays, but is there another way to extract the array class in a
@@ -534,9 +584,11 @@ final class Types {
   enum JavaVersion {
 
     JAVA6 {
+      @Impure
       @Override GenericArrayType newArrayType(Type componentType) {
         return new GenericArrayTypeImpl(componentType);
       }
+      @Impure
       @Override Type usedInGenericType(Type type) {
         checkNotNull(type);
         if (type instanceof Class) {
@@ -549,6 +601,7 @@ final class Types {
       }
     },
     JAVA7 {
+      @Impure
       @Override Type newArrayType(Type componentType) {
         if (componentType instanceof Class) {
           return getArrayClass((Class<?>) componentType);
@@ -556,21 +609,25 @@ final class Types {
           return new GenericArrayTypeImpl(componentType);
         }
       }
+      @Impure
       @Override Type usedInGenericType(Type type) {
         return checkNotNull(type);
       }
     },
     JAVA8 {
+      @Impure
       @Override
       Type newArrayType(Type componentType) {
         return JAVA7.newArrayType(componentType);
     }
 
+      @Impure
       @Override
       Type usedInGenericType(Type type) {
         return JAVA7.usedInGenericType(type);
       }
 
+      @Impure
       @Override
       String typeName(Type type) {
         try {
@@ -598,14 +655,18 @@ final class Types {
       }
     }
 
+    @Impure
     abstract Type newArrayType(Type componentType);
 
+    @Impure
     abstract Type usedInGenericType(Type type);
 
+    @Impure
     String typeName(Type type) {
       return Types.toString(type);
     }
 
+    @Impure
     final ImmutableList<Type> usedInGenericType(Type[] types) {
       ImmutableList.Builder<Type> builder = ImmutableList.builder();
       for (Type type : types) {

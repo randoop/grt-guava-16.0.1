@@ -16,6 +16,9 @@
 
 package com.google.common.net;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -77,6 +80,7 @@ public final class HostAndPort implements Serializable {
   /** True if the parsed host has colons, but no surrounding brackets. */
   private final boolean hasBracketlessColons;
 
+  @SideEffectFree
   private HostAndPort(String host, int port, boolean hasBracketlessColons) {
     this.host = host;
     this.port = port;
@@ -90,11 +94,13 @@ public final class HostAndPort implements Serializable {
    * <p>A successful parse does not imply any degree of sanity in this field.
    * For additional validation, see the {@link HostSpecifier} class.
    */
+  @Pure
   public String getHostText() {
     return host;
   }
 
   /** Return true if this instance has a defined port. */
+  @Pure
   public boolean hasPort() {
     return port >= 0;
   }
@@ -106,6 +112,7 @@ public final class HostAndPort implements Serializable {
    * @throws IllegalStateException if no port is defined.  You can use
    *         {@link #withDefaultPort(int)} to prevent this from occurring.
    */
+  @Impure
   public int getPort() {
     checkState(hasPort());
     return port;
@@ -114,6 +121,8 @@ public final class HostAndPort implements Serializable {
   /**
    * Returns the current port number, with a default if no port is defined.
    */
+  @Pure
+  @Impure
   public int getPortOrDefault(int defaultPort) {
     return hasPort() ? port : defaultPort;
   }
@@ -130,6 +139,7 @@ public final class HostAndPort implements Serializable {
    * @throws IllegalArgumentException if {@code host} contains a port number,
    *     or {@code port} is out of range.
    */
+  @Impure
   public static HostAndPort fromParts(String host, int port) {
     checkArgument(isValidPort(port), "Port out of range: %s", port);
     HostAndPort parsedHost = fromString(host);
@@ -147,6 +157,7 @@ public final class HostAndPort implements Serializable {
    * @return if parsing was successful, a populated HostAndPort object.
    * @throws IllegalArgumentException if nothing meaningful could be parsed.
    */
+  @Impure
   public static HostAndPort fromString(String hostPortString) {
     checkNotNull(hostPortString);
     String host;
@@ -193,6 +204,7 @@ public final class HostAndPort implements Serializable {
    * @return an array with 2 strings: host and port, in that order.
    * @throws IllegalArgumentException if parsing the bracketed host-port string fails.
    */
+  @Impure
   private static String[] getHostAndPortFromBracketedHost(String hostPortString) {
     int colonIndex = 0;
     int closeBracketIndex = 0;
@@ -228,6 +240,7 @@ public final class HostAndPort implements Serializable {
    * @param defaultPort a port number, from [0..65535]
    * @return a HostAndPort instance, guaranteed to have a defined port.
    */
+  @Impure
   public HostAndPort withDefaultPort(int defaultPort) {
     checkArgument(isValidPort(defaultPort));
     if (hasPort() || port == defaultPort) {
@@ -251,11 +264,14 @@ public final class HostAndPort implements Serializable {
    * @return {@code this}, to enable chaining of calls.
    * @throws IllegalArgumentException if bracketless IPv6 is detected.
    */
+  @Impure
   public HostAndPort requireBracketsForIPv6() {
     checkArgument(!hasBracketlessColons, "Possible bracketless IPv6 literal: %s", host);
     return this;
   }
 
+  @Impure
+  @Pure
   @Override
   public boolean equals(@Nullable Object other) {
     if (this == other) {
@@ -270,12 +286,15 @@ public final class HostAndPort implements Serializable {
     return false;
   }
 
+  @Impure
+  @Pure
   @Override
   public int hashCode() {
     return Objects.hashCode(host, port, hasBracketlessColons);
   }
 
   /** Rebuild the host:port string, including brackets if necessary. */
+  @Impure
   @Override
   public String toString() {
     StringBuilder builder = new StringBuilder(host.length() + 7);
@@ -291,6 +310,7 @@ public final class HostAndPort implements Serializable {
   }
 
   /** Return true for valid port numbers. */
+  @Pure
   private static boolean isValidPort(int port) {
     return port >= 0 && port <= 65535;
   }

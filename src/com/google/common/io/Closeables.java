@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -37,6 +39,7 @@ public final class Closeables {
   @VisibleForTesting static final Logger logger
       = Logger.getLogger(Closeables.class.getName());
 
+  @SideEffectFree
   private Closeables() {}
 
   /**
@@ -68,6 +71,7 @@ public final class Closeables {
    * @throws IOException if {@code swallowIOException} is false and {@code close} throws an
    *     {@code IOException}.
    */
+  @Impure
   public static void close(@Nullable Closeable closeable,
       boolean swallowIOException) throws IOException {
     if (closeable == null) {

@@ -16,6 +16,9 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collections;
@@ -31,6 +34,7 @@ import java.util.Set;
  * @since 1.0
  */
 public final class Primitives {
+  @SideEffectFree
   private Primitives() {}
 
   /** A map from primitive types to their corresponding wrapper types. */
@@ -59,6 +63,7 @@ public final class Primitives {
     WRAPPER_TO_PRIMITIVE_TYPE = Collections.unmodifiableMap(wrapToPrim);
   }
 
+  @Impure
   private static void add(Map<Class<?>, Class<?>> forward,
       Map<Class<?>, Class<?>> backward, Class<?> key, Class<?> value) {
     forward.put(key, value);
@@ -72,6 +77,7 @@ public final class Primitives {
    *
    * @since 3.0
    */
+  @SideEffectFree
   public static Set<Class<?>> allPrimitiveTypes() {
     return PRIMITIVE_TO_WRAPPER_TYPE.keySet();
   }
@@ -82,6 +88,7 @@ public final class Primitives {
    *
    * @since 3.0
    */
+  @SideEffectFree
   public static Set<Class<?>> allWrapperTypes() {
     return WRAPPER_TO_PRIMITIVE_TYPE.keySet();
   }
@@ -92,6 +99,8 @@ public final class Primitives {
    *
    * @see Class#isPrimitive
    */
+  @Impure
+  @Pure
   public static boolean isWrapperType(Class<?> type) {
     return WRAPPER_TO_PRIMITIVE_TYPE.containsKey(checkNotNull(type));
   }
@@ -105,6 +114,8 @@ public final class Primitives {
    *     wrap(String.class) == String.class
    * </pre>
    */
+  @Impure
+  @Pure
   public static <T> Class<T> wrap(Class<T> type) {
     checkNotNull(type);
 
@@ -123,6 +134,8 @@ public final class Primitives {
    *     unwrap(String.class) == String.class
    * </pre>
    */
+  @Impure
+  @Pure
   public static <T> Class<T> unwrap(Class<T> type) {
     checkNotNull(type);
 

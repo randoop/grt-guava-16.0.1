@@ -14,6 +14,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 
 import java.nio.charset.Charset;
@@ -32,6 +35,8 @@ public interface PrimitiveSink {
    * @param b a byte
    * @return this instance
    */
+  @Impure
+  @Pure
   PrimitiveSink putByte(byte b);
 
   /**
@@ -40,6 +45,8 @@ public interface PrimitiveSink {
    * @param bytes a byte array
    * @return this instance
    */
+  @Impure
+  @Pure
   PrimitiveSink putBytes(byte[] bytes);
 
   /**
@@ -53,41 +60,54 @@ public interface PrimitiveSink {
    * @throws IndexOutOfBoundsException if {@code off < 0} or {@code off + len > bytes.length} or
    *   {@code len < 0}
    */
+  @Impure
+  @Pure
   PrimitiveSink putBytes(byte[] bytes, int off, int len);
 
   /**
    * Puts a short into this sink.
    */
+  @Impure
+  @Pure
   PrimitiveSink putShort(short s);
 
   /**
    * Puts an int into this sink.
    */
+  @Impure
+  @Pure
   PrimitiveSink putInt(int i);
 
   /**
    * Puts a long into this sink.
    */
+  @Impure
+  @Pure
   PrimitiveSink putLong(long l);
 
   /**
    * Puts a float into this sink.
    */
+  @Pure
   PrimitiveSink putFloat(float f);
 
   /**
    * Puts a double into this sink.
    */
+  @Pure
   PrimitiveSink putDouble(double d);
 
   /**
    * Puts a boolean into this sink.
    */
+  @Pure
   PrimitiveSink putBoolean(boolean b);
 
   /**
    * Puts a character into this sink.
    */
+  @Impure
+  @Pure
   PrimitiveSink putChar(char c);
 
   /**
@@ -95,10 +115,13 @@ public interface PrimitiveSink {
    *
    * @since 15.0 (since 11.0 as putString(CharSequence))
    */
+  @Pure
   PrimitiveSink putUnencodedChars(CharSequence charSequence);
 
   /**
    * Puts a string into this sink using the given charset.
    */
+  @SideEffectFree
+  @Pure
   PrimitiveSink putString(CharSequence charSequence, Charset charset);
 }

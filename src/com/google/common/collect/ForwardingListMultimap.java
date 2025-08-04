@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.List;
@@ -36,18 +38,23 @@ public abstract class ForwardingListMultimap<K, V>
     extends ForwardingMultimap<K, V> implements ListMultimap<K, V> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingListMultimap() {}
 
+  @Pure
   @Override protected abstract ListMultimap<K, V> delegate();
 
+  @Impure
   @Override public List<V> get(@Nullable K key) {
     return delegate().get(key);
   }
 
+  @Impure
   @Override public List<V> removeAll(@Nullable Object key) {
     return delegate().removeAll(key);
   }
 
+  @Impure
   @Override public List<V> replaceValues(K key, Iterable<? extends V> values) {
     return delegate().replaceValues(key, values);
   }

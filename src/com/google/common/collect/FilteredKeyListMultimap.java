@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Predicate;
 
@@ -31,25 +32,30 @@ import javax.annotation.Nullable;
 @GwtCompatible
 final class FilteredKeyListMultimap<K, V> extends FilteredKeyMultimap<K, V> 
     implements ListMultimap<K, V> {
+  @Impure
   FilteredKeyListMultimap(ListMultimap<K, V> unfiltered, Predicate<? super K> keyPredicate) {
     super(unfiltered, keyPredicate);
   }
 
+  @Impure
   @Override
   public ListMultimap<K, V> unfiltered() {
     return (ListMultimap<K, V>) super.unfiltered();
   }
 
+  @Impure
   @Override
   public List<V> get(K key) {
     return (List<V>) super.get(key);
   }
 
+  @Impure
   @Override
   public List<V> removeAll(@Nullable Object key) {
     return (List<V>) super.removeAll(key);
   }
 
+  @Impure
   @Override
   public List<V> replaceValues(K key, Iterable<? extends V> values) {
     return (List<V>) super.replaceValues(key, values);

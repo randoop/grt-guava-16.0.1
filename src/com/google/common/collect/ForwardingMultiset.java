@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Objects;
@@ -53,48 +55,61 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
     implements Multiset<E> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingMultiset() {}
 
+  @Pure
   @Override protected abstract Multiset<E> delegate();
 
+  @Impure
   @Override
   public int count(Object element) {
     return delegate().count(element);
   }
 
+  @Impure
   @Override
   public int add(E element, int occurrences) {
     return delegate().add(element, occurrences);
   }
 
+  @Impure
   @Override
   public int remove(Object element, int occurrences) {
     return delegate().remove(element, occurrences);
   }
 
+  @Impure
   @Override
   public Set<E> elementSet() {
     return delegate().elementSet();
   }
 
+  @Impure
   @Override
   public Set<Entry<E>> entrySet() {
     return delegate().entrySet();
   }
 
+  @Pure
+  @Impure
   @Override public boolean equals(@Nullable Object object) {
     return object == this || delegate().equals(object);
   }
 
+  @Pure
+  @Impure
   @Override public int hashCode() {
     return delegate().hashCode();
   }
 
+  @Impure
   @Override
   public int setCount(E element, int count) {
     return delegate().setCount(element, count);
   }
 
+  @Impure
   @Override
   public boolean setCount(E element, int oldCount, int newCount) {
     return delegate().setCount(element, oldCount, newCount);
@@ -107,6 +122,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   @Override protected boolean standardContains(@Nullable Object object) {
     return count(object) > 0;
   }
@@ -118,6 +134,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    *
    * @since 7.0
    */
+  @Impure
   @Override protected void standardClear() {
     Iterators.clear(entrySet().iterator());
   }
@@ -129,6 +146,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   @Beta protected int standardCount(@Nullable Object object) {
     for (Entry<?> entry : this.entrySet()) {
       if (Objects.equal(entry.getElement(), object)) {
@@ -145,6 +163,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   protected boolean standardAdd(E element) {
     add(element, 1);
     return true;
@@ -158,6 +177,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   @Beta @Override protected boolean standardAddAll(
       Collection<? extends E> elementsToAdd) {
     return Multisets.addAllImpl(this, elementsToAdd);
@@ -171,6 +191,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   @Override protected boolean standardRemove(Object element) {
     return remove(element, 1) > 0;
   }
@@ -183,6 +204,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    *
    * @since 7.0
    */
+  @Impure
   @Override protected boolean standardRemoveAll(
       Collection<?> elementsToRemove) {
     return Multisets.removeAllImpl(this, elementsToRemove);
@@ -196,6 +218,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    *
    * @since 7.0
    */
+  @Impure
   @Override protected boolean standardRetainAll(
       Collection<?> elementsToRetain) {
     return Multisets.retainAllImpl(this, elementsToRetain);
@@ -210,6 +233,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   protected int standardSetCount(E element, int count) {
     return Multisets.setCountImpl(this, element, count);
   }
@@ -222,6 +246,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    *
    * @since 7.0
    */
+  @Impure
   protected boolean standardSetCount(E element, int oldCount, int newCount) {
     return Multisets.setCountImpl(this, element, oldCount, newCount);
   }
@@ -242,8 +267,10 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
   @Beta
   protected class StandardElementSet extends Multisets.ElementSet<E> {
     /** Constructor for use by subclasses. */
+    @Impure
     public StandardElementSet() {}
 
+    @Pure
     @Override
     Multiset<E> multiset() {
       return ForwardingMultiset.this;
@@ -257,6 +284,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   protected Iterator<E> standardIterator() {
     return Multisets.iteratorImpl(this);
   }
@@ -268,6 +296,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   protected int standardSize() {
     return Multisets.sizeImpl(this);
   }
@@ -280,6 +309,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    *
    * @since 7.0
    */
+  @Impure
   protected boolean standardEquals(@Nullable Object object) {
     return Multisets.equalsImpl(this, object);
   }
@@ -291,6 +321,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    *
    * @since 7.0
    */
+  @Impure
   protected int standardHashCode() {
     return entrySet().hashCode();
   }
@@ -302,6 +333,7 @@ public abstract class ForwardingMultiset<E> extends ForwardingCollection<E>
    *
    * @since 7.0
    */
+  @Impure
   @Override protected String standardToString() {
     return entrySet().toString();
   }

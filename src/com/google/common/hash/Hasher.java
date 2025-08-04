@@ -14,6 +14,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 
 import java.nio.charset.Charset;
@@ -51,27 +54,44 @@ import java.nio.charset.Charset;
  */
 @Beta
 public interface Hasher extends PrimitiveSink {
+  @Impure
+  @Pure
   @Override Hasher putByte(byte b);
+  @Impure
+  @Pure
   @Override Hasher putBytes(byte[] bytes);
+  @Impure
+  @Pure
   @Override Hasher putBytes(byte[] bytes, int off, int len);
+  @Impure
+  @Pure
   @Override Hasher putShort(short s);
+  @Impure
+  @Pure
   @Override Hasher putInt(int i);
+  @Impure
+  @Pure
   @Override Hasher putLong(long l);
 
   /**
    * Equivalent to {@code putInt(Float.floatToRawIntBits(f))}.
    */
+  @Pure
   @Override Hasher putFloat(float f);
 
   /**
    * Equivalent to {@code putLong(Double.doubleToRawLongBits(d))}.
    */
+  @Pure
   @Override Hasher putDouble(double d);
 
   /**
    * Equivalent to {@code putByte(b ? (byte) 1 : (byte) 0)}.
    */
+  @Pure
   @Override Hasher putBoolean(boolean b);
+  @Impure
+  @Pure
   @Override Hasher putChar(char c);
 
   /**
@@ -80,21 +100,28 @@ public interface Hasher extends PrimitiveSink {
    *
    * @since 15.0 (since 11.0 as putString(CharSequence)).
    */
+  @Pure
   @Override Hasher putUnencodedChars(CharSequence charSequence);
 
   /**
    * Equivalent to {@code putBytes(charSequence.toString().getBytes(charset))}.
    */
+  @SideEffectFree
+  @Pure
   @Override Hasher putString(CharSequence charSequence, Charset charset);
 
   /**
    * A simple convenience for {@code funnel.funnel(object, this)}.
    */
+  @SideEffectFree
+  @Pure
   <T> Hasher putObject(T instance, Funnel<? super T> funnel);
 
   /**
    * Computes a hash code based on the data that have been provided to this hasher. The result is
    * unspecified if this method is called more than once on the same instance.
    */
+  @Impure
+  @Pure
   HashCode hash();
 }

@@ -14,6 +14,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.io.Serializable;
@@ -29,44 +32,53 @@ import javax.annotation.Nullable;
 final class Count implements Serializable {
   private int value;
 
+  @SideEffectFree
   Count(int value) {
     this.value = value;
   }
 
+  @Pure
   public int get() {
     return value;
   }
 
+  @Impure
   public int getAndAdd(int delta) {
     int result = value;
     value = result + delta;
     return result;
   }
 
+  @Impure
   public int addAndGet(int delta) {
     return value += delta;
   }
 
+  @Impure
   public void set(int newValue) {
     value = newValue;
   }
 
+  @Impure
   public int getAndSet(int newValue) {
     int result = value;
     value = newValue;
     return result;
   }
 
+  @Pure
   @Override
   public int hashCode() {
     return value;
   }
 
+  @Pure
   @Override
   public boolean equals(@Nullable Object obj) {
     return obj instanceof Count && ((Count) obj).value == value;
   }
 
+  @SideEffectFree
   @Override
   public String toString() {
     return Integer.toString(value);

@@ -16,6 +16,9 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -54,6 +57,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public final class AtomicLongMap<K> {
   private final ConcurrentHashMap<K, AtomicLong> map;
 
+  @Impure
   private AtomicLongMap(ConcurrentHashMap<K, AtomicLong> map) {
     this.map = checkNotNull(map);
   }
@@ -61,6 +65,7 @@ public final class AtomicLongMap<K> {
   /**
    * Creates an {@code AtomicLongMap}.
    */
+  @Impure
   public static <K> AtomicLongMap<K> create() {
     return new AtomicLongMap<K>(new ConcurrentHashMap<K, AtomicLong>());
   }
@@ -68,6 +73,7 @@ public final class AtomicLongMap<K> {
   /**
    * Creates an {@code AtomicLongMap} with the same mappings as the specified {@code Map}.
    */
+  @Impure
   public static <K> AtomicLongMap<K> create(Map<? extends K, ? extends Long> m) {
     AtomicLongMap<K> result = create();
     result.putAll(m);
@@ -78,6 +84,7 @@ public final class AtomicLongMap<K> {
    * Returns the value associated with {@code key}, or zero if there is no value associated with
    * {@code key}.
    */
+  @Impure
   public long get(K key) {
     AtomicLong atomic = map.get(key);
     return atomic == null ? 0L : atomic.get();
@@ -86,6 +93,7 @@ public final class AtomicLongMap<K> {
   /**
    * Increments by one the value currently associated with {@code key}, and returns the new value.
    */
+  @Impure
   public long incrementAndGet(K key) {
     return addAndGet(key, 1);
   }
@@ -93,6 +101,7 @@ public final class AtomicLongMap<K> {
   /**
    * Decrements by one the value currently associated with {@code key}, and returns the new value.
    */
+  @Impure
   public long decrementAndGet(K key) {
     return addAndGet(key, -1);
   }
@@ -101,6 +110,7 @@ public final class AtomicLongMap<K> {
    * Adds {@code delta} to the value currently associated with {@code key}, and returns the new
    * value.
    */
+  @Impure
   public long addAndGet(K key, long delta) {
     outer: for (;;) {
       AtomicLong atomic = map.get(key);
@@ -135,6 +145,7 @@ public final class AtomicLongMap<K> {
   /**
    * Increments by one the value currently associated with {@code key}, and returns the old value.
    */
+  @Impure
   public long getAndIncrement(K key) {
     return getAndAdd(key, 1);
   }
@@ -142,6 +153,7 @@ public final class AtomicLongMap<K> {
   /**
    * Decrements by one the value currently associated with {@code key}, and returns the old value.
    */
+  @Impure
   public long getAndDecrement(K key) {
     return getAndAdd(key, -1);
   }
@@ -150,6 +162,7 @@ public final class AtomicLongMap<K> {
    * Adds {@code delta} to the value currently associated with {@code key}, and returns the old
    * value.
    */
+  @Impure
   public long getAndAdd(K key, long delta) {
     outer: for (;;) {
       AtomicLong atomic = map.get(key);
@@ -185,6 +198,7 @@ public final class AtomicLongMap<K> {
    * Associates {@code newValue} with {@code key} in this map, and returns the value previously
    * associated with {@code key}, or zero if there was no such value.
    */
+  @Impure
   public long put(K key, long newValue) {
     outer: for (;;) {
       AtomicLong atomic = map.get(key);
@@ -221,6 +235,7 @@ public final class AtomicLongMap<K> {
    * {@code k} to value {@code v} in the specified map. The behavior of this operation is undefined
    * if the specified map is modified while the operation is in progress.
    */
+  @Impure
   public void putAll(Map<? extends K, ? extends Long> m) {
     for (Map.Entry<? extends K, ? extends Long> entry : m.entrySet()) {
       put(entry.getKey(), entry.getValue());
@@ -231,6 +246,7 @@ public final class AtomicLongMap<K> {
    * Removes and returns the value associated with {@code key}. If {@code key} is not
    * in the map, this method has no effect and returns zero.
    */
+  @Impure
   public long remove(K key) {
     AtomicLong atomic = map.get(key);
     if (atomic == null) {
@@ -254,6 +270,7 @@ public final class AtomicLongMap<K> {
    * <p>This method is not atomic: the map may be visible in intermediate states, where some
    * of the zero values have been removed and others have not.
    */
+  @Impure
   public void removeAllZeros() {
     for (K key : map.keySet()) {
       AtomicLong atomic = map.get(key);
@@ -268,6 +285,7 @@ public final class AtomicLongMap<K> {
    *
    * <p>This method is not atomic: the sum may or may not include other concurrent operations.
    */
+  @Impure
   public long sum() {
     long sum = 0L;
     for (AtomicLong value : map.values()) {
@@ -281,14 +299,17 @@ public final class AtomicLongMap<K> {
   /**
    * Returns a live, read-only view of the map backing this {@code AtomicLongMap}.
    */
+  @Impure
   public Map<K, Long> asMap() {
     Map<K, Long> result = asMap;
     return (result == null) ? asMap = createAsMap() : result;
   }
 
+  @Impure
   private Map<K, Long> createAsMap() {
     return Collections.unmodifiableMap(
         Maps.transformValues(map, new Function<AtomicLong, Long>() {
+          @Impure
           @Override
           public Long apply(AtomicLong atomic) {
             return atomic.get();
@@ -299,6 +320,7 @@ public final class AtomicLongMap<K> {
   /**
    * Returns true if this map contains a mapping for the specified key.
    */
+  @Pure
   public boolean containsKey(Object key) {
     return map.containsKey(key);
   }
@@ -307,6 +329,7 @@ public final class AtomicLongMap<K> {
    * Returns the number of key-value mappings in this map. If the map contains more than
    * {@code Integer.MAX_VALUE} elements, returns {@code Integer.MAX_VALUE}.
    */
+  @Pure
   public int size() {
     return map.size();
   }
@@ -314,6 +337,7 @@ public final class AtomicLongMap<K> {
   /**
    * Returns {@code true} if this map contains no key-value mappings.
    */
+  @Pure
   public boolean isEmpty() {
     return map.isEmpty();
   }
@@ -324,10 +348,12 @@ public final class AtomicLongMap<K> {
    * <p>This method is not atomic: the map may not be empty after returning if there were concurrent
    * writes.
    */
+  @Impure
   public void clear() {
     map.clear();
   }
 
+  @SideEffectFree
   @Override
   public String toString() {
     return map.toString();
@@ -361,6 +387,7 @@ public final class AtomicLongMap<K> {
    * zero, associate it with {@code newValue}. Returns the previous value associated with
    * {@code key}, or zero if there was no mapping for {@code key}.
    */
+  @Impure
   long putIfAbsent(K key, long newValue) {
     for (;;) {
       AtomicLong atomic = map.get(key);
@@ -394,6 +421,7 @@ public final class AtomicLongMap<K> {
    * <p>If {@code expectedOldValue} is zero, this method will succeed if {@code (key, zero)}
    * is currently in the map, or if {@code key} is not in the map at all.
    */
+  @Impure
   boolean replace(K key, long expectedOldValue, long newValue) {
     if (expectedOldValue == 0L) {
       return putIfAbsent(key, newValue) == 0L;
@@ -407,6 +435,7 @@ public final class AtomicLongMap<K> {
    * If {@code (key, value)} is currently in the map, this method removes it and returns
    * true; otherwise, this method returns false.
    */
+  @Impure
   boolean remove(K key, long value) {
     AtomicLong atomic = map.get(key);
     if (atomic == null) {

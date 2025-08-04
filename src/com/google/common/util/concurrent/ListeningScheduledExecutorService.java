@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 
 import java.util.concurrent.Callable;
@@ -36,21 +37,25 @@ public interface ListeningScheduledExecutorService
     extends ScheduledExecutorService, ListeningExecutorService {
 
   /** @since 15.0 (previously returned ScheduledFuture) */
+  @Impure
   @Override
   ListenableScheduledFuture<?> schedule(
       Runnable command, long delay, TimeUnit unit);
 
   /** @since 15.0 (previously returned ScheduledFuture) */
+  @Impure
   @Override
   <V> ListenableScheduledFuture<V> schedule(
       Callable<V> callable, long delay, TimeUnit unit);
 
   /** @since 15.0 (previously returned ScheduledFuture) */
+  @Impure
   @Override
   ListenableScheduledFuture<?> scheduleAtFixedRate(
       Runnable command, long initialDelay, long period, TimeUnit unit);
 
   /** @since 15.0 (previously returned ScheduledFuture) */
+  @Impure
   @Override
   ListenableScheduledFuture<?> scheduleWithFixedDelay(
       Runnable command, long initialDelay, long delay, TimeUnit unit);

@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Predicate;
 
@@ -33,46 +35,55 @@ import javax.annotation.Nullable;
 final class FilteredKeySetMultimap<K, V> extends FilteredKeyMultimap<K, V>
     implements FilteredSetMultimap<K, V> {
 
+  @Impure
   FilteredKeySetMultimap(SetMultimap<K, V> unfiltered, Predicate<? super K> keyPredicate) {
     super(unfiltered, keyPredicate);
   }
 
+  @Pure
   @Override
   public SetMultimap<K, V> unfiltered() {
     return (SetMultimap<K, V>) unfiltered;
   }
 
+  @Impure
   @Override
   public Set<V> get(K key) {
     return (Set<V>) super.get(key);
   }
 
+  @Impure
   @Override
   public Set<V> removeAll(Object key) {
     return (Set<V>) super.removeAll(key);
   }
 
+  @Impure
   @Override
   public Set<V> replaceValues(K key, Iterable<? extends V> values) {
     return (Set<V>) super.replaceValues(key, values);
   }
 
+  @Impure
   @Override
   public Set<Entry<K, V>> entries() {
     return (Set<Entry<K, V>>) super.entries();
   }
 
+  @Impure
   @Override
   Set<Entry<K, V>> createEntries() {
     return new EntrySet();
   }
   
   class EntrySet extends Entries implements Set<Entry<K, V>> {
+    @Impure
     @Override
     public int hashCode() {
       return Sets.hashCodeImpl(this);
     }
     
+    @Impure
     @Override
     public boolean equals(@Nullable Object o) {
       return Sets.equalsImpl(this, o);

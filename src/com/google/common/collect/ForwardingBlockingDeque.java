@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import java.util.Collection;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.TimeUnit;
@@ -42,80 +44,97 @@ public abstract class ForwardingBlockingDeque<E>
     extends ForwardingDeque<E> implements BlockingDeque<E> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingBlockingDeque() {}
 
+  @Pure
   @Override protected abstract BlockingDeque<E> delegate();
 
+  @Impure
   @Override
   public int remainingCapacity() {
     return delegate().remainingCapacity();
   }
 
+  @Impure
   @Override
   public void putFirst(E e) throws InterruptedException {
     delegate().putFirst(e);
   }
 
+  @Impure
   @Override
   public void putLast(E e) throws InterruptedException {
     delegate().putLast(e);
   }
 
+  @Impure
   @Override
   public boolean offerFirst(E e, long timeout, TimeUnit unit) throws InterruptedException {
     return delegate().offerFirst(e, timeout, unit);
   }
 
+  @Impure
   @Override
   public boolean offerLast(E e, long timeout, TimeUnit unit) throws InterruptedException {
     return delegate().offerLast(e, timeout, unit);
   }
 
+  @Impure
   @Override
   public E takeFirst() throws InterruptedException {
     return delegate().takeFirst();
   }
 
+  @Impure
   @Override
   public E takeLast() throws InterruptedException {
     return delegate().takeLast();
   }
 
+  @Impure
   @Override
   public E pollFirst(long timeout, TimeUnit unit) throws InterruptedException {
     return delegate().pollFirst(timeout, unit);
   }
 
+  @Impure
   @Override
   public E pollLast(long timeout, TimeUnit unit) throws InterruptedException {
     return delegate().pollLast(timeout, unit);
   }
 
+  @Impure
   @Override
   public void put(E e) throws InterruptedException {
     delegate().put(e);
   }
 
+  @Impure
   @Override
   public boolean offer(E e, long timeout, TimeUnit unit) throws InterruptedException {
     return delegate().offer(e, timeout, unit);
   }
 
+  @Impure
   @Override
   public E take() throws InterruptedException {
     return delegate().take();
   }
 
+  @Impure
   @Override
   public E poll(long timeout, TimeUnit unit) throws InterruptedException {
     return delegate().poll(timeout, unit);
   }
 
+  @Impure
   @Override
   public int drainTo(Collection<? super E> c) {
     return delegate().drainTo(c);
   }
 
+  @Impure
   @Override
   public int drainTo(Collection<? super E> c, int maxElements) {
     return delegate().drainTo(c, maxElements);

@@ -15,6 +15,7 @@
  */
 
 package com.google.common.collect;
+import org.checkerframework.dataflow.qual.Pure;
 
 /**
  * "Overrides" the {@link ImmutableSet} static methods that lack
@@ -42,6 +43,7 @@ abstract class ImmutableSortedSetFauxverideShim<E> extends ImmutableSet<E> {
    * @deprecated Use {@link ImmutableSortedSet#naturalOrder}, which offers
    *     better type-safety.
    */
+  @Pure
   @Deprecated public static <E> ImmutableSortedSet.Builder<E> builder() {
     throw new UnsupportedOperationException();
   }
@@ -55,6 +57,7 @@ abstract class ImmutableSortedSetFauxverideShim<E> extends ImmutableSet<E> {
    * @deprecated <b>Pass a parameter of type {@code Comparable} to use {@link
    *     ImmutableSortedSet#of(Comparable)}.</b>
    */
+  @Pure
   @Deprecated public static <E> ImmutableSortedSet<E> of(E element) {
     throw new UnsupportedOperationException();
   }
@@ -68,6 +71,7 @@ abstract class ImmutableSortedSetFauxverideShim<E> extends ImmutableSet<E> {
    * @deprecated <b>Pass the parameters of type {@code Comparable} to use {@link
    *     ImmutableSortedSet#of(Comparable, Comparable)}.</b>
    */
+  @Pure
   @Deprecated public static <E> ImmutableSortedSet<E> of(E e1, E e2) {
     throw new UnsupportedOperationException();
   }
@@ -81,6 +85,7 @@ abstract class ImmutableSortedSetFauxverideShim<E> extends ImmutableSet<E> {
    * @deprecated <b>Pass the parameters of type {@code Comparable} to use {@link
    *     ImmutableSortedSet#of(Comparable, Comparable, Comparable)}.</b>
    */
+  @Pure
   @Deprecated public static <E> ImmutableSortedSet<E> of(E e1, E e2, E e3) {
     throw new UnsupportedOperationException();
   }
@@ -95,6 +100,7 @@ abstract class ImmutableSortedSetFauxverideShim<E> extends ImmutableSet<E> {
    *     ImmutableSortedSet#of(Comparable, Comparable, Comparable, Comparable)}.
    * </b>
    */
+  @Pure
   @Deprecated public static <E> ImmutableSortedSet<E> of(
       E e1, E e2, E e3, E e4) {
     throw new UnsupportedOperationException();
@@ -110,6 +116,7 @@ abstract class ImmutableSortedSetFauxverideShim<E> extends ImmutableSet<E> {
    *     ImmutableSortedSet#of(
    *     Comparable, Comparable, Comparable, Comparable, Comparable)}. </b>
    */
+  @Pure
   @Deprecated public static <E> ImmutableSortedSet<E> of(
       E e1, E e2, E e3, E e4, E e5) {
     throw new UnsupportedOperationException();
@@ -125,6 +132,7 @@ abstract class ImmutableSortedSetFauxverideShim<E> extends ImmutableSet<E> {
    *     ImmutableSortedSet#of(Comparable, Comparable, Comparable, Comparable, 
    *     Comparable, Comparable, Comparable...)}. </b>
    */
+  @Pure
   @Deprecated public static <E> ImmutableSortedSet<E> of(
       E e1, E e2, E e3, E e4, E e5, E e6, E... remaining) {
     throw new UnsupportedOperationException();
@@ -139,6 +147,7 @@ abstract class ImmutableSortedSetFauxverideShim<E> extends ImmutableSet<E> {
    * @deprecated <b>Pass parameters of type {@code Comparable} to use {@link
    *     ImmutableSortedSet#copyOf(Comparable[])}.</b>
    */
+  @Pure
   @Deprecated public static <E> ImmutableSortedSet<E> copyOf(E[] elements) {
     throw new UnsupportedOperationException();
   }

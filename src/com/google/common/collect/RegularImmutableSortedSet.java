@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.SortedLists.KeyAbsentBehavior.INVERTED_INSERTION_INDEX;
@@ -49,6 +52,7 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
 
   private transient final ImmutableList<E> elements;
 
+  @Impure
   RegularImmutableSortedSet(
       ImmutableList<E> elements, Comparator<? super E> comparator) {
     super(comparator);
@@ -56,24 +60,29 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
     checkArgument(!elements.isEmpty());
   }
 
+  @SideEffectFree
   @Override public UnmodifiableIterator<E> iterator() {
     return elements.iterator();
   }
 
+  @SideEffectFree
   @GwtIncompatible("NavigableSet")
   @Override public UnmodifiableIterator<E> descendingIterator() {
     return elements.reverse().iterator();
   }
 
+  @Pure
   @Override public boolean isEmpty() {
     return false;
   }
 
+  @Pure
   @Override
   public int size() {
     return elements.size();
   }
 
+  @Impure
   @Override public boolean contains(Object o) {
     try {
       return o != null && unsafeBinarySearch(o) >= 0;
@@ -82,6 +91,7 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
     }
   }
 
+  @Impure
   @Override public boolean containsAll(Collection<?> targets) {
     // TODO(jlevy): For optimal performance, use a binary search when
     // targets.size() < size() / log(size())
@@ -133,19 +143,23 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
     return false;
   }
 
+  @Impure
   private int unsafeBinarySearch(Object key) throws ClassCastException {
     return Collections.binarySearch(elements, key, unsafeComparator());
   }
 
+  @Impure
   @Override boolean isPartialView() {
     return elements.isPartialView();
   }
 
+  @Impure
   @Override
   int copyIntoArray(Object[] dst, int offset) {
     return elements.copyIntoArray(dst, offset);
   }
 
+  @Impure
   @Override public boolean equals(@Nullable Object object) {
     if (object == this) {
       return true;
@@ -181,51 +195,60 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
     return this.containsAll(that);
   }
 
+  @Pure
   @Override
   public E first() {
     return elements.get(0);
   }
 
+  @Pure
   @Override
   public E last() {
     return elements.get(size() - 1);
   }
 
+  @Impure
   @Override
   public E lower(E element) {
     int index = headIndex(element, false) - 1;
     return (index == -1) ? null : elements.get(index);
   }
 
+  @Impure
   @Override
   public E floor(E element) {
     int index = headIndex(element, true) - 1;
     return (index == -1) ? null : elements.get(index);
   }
 
+  @Impure
   @Override
   public E ceiling(E element) {
     int index = tailIndex(element, true);
     return (index == size()) ? null : elements.get(index);
   }
 
+  @Impure
   @Override
   public E higher(E element) {
     int index = tailIndex(element, false);
     return (index == size()) ? null : elements.get(index);
   }
 
+  @Impure
   @Override
   ImmutableSortedSet<E> headSetImpl(E toElement, boolean inclusive) {
     return getSubSet(0, headIndex(toElement, inclusive));
   }
 
+  @Impure
   int headIndex(E toElement, boolean inclusive) {
     return SortedLists.binarySearch(
         elements, checkNotNull(toElement), comparator(),
         inclusive ? FIRST_AFTER : FIRST_PRESENT, NEXT_HIGHER);
   }
 
+  @Pure
   @Override
   ImmutableSortedSet<E> subSetImpl(
       E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
@@ -233,11 +256,13 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
         .headSetImpl(toElement, toInclusive);
   }
 
+  @Impure
   @Override
   ImmutableSortedSet<E> tailSetImpl(E fromElement, boolean inclusive) {
     return getSubSet(tailIndex(fromElement, inclusive), size());
   }
 
+  @Impure
   int tailIndex(E fromElement, boolean inclusive) {
     return SortedLists.binarySearch(
         elements,
@@ -249,11 +274,13 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
   // Pretend the comparator can compare anything. If it turns out it can't
   // compare two elements, it'll throw a CCE. Only methods that are specified to
   // throw CCE should call this.
+  @Pure
   @SuppressWarnings("unchecked")
   Comparator<Object> unsafeComparator() {
     return (Comparator<Object>) comparator;
   }
 
+  @Impure
   ImmutableSortedSet<E> getSubSet(int newFromIndex, int newToIndex) {
     if (newFromIndex == 0 && newToIndex == size()) {
       return this;
@@ -265,6 +292,7 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
     }
   }
 
+  @Impure
   @Override int indexOf(@Nullable Object target) {
     if (target == null) {
       return -1;
@@ -279,10 +307,12 @@ final class RegularImmutableSortedSet<E> extends ImmutableSortedSet<E> {
     return (position >= 0) ? position : -1;
   }
 
+  @Impure
   @Override ImmutableList<E> createAsList() {
     return new ImmutableSortedAsList<E>(this, elements);
   }
 
+  @Impure
   @Override
   ImmutableSortedSet<E> createDescendingSet() {
     return new RegularImmutableSortedSet<E>(elements.reverse(),

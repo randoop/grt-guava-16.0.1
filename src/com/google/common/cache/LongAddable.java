@@ -16,6 +16,7 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 /**
@@ -25,9 +26,12 @@ import com.google.common.annotations.GwtCompatible;
  */
 @GwtCompatible
 interface LongAddable {
+  @Impure
   void increment();
   
+  @Impure
   void add(long x);
   
+  @Impure
   long sum();
 }

@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.collect.ForwardingObject;
 
 import java.util.Collection;
@@ -39,23 +41,28 @@ import java.util.concurrent.TimeoutException;
 public abstract class ForwardingExecutorService extends ForwardingObject
     implements ExecutorService {
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingExecutorService() {}
   
+  @Pure
   @Override
   protected abstract ExecutorService delegate();
 
+  @Impure
   @Override
   public boolean awaitTermination(long timeout, TimeUnit unit)
       throws InterruptedException {
     return delegate().awaitTermination(timeout, unit);
   }
 
+  @Impure
   @Override
   public <T> List<Future<T>> invokeAll(
       Collection<? extends Callable<T>> tasks) throws InterruptedException {
     return delegate().invokeAll(tasks);
   }
 
+  @Impure
   @Override
   public <T> List<Future<T>> invokeAll(
       Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
@@ -63,12 +70,14 @@ public abstract class ForwardingExecutorService extends ForwardingObject
     return delegate().invokeAll(tasks, timeout, unit);
   }
 
+  @Impure
   @Override
   public <T> T invokeAny(Collection<? extends Callable<T>> tasks)
       throws InterruptedException, ExecutionException {
     return delegate().invokeAny(tasks);
   }
 
+  @Impure
   @Override
   public <T> T invokeAny(
       Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)
@@ -76,40 +85,48 @@ public abstract class ForwardingExecutorService extends ForwardingObject
     return delegate().invokeAny(tasks, timeout, unit);
   }
 
+  @Impure
   @Override
   public boolean isShutdown() {
     return delegate().isShutdown();
   }
 
+  @Impure
   @Override
   public boolean isTerminated() {
     return delegate().isTerminated();
   }
 
+  @Impure
   @Override
   public void shutdown() {
     delegate().shutdown();
   }
 
+  @Impure
   @Override
   public List<Runnable> shutdownNow() {
     return delegate().shutdownNow();
   }
 
+  @Impure
   @Override
   public void execute(Runnable command) {
     delegate().execute(command);
   }
 
+  @Impure
   public <T> Future<T> submit(Callable<T> task) {
     return delegate().submit(task);
   }
 
+  @Impure
   @Override
   public Future<?> submit(Runnable task) {
     return delegate().submit(task);
   }
 
+  @Impure
   @Override
   public <T> Future<T> submit(Runnable task, T result) {
     return delegate().submit(task, result);

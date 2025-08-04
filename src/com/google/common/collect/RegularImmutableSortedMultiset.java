@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkPositionIndexes;
 import static com.google.common.collect.BoundType.CLOSED;
@@ -35,6 +37,7 @@ final class RegularImmutableSortedMultiset<E> extends ImmutableSortedMultiset<E>
   private final transient int offset;
   private final transient int length;
 
+  @Impure
   RegularImmutableSortedMultiset(
       RegularImmutableSortedSet<E> elementSet,
       int[] counts,
@@ -48,6 +51,7 @@ final class RegularImmutableSortedMultiset<E> extends ImmutableSortedMultiset<E>
     this.length = length;
   }
 
+  @Impure
   @Override
   Entry<E> getEntry(int index) {
     return Multisets.immutableEntry(
@@ -55,44 +59,52 @@ final class RegularImmutableSortedMultiset<E> extends ImmutableSortedMultiset<E>
         counts[offset + index]);
   }
 
+  @Pure
   @Override
   public Entry<E> firstEntry() {
     return getEntry(0);
   }
 
+  @Pure
   @Override
   public Entry<E> lastEntry() {
     return getEntry(length - 1);
   }
 
+  @Pure
   @Override
   public int count(@Nullable Object element) {
     int index = elementSet.indexOf(element);
     return (index == -1) ? 0 : counts[index + offset];
   }
 
+  @Impure
   @Override
   public int size() {
     long size = cumulativeCounts[offset + length] - cumulativeCounts[offset];
     return Ints.saturatedCast(size);
   }
 
+  @Pure
   @Override
   public ImmutableSortedSet<E> elementSet() {
     return elementSet;
   }
 
+  @Impure
   @Override
   public ImmutableSortedMultiset<E> headMultiset(E upperBound, BoundType boundType) {
     return getSubMultiset(0, elementSet.headIndex(upperBound, checkNotNull(boundType) == CLOSED));
   }
 
+  @Impure
   @Override
   public ImmutableSortedMultiset<E> tailMultiset(E lowerBound, BoundType boundType) {
     return getSubMultiset(elementSet.tailIndex(lowerBound, checkNotNull(boundType) == CLOSED),
         length);
   }
 
+  @Impure
   ImmutableSortedMultiset<E> getSubMultiset(int from, int to) {
     checkPositionIndexes(from, to, length);
     if (from == to) {
@@ -107,6 +119,7 @@ final class RegularImmutableSortedMultiset<E> extends ImmutableSortedMultiset<E>
     }
   }
 
+  @Pure
   @Override
   boolean isPartialView() {
     return offset > 0 || length < counts.length;

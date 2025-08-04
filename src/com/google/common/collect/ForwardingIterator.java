@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Iterator;
@@ -34,20 +37,27 @@ public abstract class ForwardingIterator<T>
     extends ForwardingObject implements Iterator<T> {
 
   /** Constructor for use by subclasses. */
+  @SideEffectFree
+  @Impure
   protected ForwardingIterator() {}
 
+  @Pure
   @Override protected abstract Iterator<T> delegate();
 
+  @Pure
+  @Impure
   @Override
   public boolean hasNext() {
     return delegate().hasNext();
   }
 
+  @Impure
   @Override
   public T next() {
     return delegate().next();
   }
 
+  @Impure
   @Override
   public void remove() {
     delegate().remove();

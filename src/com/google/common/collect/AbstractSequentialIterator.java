@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.NoSuchElementException;
@@ -49,6 +51,7 @@ public abstract class AbstractSequentialIterator<T>
    * Creates a new iterator with the given first element, or, if {@code
    * firstOrNull} is null, creates a new empty iterator.
    */
+  @Impure
   protected AbstractSequentialIterator(@Nullable T firstOrNull) {
     this.nextOrNull = firstOrNull;
   }
@@ -59,13 +62,16 @@ public abstract class AbstractSequentialIterator<T>
    * {@link #next()} in order to compute the result of a <i>future</i> call to
    * {@code next()}.
    */
+  @Pure
   protected abstract T computeNext(T previous);
 
+  @Pure
   @Override
   public final boolean hasNext() {
     return nextOrNull != null;
   }
 
+  @Impure
   @Override
   public final T next() {
     if (!hasNext()) {

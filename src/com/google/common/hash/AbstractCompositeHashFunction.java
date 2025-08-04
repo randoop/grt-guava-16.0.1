@@ -16,6 +16,8 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.nio.charset.Charset;
@@ -30,6 +32,7 @@ import java.nio.charset.Charset;
 abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFunction {
   final HashFunction[] functions;
 
+  @Impure
   AbstractCompositeHashFunction(HashFunction... functions) {
     for (HashFunction function : functions) {
       checkNotNull(function);
@@ -43,8 +46,9 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
    * the hashers are the same order as the functions given to the constructor.
    */
   // this could be cleaner if it passed HashCode[], but that would create yet another array...
-  /* protected */ abstract HashCode makeHash(Hasher[] hashers);
+  /* protected */ @Impure abstract HashCode makeHash(Hasher[] hashers);
 
+  @Impure
   @Override
   public Hasher newHasher() {
     final Hasher[] hashers = new Hasher[functions.length];
@@ -52,6 +56,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
       hashers[i] = functions[i].newHasher();
     }
     return new Hasher() {
+      @Pure
       @Override public Hasher putByte(byte b) {
         for (Hasher hasher : hashers) {
           hasher.putByte(b);
@@ -59,6 +64,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putBytes(byte[] bytes) {
         for (Hasher hasher : hashers) {
           hasher.putBytes(bytes);
@@ -66,6 +72,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putBytes(byte[] bytes, int off, int len) {
         for (Hasher hasher : hashers) {
           hasher.putBytes(bytes, off, len);
@@ -73,6 +80,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putShort(short s) {
         for (Hasher hasher : hashers) {
           hasher.putShort(s);
@@ -80,6 +88,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putInt(int i) {
         for (Hasher hasher : hashers) {
           hasher.putInt(i);
@@ -87,6 +96,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putLong(long l) {
         for (Hasher hasher : hashers) {
           hasher.putLong(l);
@@ -94,6 +104,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putFloat(float f) {
         for (Hasher hasher : hashers) {
           hasher.putFloat(f);
@@ -101,6 +112,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putDouble(double d) {
         for (Hasher hasher : hashers) {
           hasher.putDouble(d);
@@ -108,6 +120,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putBoolean(boolean b) {
         for (Hasher hasher : hashers) {
           hasher.putBoolean(b);
@@ -115,6 +128,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putChar(char c) {
         for (Hasher hasher : hashers) {
           hasher.putChar(c);
@@ -122,6 +136,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putUnencodedChars(CharSequence chars) {
         for (Hasher hasher : hashers) {
           hasher.putUnencodedChars(chars);
@@ -129,6 +144,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public Hasher putString(CharSequence chars, Charset charset) {
         for (Hasher hasher : hashers) {
           hasher.putString(chars, charset);
@@ -136,6 +152,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Pure
       @Override public <T> Hasher putObject(T instance, Funnel<? super T> funnel) {
         for (Hasher hasher : hashers) {
           hasher.putObject(instance, funnel);
@@ -143,6 +160,7 @@ abstract class AbstractCompositeHashFunction extends AbstractStreamingHashFuncti
         return this;
       }
 
+      @Impure
       @Override public HashCode hash() {
         return makeHash(hashers);
       }

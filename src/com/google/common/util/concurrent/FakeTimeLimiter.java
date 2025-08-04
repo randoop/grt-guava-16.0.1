@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -35,6 +36,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Beta
 public final class FakeTimeLimiter implements TimeLimiter {
+  @Impure
   @Override
   public <T> T newProxy(T target, Class<T> interfaceType, long timeoutDuration,
       TimeUnit timeoutUnit) {
@@ -44,6 +46,7 @@ public final class FakeTimeLimiter implements TimeLimiter {
     return target; // ha ha
   }
 
+  @Impure
   @Override
   public <T> T callWithTimeout(Callable<T> callable, long timeoutDuration,
       TimeUnit timeoutUnit, boolean amInterruptible) throws Exception {

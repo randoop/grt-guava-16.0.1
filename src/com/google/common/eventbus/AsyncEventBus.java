@@ -16,6 +16,7 @@
 
 package com.google.common.eventbus;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -47,6 +48,7 @@ public class AsyncEventBus extends EventBus {
    *        responsibility to shut down the executor after the last event has
    *        been posted to this event bus.
    */
+  @Impure
   public AsyncEventBus(String identifier, Executor executor) {
     super(identifier);
     this.executor = checkNotNull(executor);
@@ -63,6 +65,7 @@ public class AsyncEventBus extends EventBus {
    *    See {@link SubscriberExceptionHandler} for more information.
    * @since 16.0
    */
+  @Impure
   public AsyncEventBus(Executor executor, SubscriberExceptionHandler subscriberExceptionHandler) {
     super(subscriberExceptionHandler);
     this.executor = checkNotNull(executor);
@@ -76,11 +79,13 @@ public class AsyncEventBus extends EventBus {
    *        responsibility to shut down the executor after the last event has
    *        been posted to this event bus.
    */
+  @Impure
   public AsyncEventBus(Executor executor) {
     super("default");
     this.executor = checkNotNull(executor);
   }
 
+  @Impure
   @Override
   void enqueueEvent(Object event, EventSubscriber subscriber) {
     eventsToDispatch.offer(new EventWithSubscriber(event, subscriber));
@@ -90,6 +95,7 @@ public class AsyncEventBus extends EventBus {
    * Dispatch {@code events} in the order they were posted, regardless of
    * the posting thread.
    */
+  @Impure
   @SuppressWarnings("deprecation") // only deprecated for external subclasses
   @Override
   protected void dispatchQueuedEvents() {
@@ -106,12 +112,14 @@ public class AsyncEventBus extends EventBus {
   /**
    * Calls the {@link #executor} to dispatch {@code event} to {@code subscriber}.
    */
+  @Impure
   @Override
   void dispatch(final Object event, final EventSubscriber subscriber) {
     checkNotNull(event);
     checkNotNull(subscriber);
     executor.execute(
         new Runnable() {
+          @Impure
           @Override
           public void run() {
             AsyncEventBus.super.dispatch(event, subscriber);

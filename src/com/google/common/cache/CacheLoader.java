@@ -16,6 +16,9 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Deterministic;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -52,6 +55,7 @@ public abstract class CacheLoader<K, V> {
   /**
    * Constructor for use by subclasses.
    */
+  @SideEffectFree
   protected CacheLoader() {}
 
   /**
@@ -64,6 +68,7 @@ public abstract class CacheLoader<K, V> {
    *     treated like any other {@code Exception} in all respects except that, when it is caught,
    *     the thread's interrupt status is set
    */
+  @Impure
   public abstract V load(K key) throws Exception;
 
   /**
@@ -87,6 +92,7 @@ public abstract class CacheLoader<K, V> {
    *     the thread's interrupt status is set
    * @since 11.0
    */
+  @Impure
   @GwtIncompatible("Futures")
   public ListenableFuture<V> reload(K key, V oldValue) throws Exception {
     checkNotNull(key);
@@ -116,6 +122,7 @@ public abstract class CacheLoader<K, V> {
    *     the thread's interrupt status is set
    * @since 11.0
    */
+  @Deterministic
   public Map<K, V> loadAll(Iterable<? extends K> keys) throws Exception {
     // This will be caught by getAll(), causing it to fall back to multiple calls to
     // LoadingCache.get
@@ -130,6 +137,7 @@ public abstract class CacheLoader<K, V> {
    * @param function the function to be used for loading values; must never return {@code null}
    * @return a cache loader that loads values by passing each key to {@code function}
    */
+  @Impure
   @Beta
   public static <K, V> CacheLoader<K, V> from(Function<K, V> function) {
     return new FunctionToCacheLoader<K, V>(function);
@@ -139,10 +147,12 @@ public abstract class CacheLoader<K, V> {
       extends CacheLoader<K, V> implements Serializable {
     private final Function<K, V> computingFunction;
 
+    @Impure
     public FunctionToCacheLoader(Function<K, V> computingFunction) {
       this.computingFunction = checkNotNull(computingFunction);
     }
 
+    @Impure
     @Override
     public V load(K key) {
       return computingFunction.apply(checkNotNull(key));
@@ -160,6 +170,7 @@ public abstract class CacheLoader<K, V> {
    * @return a cache loader that loads values by calling {@link Supplier#get}, irrespective of the
    *     key
    */
+  @Impure
   @Beta
   public static <V> CacheLoader<Object, V> from(Supplier<V> supplier) {
     return new SupplierToCacheLoader<V>(supplier);
@@ -169,10 +180,12 @@ public abstract class CacheLoader<K, V> {
       extends CacheLoader<Object, V> implements Serializable {
     private final Supplier<V> computingSupplier;
 
+    @Impure
     public SupplierToCacheLoader(Supplier<V> computingSupplier) {
       this.computingSupplier = checkNotNull(computingSupplier);
     }
 
+    @Impure
     @Override
     public V load(Object key) {
       checkNotNull(key);
@@ -190,6 +203,7 @@ public abstract class CacheLoader<K, V> {
    * @since 11.0
    */
   public static final class InvalidCacheLoadException extends RuntimeException {
+    @SideEffectFree
     public InvalidCacheLoadException(String message) {
       super(message);
     }

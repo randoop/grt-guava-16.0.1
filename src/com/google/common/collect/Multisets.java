@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.CollectPreconditions.checkNonnegative;
@@ -69,6 +72,7 @@ public final class Multisets {
    *     generated
    * @return an unmodifiable view of the multiset
    */
+  @Impure
   public static <E> Multiset<E> unmodifiableMultiset(
       Multiset<? extends E> multiset) {
     if (multiset instanceof UnmodifiableMultiset ||
@@ -87,6 +91,7 @@ public final class Multisets {
    * @deprecated no need to use this
    * @since 10.0
    */
+  @Impure
   @Deprecated public static <E> Multiset<E> unmodifiableMultiset(
       ImmutableMultiset<E> multiset) {
     return checkNotNull(multiset);
@@ -96,10 +101,12 @@ public final class Multisets {
       extends ForwardingMultiset<E> implements Serializable {
     final Multiset<? extends E> delegate;
 
+    @Impure
     UnmodifiableMultiset(Multiset<? extends E> delegate) {
       this.delegate = delegate;
     }
 
+    @Pure
     @SuppressWarnings("unchecked")
     @Override protected Multiset<E> delegate() {
       // This is safe because all non-covariant methods are overriden
@@ -108,10 +115,12 @@ public final class Multisets {
 
     transient Set<E> elementSet;
 
+    @Impure
     Set<E> createElementSet() {
       return Collections.<E>unmodifiableSet(delegate.elementSet());
     }
 
+    @Impure
     @Override
     public Set<E> elementSet() {
       Set<E> es = elementSet;
@@ -120,6 +129,7 @@ public final class Multisets {
 
     transient Set<Multiset.Entry<E>> entrySet;
 
+    @Impure
     @SuppressWarnings("unchecked")
     @Override public Set<Multiset.Entry<E>> entrySet() {
       Set<Multiset.Entry<E>> es = entrySet;
@@ -130,48 +140,59 @@ public final class Multisets {
           : es;
     }
 
+    @Impure
     @SuppressWarnings("unchecked")
     @Override public Iterator<E> iterator() {
       // Safe because the returned Iterator is made unmodifiable
       return (Iterator<E>) Iterators.unmodifiableIterator(delegate.iterator());
     }
 
+    @Pure
     @Override public boolean add(E element) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public int add(E element, int occurences) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public boolean addAll(Collection<? extends E> elementsToAdd) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public boolean remove(Object element) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public int remove(Object element, int occurrences) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public boolean removeAll(Collection<?> elementsToRemove) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public boolean retainAll(Collection<?> elementsToRetain) {
       throw new UnsupportedOperationException();
     }
 
+    @SideEffectFree
     @Override public void clear() {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public int setCount(E element, int count) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public boolean setCount(E element, int oldCount, int newCount) {
       throw new UnsupportedOperationException();
     }
@@ -193,6 +214,7 @@ public final class Multisets {
    * @return an unmodifiable view of the multiset
    * @since 11.0
    */
+  @Impure
   @Beta
   public static <E> SortedMultiset<E> unmodifiableSortedMultiset(
       SortedMultiset<E> sortedMultiset) {
@@ -208,6 +230,7 @@ public final class Multisets {
    * @param n the count to be associated with the returned entry
    * @throws IllegalArgumentException if {@code n} is negative
    */
+  @Impure
   public static <E> Multiset.Entry<E> immutableEntry(@Nullable E e, int n) {
     return new ImmutableEntry<E>(e, n);
   }
@@ -217,17 +240,20 @@ public final class Multisets {
     @Nullable final E element;
     final int count;
 
+    @Impure
     ImmutableEntry(@Nullable E element, int count) {
       this.element = element;
       this.count = count;
       checkNonnegative(count, "count");
     }
 
+    @Pure
     @Override
     @Nullable public E getElement() {
       return element;
     }
 
+    @Pure
     @Override
     public int getCount() {
       return count;
@@ -262,6 +288,7 @@ public final class Multisets {
    *
    * @since 14.0
    */
+  @Impure
   @Beta
   public static <E> Multiset<E> filter(Multiset<E> unfiltered, Predicate<? super E> predicate) {
     if (unfiltered instanceof FilteredMultiset) {
@@ -279,24 +306,29 @@ public final class Multisets {
     final Multiset<E> unfiltered;
     final Predicate<? super E> predicate;
 
+    @Impure
     FilteredMultiset(Multiset<E> unfiltered, Predicate<? super E> predicate) {
       this.unfiltered = checkNotNull(unfiltered);
       this.predicate = checkNotNull(predicate);
     }
 
+    @Impure
     @Override
     public UnmodifiableIterator<E> iterator() {
       return Iterators.filter(unfiltered.iterator(), predicate);
     }
 
+    @Impure
     @Override
     Set<E> createElementSet() {
       return Sets.filter(unfiltered.elementSet(), predicate);
     }
 
+    @Impure
     @Override
     Set<Entry<E>> createEntrySet() {
       return Sets.filter(unfiltered.entrySet(), new Predicate<Entry<E>>() {
+        @Impure
         @Override
         public boolean apply(Entry<E> entry) {
           return predicate.apply(entry.getElement());
@@ -304,16 +336,19 @@ public final class Multisets {
       });
     }
 
+    @Pure
     @Override
     Iterator<Entry<E>> entryIterator() {
       throw new AssertionError("should never be called");
     }
 
+    @Impure
     @Override
     int distinctElements() {
       return elementSet().size();
     }
 
+    @Impure
     @Override
     public int count(@Nullable Object element) {
       int count = unfiltered.count(element);
@@ -325,6 +360,7 @@ public final class Multisets {
       return 0;
     }
 
+    @Impure
     @Override
     public int add(@Nullable E element, int occurrences) {
       checkArgument(predicate.apply(element),
@@ -332,6 +368,7 @@ public final class Multisets {
       return unfiltered.add(element, occurrences);
     }
 
+    @Impure
     @Override
     public int remove(@Nullable Object element, int occurrences) {
       checkNonnegative(occurrences, "occurrences");
@@ -342,6 +379,7 @@ public final class Multisets {
       }
     }
 
+    @Impure
     @Override
     public void clear() {
       elementSet().clear();
@@ -354,6 +392,7 @@ public final class Multisets {
    * elements} is an instance of {@code Multiset}; otherwise the default value
    * of 11 is returned.
    */
+  @Impure
   static int inferDistinctElements(Iterable<?> elements) {
     if (elements instanceof Multiset) {
       return ((Multiset<?>) elements).elementSet().size();
@@ -376,6 +415,7 @@ public final class Multisets {
    *
    * @since 14.0
    */
+  @Impure
   @Beta
   public static <E> Multiset<E> union(
       final Multiset<? extends E> multiset1, final Multiset<? extends E> multiset2) {
@@ -393,16 +433,19 @@ public final class Multisets {
         return multiset1.isEmpty() && multiset2.isEmpty();
       }
 
+      @Impure
       @Override
       public int count(Object element) {
         return Math.max(multiset1.count(element), multiset2.count(element));
       }
 
+      @Impure
       @Override
       Set<E> createElementSet() {
         return Sets.union(multiset1.elementSet(), multiset2.elementSet());
       }
 
+      @Impure
       @Override
       Iterator<Entry<E>> entryIterator() {
         final Iterator<? extends Entry<? extends E>> iterator1
@@ -411,6 +454,7 @@ public final class Multisets {
             = multiset2.entrySet().iterator();
         // TODO(user): consider making the entries live views
         return new AbstractIterator<Entry<E>>() {
+          @Impure
           @Override
           protected Entry<E> computeNext() {
             if (iterator1.hasNext()) {
@@ -431,6 +475,7 @@ public final class Multisets {
         };
       }
 
+      @Impure
       @Override
       int distinctElements() {
         return elementSet().size();
@@ -452,29 +497,34 @@ public final class Multisets {
    *
    * @since 2.0
    */
+  @Impure
   public static <E> Multiset<E> intersection(
       final Multiset<E> multiset1, final Multiset<?> multiset2) {
     checkNotNull(multiset1);
     checkNotNull(multiset2);
 
     return new AbstractMultiset<E>() {
+      @Impure
       @Override
       public int count(Object element) {
         int count1 = multiset1.count(element);
         return (count1 == 0) ? 0 : Math.min(count1, multiset2.count(element));
       }
 
+      @Impure
       @Override
       Set<E> createElementSet() {
         return Sets.intersection(
             multiset1.elementSet(), multiset2.elementSet());
       }
 
+      @Impure
       @Override
       Iterator<Entry<E>> entryIterator() {
         final Iterator<Entry<E>> iterator1 = multiset1.entrySet().iterator();
         // TODO(user): consider making the entries live views
         return new AbstractIterator<Entry<E>>() {
+          @Impure
           @Override
           protected Entry<E> computeNext() {
             while (iterator1.hasNext()) {
@@ -490,6 +540,7 @@ public final class Multisets {
         };
       }
 
+      @Impure
       @Override
       int distinctElements() {
         return elementSet().size();
@@ -512,6 +563,7 @@ public final class Multisets {
    *
    * @since 14.0
    */
+  @Impure
   @Beta
   public static <E> Multiset<E> sum(
       final Multiset<? extends E> multiset1, final Multiset<? extends E> multiset2) {
@@ -535,6 +587,7 @@ public final class Multisets {
         return multiset1.size() + multiset2.size();
       }
 
+      @Impure
       @Override
       public int count(Object element) {
         return multiset1.count(element) + multiset2.count(element);
@@ -545,6 +598,7 @@ public final class Multisets {
         return Sets.union(multiset1.elementSet(), multiset2.elementSet());
       }
 
+      @Impure
       @Override
       Iterator<Entry<E>> entryIterator() {
         final Iterator<? extends Entry<? extends E>> iterator1
@@ -552,6 +606,7 @@ public final class Multisets {
         final Iterator<? extends Entry<? extends E>> iterator2
             = multiset2.entrySet().iterator();
         return new AbstractIterator<Entry<E>>() {
+          @Impure
           @Override
           protected Entry<E> computeNext() {
             if (iterator1.hasNext()) {
@@ -572,6 +627,7 @@ public final class Multisets {
         };
       }
 
+      @Impure
       @Override
       int distinctElements() {
         return elementSet().size();
@@ -594,6 +650,7 @@ public final class Multisets {
    *
    * @since 14.0
    */
+  @Impure
   @Beta
   public static <E> Multiset<E> difference(
       final Multiset<E> multiset1, final Multiset<?> multiset2) {
@@ -641,6 +698,7 @@ public final class Multisets {
    *
    * @since 10.0
    */
+  @Impure
   public static boolean containsOccurrences(
       Multiset<?> superMultiset, Multiset<?> subMultiset) {
     checkNotNull(superMultiset);
@@ -673,6 +731,7 @@ public final class Multisets {
    *         of this operation
    * @since 10.0
    */
+  @Impure
   public static boolean retainOccurrences(Multiset<?> multisetToModify,
       Multiset<?> multisetToRetain) {
     return retainOccurrencesImpl(multisetToModify, multisetToRetain);
@@ -681,6 +740,7 @@ public final class Multisets {
   /**
    * Delegate implementation which cares about the element type.
    */
+  @Impure
   private static <E> boolean retainOccurrencesImpl(
       Multiset<E> multisetToModify, Multiset<?> occurrencesToRetain) {
     checkNotNull(multisetToModify);
@@ -725,6 +785,7 @@ public final class Multisets {
    *         this operation
    * @since 10.0
    */
+  @Impure
   public static boolean removeOccurrences(
       Multiset<?> multisetToModify, Multiset<?> occurrencesToRemove) {
     return removeOccurrencesImpl(multisetToModify, occurrencesToRemove);
@@ -733,6 +794,7 @@ public final class Multisets {
   /**
    * Delegate that cares about the element types in occurrencesToRemove.
    */
+  @Impure
   private static <E> boolean removeOccurrencesImpl(
       Multiset<E> multisetToModify, Multiset<?> occurrencesToRemove) {
     // TODO(user): generalize to removing an Iterable, perhaps
@@ -764,6 +826,7 @@ public final class Multisets {
      * Indicates whether an object equals this entry, following the behavior
      * specified in {@link Multiset.Entry#equals}.
      */
+    @Impure
     @Override public boolean equals(@Nullable Object object) {
       if (object instanceof Multiset.Entry) {
         Multiset.Entry<?> that = (Multiset.Entry<?>) object;
@@ -777,6 +840,7 @@ public final class Multisets {
      * Return this entry's hash code, following the behavior specified in
      * {@link Multiset.Entry#hashCode}.
      */
+    @Pure
     @Override public int hashCode() {
       E e = getElement();
       return ((e == null) ? 0 : e.hashCode()) ^ getCount();
@@ -789,6 +853,7 @@ public final class Multisets {
      * " x " (space, x and space) followed by the count. Elements and counts are
      * converted to strings as by {@code String.valueOf}.
      */
+    @SideEffectFree
     @Override public String toString() {
       String text = String.valueOf(getElement());
       int n = getCount();
@@ -799,6 +864,7 @@ public final class Multisets {
   /**
    * An implementation of {@link Multiset#equals}.
    */
+  @Impure
   static boolean equalsImpl(Multiset<?> multiset, @Nullable Object object) {
     if (object == multiset) {
       return true;
@@ -828,6 +894,7 @@ public final class Multisets {
   /**
    * An implementation of {@link Multiset#addAll}.
    */
+  @Impure
   static <E> boolean addAllImpl(
       Multiset<E> self, Collection<? extends E> elements) {
     if (elements.isEmpty()) {
@@ -847,6 +914,7 @@ public final class Multisets {
   /**
    * An implementation of {@link Multiset#removeAll}.
    */
+  @Impure
   static boolean removeAllImpl(
       Multiset<?> self, Collection<?> elementsToRemove) {
     Collection<?> collection = (elementsToRemove instanceof Multiset)
@@ -858,6 +926,7 @@ public final class Multisets {
   /**
    * An implementation of {@link Multiset#retainAll}.
    */
+  @Impure
   static boolean retainAllImpl(
       Multiset<?> self, Collection<?> elementsToRetain) {
     checkNotNull(elementsToRetain);
@@ -870,6 +939,7 @@ public final class Multisets {
   /**
    * An implementation of {@link Multiset#setCount(Object, int)}.
    */
+  @Impure
   static <E> int setCountImpl(Multiset<E> self, E element, int count) {
     checkNonnegative(count, "count");
 
@@ -888,6 +958,7 @@ public final class Multisets {
   /**
    * An implementation of {@link Multiset#setCount(Object, int, int)}.
    */
+  @Impure
   static <E> boolean setCountImpl(
       Multiset<E> self, E element, int oldCount, int newCount) {
     checkNonnegative(oldCount, "oldCount");
@@ -902,26 +973,36 @@ public final class Multisets {
   }
 
   abstract static class ElementSet<E> extends Sets.ImprovedAbstractSet<E> {
+    @Pure
     abstract Multiset<E> multiset();
 
+    @Impure
     @Override public void clear() {
       multiset().clear();
     }
 
+    @Pure
+    @Impure
     @Override public boolean contains(Object o) {
       return multiset().contains(o);
     }
 
+    @Pure
+    @Impure
     @Override public boolean containsAll(Collection<?> c) {
       return multiset().containsAll(c);
     }
 
+    @Pure
+    @Impure
     @Override public boolean isEmpty() {
       return multiset().isEmpty();
     }
 
+    @Impure
     @Override public Iterator<E> iterator() {
       return new TransformedIterator<Entry<E>, E>(multiset().entrySet().iterator()) {
+        @Pure
         @Override
         E transform(Entry<E> entry) {
           return entry.getElement();
@@ -929,6 +1010,7 @@ public final class Multisets {
       };
     }
 
+    @Impure
     @Override
     public boolean remove(Object o) {
       int count = multiset().count(o);
@@ -939,14 +1021,17 @@ public final class Multisets {
       return false;
     }
 
+    @Impure
     @Override public int size() {
       return multiset().entrySet().size();
     }
   }
 
   abstract static class EntrySet<E> extends Sets.ImprovedAbstractSet<Entry<E>> {
+    @Pure
     abstract Multiset<E> multiset();
 
+    @Impure
     @Override public boolean contains(@Nullable Object o) {
       if (o instanceof Entry) {
         /*
@@ -965,6 +1050,7 @@ public final class Multisets {
     }
 
     // GWT compiler warning; see contains().
+    @Impure
     @SuppressWarnings("cast")
     @Override public boolean remove(Object object) {
       if (object instanceof Multiset.Entry) {
@@ -981,6 +1067,7 @@ public final class Multisets {
       return false;
     }
 
+    @Impure
     @Override public void clear() {
       multiset().clear();
     }
@@ -989,6 +1076,7 @@ public final class Multisets {
   /**
    * An implementation of {@link Multiset#iterator}.
    */
+  @Impure
   static <E> Iterator<E> iteratorImpl(Multiset<E> multiset) {
     return new MultisetIteratorImpl<E>(
         multiset, multiset.entrySet().iterator());
@@ -1004,17 +1092,20 @@ public final class Multisets {
     private int totalCount;
     private boolean canRemove;
 
+    @SideEffectFree
     MultisetIteratorImpl(
         Multiset<E> multiset, Iterator<Entry<E>> entryIterator) {
       this.multiset = multiset;
       this.entryIterator = entryIterator;
     }
 
+    @Pure
     @Override
     public boolean hasNext() {
       return laterCount > 0 || entryIterator.hasNext();
     }
 
+    @Impure
     @Override
     public E next() {
       if (!hasNext()) {
@@ -1029,6 +1120,7 @@ public final class Multisets {
       return currentEntry.getElement();
     }
 
+    @Impure
     @Override
     public void remove() {
       checkRemove(canRemove);
@@ -1045,6 +1137,7 @@ public final class Multisets {
   /**
    * An implementation of {@link Multiset#size}.
    */
+  @Impure
   static int sizeImpl(Multiset<?> multiset) {
     long size = 0;
     for (Entry<?> entry : multiset.entrySet()) {
@@ -1056,6 +1149,7 @@ public final class Multisets {
   /**
    * Used to avoid http://bugs.sun.com/view_bug.do?bug_id=6558557
    */
+  @Pure
   static <T> Multiset<T> cast(Iterable<T> iterable) {
     return (Multiset<T>) iterable;
   }
@@ -1073,6 +1167,7 @@ public final class Multisets {
    *
    * @since 11.0
    */
+  @Impure
   @Beta
   public static <E> ImmutableMultiset<E> copyHighestCountFirst(Multiset<E> multiset) {
     List<Entry<E>> sortedEntries =

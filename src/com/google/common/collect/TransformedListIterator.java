@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Function;
 
@@ -31,39 +33,47 @@ import java.util.ListIterator;
 @GwtCompatible
 abstract class TransformedListIterator<F, T> extends TransformedIterator<F, T>
     implements ListIterator<T> {
+  @Impure
   TransformedListIterator(ListIterator<? extends F> backingIterator) {
     super(backingIterator);
   }
 
+  @Impure
   private ListIterator<? extends F> backingIterator() {
     return Iterators.cast(backingIterator);
   }
 
+  @Impure
   @Override
   public final boolean hasPrevious() {
     return backingIterator().hasPrevious();
   }
 
+  @Impure
   @Override
   public final T previous() {
     return transform(backingIterator().previous());
   }
 
+  @Impure
   @Override
   public final int nextIndex() {
     return backingIterator().nextIndex();
   }
 
+  @Impure
   @Override
   public final int previousIndex() {
     return backingIterator().previousIndex();
   }
 
+  @SideEffectFree
   @Override
   public void set(T element) {
     throw new UnsupportedOperationException();
   }
 
+  @SideEffectFree
   @Override
   public void add(T element) {
     throw new UnsupportedOperationException();

@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import javax.annotation.Nullable;
 
 /**
@@ -30,6 +31,7 @@ public final class SettableFuture<V> extends AbstractFuture<V> {
   /**
    * Creates a new {@code SettableFuture} in the default state.
    */
+  @Impure
   public static <V> SettableFuture<V> create() {
     return new SettableFuture<V>();
   }
@@ -38,6 +40,7 @@ public final class SettableFuture<V> extends AbstractFuture<V> {
    * Explicit private constructor, use the {@link #create} factory method to
    * create instances of {@code SettableFuture}.
    */
+  @Impure
   private SettableFuture() {}
 
   /**
@@ -48,6 +51,7 @@ public final class SettableFuture<V> extends AbstractFuture<V> {
    * @param value the value the future should hold.
    * @return true if the value was successfully set.
    */
+  @Impure
   @Override
   public boolean set(@Nullable V value) {
     return super.set(value);
@@ -63,6 +67,7 @@ public final class SettableFuture<V> extends AbstractFuture<V> {
    * @param throwable the exception the future should hold.
    * @return true if the exception was successfully set.
    */
+  @Impure
   @Override
   public boolean setException(Throwable throwable) {
     return super.setException(throwable);

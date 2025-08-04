@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -37,6 +39,7 @@ public interface ListeningExecutorService extends ExecutorService {
    * @return a {@code ListenableFuture} representing pending completion of the task
    * @throws RejectedExecutionException {@inheritDoc}
    */
+  @Impure
   @Override
   <T> ListenableFuture<T> submit(Callable<T> task);
 
@@ -44,6 +47,7 @@ public interface ListeningExecutorService extends ExecutorService {
    * @return a {@code ListenableFuture} representing pending completion of the task
    * @throws RejectedExecutionException {@inheritDoc}
    */
+  @Impure
   @Override
   ListenableFuture<?> submit(Runnable task);
 
@@ -51,6 +55,7 @@ public interface ListeningExecutorService extends ExecutorService {
    * @return a {@code ListenableFuture} representing pending completion of the task
    * @throws RejectedExecutionException {@inheritDoc}
    */
+  @Impure
   @Override
   <T> ListenableFuture<T> submit(Runnable task, T result);
 
@@ -70,6 +75,7 @@ public interface ListeningExecutorService extends ExecutorService {
    * @throws RejectedExecutionException {@inheritDoc}
    * @throws NullPointerException if any task is null
    */
+  @Pure
   @Override
   <T> List<Future<T>> invokeAll(Collection<? extends Callable<T>> tasks)
       throws InterruptedException;
@@ -91,6 +97,7 @@ public interface ListeningExecutorService extends ExecutorService {
    * @throws RejectedExecutionException {@inheritDoc}
    * @throws NullPointerException if any task is null
    */
+  @Pure
   @Override
   <T> List<Future<T>> invokeAll(
       Collection<? extends Callable<T>> tasks, long timeout, TimeUnit unit)

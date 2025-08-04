@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -41,6 +44,7 @@ public abstract class Equivalence<T> {
   /**
    * Constructor for use by subclasses.
    */
+  @SideEffectFree
   protected Equivalence() {}
 
   /**
@@ -61,6 +65,7 @@ public abstract class Equivalence<T> {
    *     false} (provided that neither {@code x} nor {@code y} is modified).
    * </ul>
    */
+  @Impure
   public final boolean equivalent(@Nullable T a, @Nullable T b) {
     if (a == b) {
       return true;
@@ -79,6 +84,7 @@ public abstract class Equivalence<T> {
    *
    * @since 10.0 (previously, subclasses would override equivalent())
    */
+  @Impure
   protected abstract boolean doEquivalent(T a, T b);
 
   /**
@@ -97,6 +103,7 @@ public abstract class Equivalence<T> {
    * <li>{@code hash(null)} is {@code 0}.
    * </ul>
    */
+  @Impure
   public final int hash(@Nullable T t) {
     if (t == null) {
       return 0;
@@ -111,6 +118,7 @@ public abstract class Equivalence<T> {
    *
    * @since 10.0 (previously, subclasses would override hash())
    */
+  @Impure
   protected abstract int doHash(T t);
 
   /**
@@ -136,6 +144,7 @@ public abstract class Equivalence<T> {
    * 
    * @since 10.0
    */
+  @Impure
   public final <F> Equivalence<F> onResultOf(Function<F, ? extends T> function) {
     return new FunctionalEquivalence<F, T>(function, this);
   }
@@ -173,12 +182,14 @@ public abstract class Equivalence<T> {
     private final Equivalence<? super T> equivalence;
     @Nullable private final T reference;
 
+    @SideEffectFree
     private Wrapper(Equivalence<? super T> equivalence, @Nullable T reference) {
       this.equivalence = checkNotNull(equivalence);
       this.reference = reference;
     }
 
     /** Returns the (possibly null) reference wrapped by this instance. */
+    @Pure
     @Nullable public T get() {
       return reference;
     }
@@ -188,6 +199,7 @@ public abstract class Equivalence<T> {
      * references is {@code true} and both wrappers use the {@link Object#equals(Object) same}
      * equivalence.
      */
+    @Impure
     @Override public boolean equals(@Nullable Object obj) {
       if (obj == this) {
         return true;
@@ -211,6 +223,7 @@ public abstract class Equivalence<T> {
     /**
      * Returns the result of {@link Equivalence#hash(Object)} applied to the wrapped reference.
      */
+    @Impure
     @Override public int hashCode() {
       return equivalence.hash(reference);
     }
@@ -219,6 +232,7 @@ public abstract class Equivalence<T> {
      * Returns a string representation for this equivalence wrapper. The form of this string
      * representation is not specified.
      */
+    @Pure
     @Override public String toString() {
       return equivalence + ".wrap(" + reference + ")";
     }
@@ -237,6 +251,7 @@ public abstract class Equivalence<T> {
    *
    * @since 10.0
    */
+  @Impure
   @GwtCompatible(serializable = true)
   public final <S extends T> Equivalence<Iterable<S>> pairwise() {
     // Ideally, the returned equivalence would support Iterable<? extends T>. However,
@@ -250,6 +265,7 @@ public abstract class Equivalence<T> {
    * 
    * @since 10.0
    */
+  @Impure
   @Beta
   public final Predicate<T> equivalentTo(@Nullable T target) {
     return new EquivalentToPredicate<T>(this, target);
@@ -260,15 +276,18 @@ public abstract class Equivalence<T> {
     private final Equivalence<T> equivalence;
     @Nullable private final T target;
 
+    @SideEffectFree
     EquivalentToPredicate(Equivalence<T> equivalence, @Nullable T target) {
       this.equivalence = checkNotNull(equivalence);
       this.target = target;
     }
 
+    @Impure
     @Override public boolean apply(@Nullable T input) {
       return equivalence.equivalent(input, target);
     }
 
+    @Impure
     @Override public boolean equals(@Nullable Object obj) {
       if (this == obj) {
         return true;
@@ -281,10 +300,12 @@ public abstract class Equivalence<T> {
       return false;
     }
 
+    @Impure
     @Override public int hashCode() {
       return Objects.hashCode(equivalence, target);
     }
 
+    @Pure
     @Override public String toString() {
       return equivalence + ".equivalentTo(" + target + ")";
     }
@@ -302,6 +323,7 @@ public abstract class Equivalence<T> {
    * @since 8.0 (in Equivalences with null-friendly behavior)
    * @since 4.0 (in Equivalences)
    */
+  @Pure
   public static Equivalence<Object> equals() {
     return Equals.INSTANCE;
   }
@@ -314,6 +336,7 @@ public abstract class Equivalence<T> {
    * @since 13.0
    * @since 4.0 (in Equivalences)
    */
+  @Pure
   public static Equivalence<Object> identity() {
     return Identity.INSTANCE;
   }
@@ -323,13 +346,16 @@ public abstract class Equivalence<T> {
     
     static final Equals INSTANCE = new Equals();
 
+    @Pure
     @Override protected boolean doEquivalent(Object a, Object b) {
       return a.equals(b);
     }
+    @Pure
     @Override public int doHash(Object o) {
       return o.hashCode();
     }
 
+    @Pure
     private Object readResolve() {
       return INSTANCE;
     } 
@@ -341,14 +367,17 @@ public abstract class Equivalence<T> {
     
     static final Identity INSTANCE = new Identity();
     
+    @Pure
     @Override protected boolean doEquivalent(Object a, Object b) {
       return false;
     }
 
+    @Pure
     @Override protected int doHash(Object o) {
       return System.identityHashCode(o);
     }
  
+    @Pure
     private Object readResolve() {
       return INSTANCE;
     }

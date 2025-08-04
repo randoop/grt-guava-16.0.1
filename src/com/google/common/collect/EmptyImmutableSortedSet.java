@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Deterministic;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 
@@ -34,49 +37,60 @@ import javax.annotation.Nullable;
 @GwtCompatible(serializable = true, emulated = true)
 @SuppressWarnings("serial") // uses writeReplace(), not default serialization
 class EmptyImmutableSortedSet<E> extends ImmutableSortedSet<E> {
+  @Impure
   EmptyImmutableSortedSet(Comparator<? super E> comparator) {
     super(comparator);
   }
 
+  @Pure
   @Override
   public int size() {
     return 0;
   }
 
+  @Pure
   @Override public boolean isEmpty() {
     return true;
   }
 
+  @Pure
   @Override public boolean contains(@Nullable Object target) {
     return false;
   }
 
+  @Pure
   @Override public boolean containsAll(Collection<?> targets) {
     return targets.isEmpty();
   }
 
+  @Impure
   @Override public UnmodifiableIterator<E> iterator() {
     return Iterators.emptyIterator();
   }
 
+  @Impure
   @GwtIncompatible("NavigableSet")
   @Override public UnmodifiableIterator<E> descendingIterator() {
     return Iterators.emptyIterator();
   }
 
+  @Pure
   @Override boolean isPartialView() {
     return false;
   }
 
+  @Impure
   @Override public ImmutableList<E> asList() {
     return ImmutableList.of();
   }
 
+  @Pure
   @Override
   int copyIntoArray(Object[] dst, int offset) {
     return offset;
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object object) {
     if (object instanceof Set) {
       Set<?> that = (Set<?>) object;
@@ -85,44 +99,53 @@ class EmptyImmutableSortedSet<E> extends ImmutableSortedSet<E> {
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     return 0;
   }
 
+  @Pure
   @Override public String toString() {
     return "[]";
   }
 
+  @Deterministic
   @Override
   public E first() {
     throw new NoSuchElementException();
   }
 
+  @Deterministic
   @Override
   public E last() {
     throw new NoSuchElementException();
   }
 
+  @Pure
   @Override
   ImmutableSortedSet<E> headSetImpl(E toElement, boolean inclusive) {
     return this;
   }
 
+  @Pure
   @Override
   ImmutableSortedSet<E> subSetImpl(
       E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
     return this;
   }
 
+  @Pure
   @Override
   ImmutableSortedSet<E> tailSetImpl(E fromElement, boolean inclusive) {
     return this;
   }
 
+  @Pure
   @Override int indexOf(@Nullable Object target) {
     return -1;
   }
 
+  @Impure
   @Override
   ImmutableSortedSet<E> createDescendingSet() {
     return new EmptyImmutableSortedSet<E>(Ordering.from(comparator).reverse());

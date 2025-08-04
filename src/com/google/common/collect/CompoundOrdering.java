@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.io.Serializable;
@@ -26,16 +28,19 @@ import java.util.Comparator;
 final class CompoundOrdering<T> extends Ordering<T> implements Serializable {
   final ImmutableList<Comparator<? super T>> comparators;
 
+  @Impure
   CompoundOrdering(Comparator<? super T> primary,
       Comparator<? super T> secondary) {
     this.comparators
         = ImmutableList.<Comparator<? super T>>of(primary, secondary);
   }
 
+  @Impure
   CompoundOrdering(Iterable<? extends Comparator<? super T>> comparators) {
     this.comparators = ImmutableList.copyOf(comparators);
   }
 
+  @Impure
   @Override public int compare(T left, T right) {
     // Avoid using the Iterator to avoid generating garbage (issue 979).
     int size = comparators.size();
@@ -48,6 +53,7 @@ final class CompoundOrdering<T> extends Ordering<T> implements Serializable {
     return 0;
   }
 
+  @Pure
   @Override public boolean equals(Object object) {
     if (object == this) {
       return true;
@@ -59,10 +65,12 @@ final class CompoundOrdering<T> extends Ordering<T> implements Serializable {
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     return comparators.hashCode();
   }
 
+  @Pure
   @Override public String toString() {
     return "Ordering.compound(" + comparators + ")";
   }

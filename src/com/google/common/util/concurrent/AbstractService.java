@@ -16,6 +16,9 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -58,24 +61,28 @@ public abstract class AbstractService implements Service {
   private final Transition shutdown = new Transition();
 
   private final Guard isStartable = new Guard(monitor) {
+    @Impure
     @Override public boolean isSatisfied() {
       return state() == NEW;
     }
   };
 
   private final Guard isStoppable = new Guard(monitor) {
+    @Impure
     @Override public boolean isSatisfied() {
       return state().compareTo(RUNNING) <= 0;
     }
   };
 
   private final Guard hasReachedRunning = new Guard(monitor) {
+    @Impure
     @Override public boolean isSatisfied() {
       return state().compareTo(RUNNING) >= 0;
     }
   };
 
   private final Guard isStopped = new Guard(monitor) {
+    @Impure
     @Override public boolean isSatisfied() {
       return state().isTerminal();
     }
@@ -113,16 +120,19 @@ public abstract class AbstractService implements Service {
     // before the other listeners. This way the other listeners can access the completed futures.
     addListener(
         new Listener() {
+          @Impure
           @Override public void running() {
             startup.set(RUNNING);
           }
 
+          @Impure
           @Override public void stopping(State from) {
             if (from == STARTING) {
               startup.set(STOPPING);
             }
           }
 
+          @Impure
           @Override public void terminated(State from) {
             if (from == NEW) {
               startup.set(TERMINATED);
@@ -130,6 +140,7 @@ public abstract class AbstractService implements Service {
             shutdown.set(TERMINATED);
           }
 
+          @Impure
           @Override public void failed(State from, Throwable failure) {
             switch (from) {
               case STARTING:
@@ -163,6 +174,7 @@ public abstract class AbstractService implements Service {
    * convenient. It is invoked exactly once on service startup, even when {@link #start} is called
    * multiple times.
    */
+  @Impure
   protected abstract void doStart();
 
   /**
@@ -175,8 +187,10 @@ public abstract class AbstractService implements Service {
    * convenient. It is invoked exactly once on service shutdown, even when {@link #stop} is called
    * multiple times.
    */
+  @Impure
   protected abstract void doStop();
 
+  @Impure
   @Override public final Service startAsync() {
     if (monitor.enterIf(isStartable)) {
       try {
@@ -196,6 +210,7 @@ public abstract class AbstractService implements Service {
     return this;
   }
 
+  @Impure
   @Deprecated
   @Override
   public final ListenableFuture<State> start() {
@@ -214,11 +229,13 @@ public abstract class AbstractService implements Service {
     return startup;
   }
 
+  @Impure
   @Override public final Service stopAsync() {
     stop();
     return this;
   }
 
+  @Impure
   @Deprecated
   @Override
   public final ListenableFuture<State> stop() {
@@ -259,18 +276,21 @@ public abstract class AbstractService implements Service {
     return shutdown;
   }
 
+  @Impure
   @Deprecated
   @Override
   public State startAndWait() {
     return Futures.getUnchecked(start());
   }
 
+  @Impure
   @Deprecated
   @Override
   public State stopAndWait() {
     return Futures.getUnchecked(stop());
   }
 
+  @Impure
   @Override public final void awaitRunning() {
     monitor.enterWhenUninterruptibly(hasReachedRunning);
     try {
@@ -280,6 +300,7 @@ public abstract class AbstractService implements Service {
     }
   }
 
+  @Impure
   @Override public final void awaitRunning(long timeout, TimeUnit unit) throws TimeoutException {
     if (monitor.enterWhenUninterruptibly(hasReachedRunning, timeout, unit)) {
       try {
@@ -297,6 +318,7 @@ public abstract class AbstractService implements Service {
     }
   }
 
+  @Impure
   @Override public final void awaitTerminated() {
     monitor.enterWhenUninterruptibly(isStopped);
     try {
@@ -306,6 +328,7 @@ public abstract class AbstractService implements Service {
     }
   }
 
+  @Impure
   @Override public final void awaitTerminated(long timeout, TimeUnit unit) throws TimeoutException {
     if (monitor.enterWhenUninterruptibly(isStopped, timeout, unit)) {
       try {
@@ -325,6 +348,7 @@ public abstract class AbstractService implements Service {
   }
 
   /** Checks that the current state is equal to the expected state. */
+  @Impure
   @GuardedBy("monitor")
   private void checkCurrentState(State expected) {
     State actual = state();
@@ -345,6 +369,7 @@ public abstract class AbstractService implements Service {
    *
    * @throws IllegalStateException if the service is not {@link State#STARTING}.
    */
+  @Impure
   protected final void notifyStarted() {
     monitor.enter();
     try {
@@ -379,6 +404,7 @@ public abstract class AbstractService implements Service {
    * @throws IllegalStateException if the service is neither {@link State#STOPPING} nor
    *         {@link State#RUNNING}.
    */
+  @Impure
   protected final void notifyStopped() {
     monitor.enter();
     try {
@@ -404,6 +430,7 @@ public abstract class AbstractService implements Service {
    * <b>not be stopped</b> if it is running. Invoke this method when a service has failed critically
    * or otherwise cannot be started nor stopped.
    */
+  @Impure
   protected final void notifyFailed(Throwable cause) {
     checkNotNull(cause);
 
@@ -432,11 +459,13 @@ public abstract class AbstractService implements Service {
     }
   }
 
+  @Impure
   @Override
   public final boolean isRunning() {
     return state() == RUNNING;
   }
 
+  @Impure
   @Override
   public final State state() {
     return snapshot.externalState();
@@ -445,6 +474,7 @@ public abstract class AbstractService implements Service {
   /**
    * @since 14.0
    */
+  @Impure
   @Override
   public final Throwable failureCause() {
     return snapshot.failureCause();
@@ -453,6 +483,7 @@ public abstract class AbstractService implements Service {
   /**
    * @since 13.0
    */
+  @Impure
   @Override
   public final void addListener(Listener listener, Executor executor) {
     checkNotNull(listener, "listener");
@@ -468,6 +499,7 @@ public abstract class AbstractService implements Service {
     }
   }
 
+  @Impure
   @Override public String toString() {
     return getClass().getSimpleName() + " [" + state() + "]";
   }
@@ -476,6 +508,7 @@ public abstract class AbstractService implements Service {
    * A change from one service state to another, plus the result of the change.
    */
   private class Transition extends AbstractFuture<State> {
+    @Impure
     @Override
     public State get(long timeout, TimeUnit unit)
         throws InterruptedException, TimeoutException, ExecutionException {
@@ -491,16 +524,19 @@ public abstract class AbstractService implements Service {
    * Attempts to execute all the listeners in {@link #queuedListeners} while not holding the
    * {@link #monitor}.
    */
+  @Impure
   private void executeListeners() {
     if (!monitor.isOccupiedByCurrentThread()) {
       queuedListeners.execute();
     }
   }
 
+  @Impure
   @GuardedBy("monitor")
   private void starting() {
     for (final ListenerExecutorPair pair : listeners) {
       queuedListeners.add(new Runnable() {
+        @Impure
         @Override public void run() {
           pair.listener.starting();
         }
@@ -508,10 +544,12 @@ public abstract class AbstractService implements Service {
     }
   }
 
+  @Impure
   @GuardedBy("monitor")
   private void running() {
     for (final ListenerExecutorPair pair : listeners) {
       queuedListeners.add(new Runnable() {
+        @Impure
         @Override public void run() {
           pair.listener.running();
         }
@@ -519,10 +557,12 @@ public abstract class AbstractService implements Service {
     }
   }
 
+  @Impure
   @GuardedBy("monitor")
   private void stopping(final State from) {
     for (final ListenerExecutorPair pair : listeners) {
       queuedListeners.add(new Runnable() {
+        @Impure
         @Override public void run() {
           pair.listener.stopping(from);
         }
@@ -530,10 +570,12 @@ public abstract class AbstractService implements Service {
     }
   }
 
+  @Impure
   @GuardedBy("monitor")
   private void terminated(final State from) {
     for (final ListenerExecutorPair pair : listeners) {
       queuedListeners.add(new Runnable() {
+        @Impure
         @Override public void run() {
           pair.listener.terminated(from);
         }
@@ -543,10 +585,12 @@ public abstract class AbstractService implements Service {
     listeners.clear();
   }
 
+  @Impure
   @GuardedBy("monitor")
   private void failed(final State from, final Throwable cause) {
     for (final ListenerExecutorPair pair : listeners) {
       queuedListeners.add(new Runnable() {
+        @Impure
         @Override public void run() {
           pair.listener.failed(from, cause);
         }
@@ -561,6 +605,7 @@ public abstract class AbstractService implements Service {
     final Listener listener;
     final Executor executor;
 
+    @SideEffectFree
     ListenerExecutorPair(Listener listener, Executor executor) {
       this.listener = listener;
       this.executor = executor;
@@ -593,10 +638,12 @@ public abstract class AbstractService implements Service {
     @Nullable
     final Throwable failure;
 
+    @Impure
     StateSnapshot(State internalState) {
       this(internalState, false, null);
     }
 
+    @Impure
     StateSnapshot(
         State internalState, boolean shutdownWhenStartupFinishes, @Nullable Throwable failure) {
       checkArgument(!shutdownWhenStartupFinishes || internalState == STARTING,
@@ -611,6 +658,7 @@ public abstract class AbstractService implements Service {
     }
 
     /** @see Service#state() */
+    @Pure
     State externalState() {
       if (shutdownWhenStartupFinishes && state == STARTING) {
         return STOPPING;
@@ -620,6 +668,7 @@ public abstract class AbstractService implements Service {
     }
 
     /** @see Service#failureCause() */
+    @Impure
     Throwable failureCause() {
       checkState(state == FAILED,
           "failureCause() is only valid if the service has failed, service is %s", state);

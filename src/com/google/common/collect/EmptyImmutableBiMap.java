@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import javax.annotation.Nullable;
@@ -30,52 +32,63 @@ import javax.annotation.Nullable;
 final class EmptyImmutableBiMap extends ImmutableBiMap<Object, Object> {
   static final EmptyImmutableBiMap INSTANCE = new EmptyImmutableBiMap();
 
+  @Impure
   private EmptyImmutableBiMap() {}
   
+  @Pure
   @Override public ImmutableBiMap<Object, Object> inverse() {
     return this;
   }
   
+  @Pure
   @Override
   public int size() {
     return 0;
   }
 
+  @Pure
   @Override
   public boolean isEmpty() {
     return true;
   }
 
+  @Pure
   @Override
   public Object get(@Nullable Object key) {
     return null;
   }
 
+  @Impure
   @Override
   public ImmutableSet<Entry<Object, Object>> entrySet() {
     return ImmutableSet.of();
   }
 
+  @Pure
   @Override
   ImmutableSet<Entry<Object, Object>> createEntrySet() {
     throw new AssertionError("should never be called");
   }
 
+  @Impure
   @Override
   public ImmutableSetMultimap<Object, Object> asMultimap() {
     return ImmutableSetMultimap.of();
   }
 
+  @Impure
   @Override
   public ImmutableSet<Object> keySet() {
     return ImmutableSet.of();
   }
 
+  @Pure
   @Override
   boolean isPartialView() {
     return false;
   }
   
+  @Pure
   Object readResolve() {
     return INSTANCE; // preserve singleton property
   }

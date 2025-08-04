@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -33,16 +35,19 @@ class SingletonImmutableTable<R, C, V> extends ImmutableTable<R, C, V> {
   final C singleColumnKey;
   final V singleValue;
 
+  @Impure
   SingletonImmutableTable(R rowKey, C columnKey, V value) {
     this.singleRowKey = checkNotNull(rowKey);
     this.singleColumnKey = checkNotNull(columnKey);
     this.singleValue = checkNotNull(value);
   }
 
+  @Impure
   SingletonImmutableTable(Cell<R, C, V> cell) {
     this(cell.getRowKey(), cell.getColumnKey(), cell.getValue());
   }
 
+  @Impure
   @Override public ImmutableMap<R, V> column(C columnKey) {
     checkNotNull(columnKey);
     return containsColumn(columnKey)
@@ -50,26 +55,31 @@ class SingletonImmutableTable<R, C, V> extends ImmutableTable<R, C, V> {
         : ImmutableMap.<R, V>of();
   }
 
+  @Impure
   @Override public ImmutableMap<C, Map<R, V>> columnMap() {
     return ImmutableMap.of(singleColumnKey,
         (Map<R, V>) ImmutableMap.of(singleRowKey, singleValue));
   }
 
+  @Impure
   @Override public ImmutableMap<R, Map<C, V>> rowMap() {
     return ImmutableMap.of(singleRowKey,
         (Map<C, V>) ImmutableMap.of(singleColumnKey, singleValue));
   }
 
+  @Pure
   @Override public int size() {
     return 1;
   }
 
+  @Impure
   @Override
   ImmutableSet<Cell<R, C, V>> createCellSet() {
     return ImmutableSet.of(
         cellOf(singleRowKey, singleColumnKey, singleValue));
   }
 
+  @Impure
   @Override ImmutableCollection<V> createValues() {
     return ImmutableSet.of(singleValue);
   }

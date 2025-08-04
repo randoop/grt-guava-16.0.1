@@ -16,6 +16,7 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.io.IOException;
 
 /**
@@ -43,5 +44,6 @@ public interface InputSupplier<T> {
    * cursor within one channel should not affect the starting position of
    * channels returned by other calls.
    */
+  @Impure
   T getInput() throws IOException;
 }

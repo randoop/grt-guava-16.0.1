@@ -16,6 +16,8 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import javax.annotation.Nullable;
@@ -48,6 +50,7 @@ public interface Function<F, T> {
    * @throws NullPointerException if {@code input} is null and this function does not accept null
    *     arguments
    */
+  @Impure
   @Nullable T apply(@Nullable F input);
 
   /**
@@ -60,6 +63,8 @@ public interface Function<F, T> {
    * {@code f} of type {@code F}. Note that a {@code false} result from this method does not imply
    * that the functions are known <i>not</i> to be interchangeable.
    */
+  @Impure
+  @Pure
   @Override
   boolean equals(@Nullable Object object);
 }

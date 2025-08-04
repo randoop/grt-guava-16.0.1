@@ -16,6 +16,8 @@
 
 package com.google.common.base.internal;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
@@ -65,6 +67,7 @@ public class Finalizer implements Runnable {
    * queued either when the FinalizableReferenceQueue is no longer referenced anywhere, or when
    * its close() method is called.
    */
+  @Impure
   public static void startFinalizer(
       Class<?> finalizableReferenceClass,
       ReferenceQueue<Object> queue,
@@ -107,6 +110,7 @@ public class Finalizer implements Runnable {
       = getInheritableThreadLocalsField();
 
   /** Constructs a new finalizer thread. */
+  @Impure
   private Finalizer(
       Class<?> finalizableReferenceClass,
       ReferenceQueue<Object> queue,
@@ -123,6 +127,7 @@ public class Finalizer implements Runnable {
   /**
    * Loops continuously, pulling references off the queue and cleaning them up.
    */
+  @Impure
   @SuppressWarnings("InfiniteLoopStatement")
   @Override
   public void run() {
@@ -140,6 +145,7 @@ public class Finalizer implements Runnable {
    * @return true if the caller should continue, false if the associated FinalizableReferenceQueue
    * is no longer referenced.
    */
+  @Impure
   private boolean cleanUp(Reference<?> reference) {
     Method finalizeReferentMethod = getFinalizeReferentMethod();
     if (finalizeReferentMethod == null) {
@@ -177,6 +183,7 @@ public class Finalizer implements Runnable {
   /**
    * Looks up FinalizableReference.finalizeReferent() method.
    */
+  @SideEffectFree
   private Method getFinalizeReferentMethod() {
     Class<?> finalizableReferenceClass
         = finalizableReferenceClassReference.get();
@@ -198,6 +205,7 @@ public class Finalizer implements Runnable {
     }
   }
 
+  @Impure
   public static Field getInheritableThreadLocalsField() {
     try {
       Field inheritableThreadLocals

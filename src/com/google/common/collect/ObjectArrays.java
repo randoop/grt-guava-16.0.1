@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkPositionIndexes;
 
 import com.google.common.annotations.GwtCompatible;
@@ -36,6 +39,7 @@ import javax.annotation.Nullable;
 public final class ObjectArrays {
   static final Object[] EMPTY_ARRAY = new Object[0];
 
+  @SideEffectFree
   private ObjectArrays() {}
 
   /**
@@ -44,6 +48,7 @@ public final class ObjectArrays {
    * @param type the component type
    * @param length the length of the new array
    */
+  @SideEffectFree
   @GwtIncompatible("Array.newInstance(Class, int)")
   @SuppressWarnings("unchecked")
   public static <T> T[] newArray(Class<T> type, int length) {
@@ -57,6 +62,8 @@ public final class ObjectArrays {
    * @param reference any array of the desired type
    * @param length the length of the new array
    */
+  @SideEffectFree
+  @Impure
   public static <T> T[] newArray(T[] reference, int length) {
     return Platform.newArray(reference, length);
   }
@@ -68,6 +75,8 @@ public final class ObjectArrays {
    * @param second the second array of elements to concatenate
    * @param type the component type of the returned array
    */
+  @SideEffectFree
+  @Impure
   @GwtIncompatible("Array.newInstance(Class, int)")
   public static <T> T[] concat(T[] first, T[] second, Class<T> type) {
     T[] result = newArray(type, first.length + second.length);
@@ -85,6 +94,7 @@ public final class ObjectArrays {
    *     {@code element} occupying the first position, and the
    *     elements of {@code array} occupying the remaining elements.
    */
+  @Impure
   public static <T> T[] concat(@Nullable T element, T[] array) {
     T[] result = newArray(array, array.length + 1);
     result[0] = element;
@@ -101,6 +111,7 @@ public final class ObjectArrays {
    *     the same contents as {@code array}, plus {@code element} occupying the
    *     last position.
    */
+  @Impure
   public static <T> T[] concat(T[] array, @Nullable T element) {
     T[] result = arraysCopyOf(array, array.length + 1);
     result[array.length] = element;
@@ -108,6 +119,8 @@ public final class ObjectArrays {
   }
 
   /** GWT safe version of Arrays.copyOf. */
+  @SideEffectFree
+  @Impure
   static <T> T[] arraysCopyOf(T[] original, int newLength) {
     T[] copy = newArray(original, newLength);
     System.arraycopy(
@@ -139,6 +152,7 @@ public final class ObjectArrays {
    *     not a supertype of the runtime type of every element in the specified
    *     collection
    */
+  @Impure
   static <T> T[] toArrayImpl(Collection<?> c, T[] array) {
     int size = c.size();
     if (array.length < size) {
@@ -162,6 +176,7 @@ public final class ObjectArrays {
    * collection is set to {@code null}. This is useful in determining the length of the collection
    * <i>only</i> if the caller knows that the collection does not contain any null elements.
    */
+  @Impure
   static <T> T[] toArrayImpl(Object[] src, int offset, int len, T[] dst) {
     checkPositionIndexes(offset, offset + len, src.length);
     if (dst.length < len) {
@@ -187,6 +202,7 @@ public final class ObjectArrays {
    *
    * @param c the collection for which to return an array of elements
    */
+  @Impure
   static Object[] toArrayImpl(Collection<?> c) {
     return fillArray(c, new Object[c.size()]);
   }
@@ -195,6 +211,7 @@ public final class ObjectArrays {
    * Returns a copy of the specified subrange of the specified array that is literally an Object[],
    * and not e.g. a {@code String[]}.
    */
+  @Impure
   static Object[] copyAsObjectArray(Object[] elements, int offset, int length) {
     checkPositionIndexes(offset, offset + length, elements.length);
     if (length == 0) {
@@ -205,6 +222,7 @@ public final class ObjectArrays {
     return result;
   }
 
+  @Impure
   private static Object[] fillArray(Iterable<?> elements, Object[] array) {
     int i = 0;
     for (Object element : elements) {
@@ -216,16 +234,21 @@ public final class ObjectArrays {
   /**
    * Swaps {@code array[i]} with {@code array[j]}.
    */
+  @Impure
   static void swap(Object[] array, int i, int j) {
     Object temp = array[i];
     array[i] = array[j];
     array[j] = temp;
   }
 
+  @Pure
+  @Impure
   static Object[] checkElementsNotNull(Object... array) {
     return checkElementsNotNull(array, array.length);
   }
   
+  @Pure
+  @Impure
   static Object[] checkElementsNotNull(Object[] array, int length) {
     for (int i = 0; i < length; i++) {
       checkElementNotNull(array[i], i);
@@ -235,6 +258,7 @@ public final class ObjectArrays {
 
   // We do this instead of Preconditions.checkNotNull to save boxing and array
   // creation cost.
+  @Pure
   static Object checkElementNotNull(Object element, int index) {
     if (element == null) {
       throw new NullPointerException("at index " + index);

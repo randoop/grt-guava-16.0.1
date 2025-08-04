@@ -16,6 +16,9 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -158,21 +161,27 @@ public final class CacheBuilder<K, V> {
 
   static final Supplier<? extends StatsCounter> NULL_STATS_COUNTER = Suppliers.ofInstance(
       new StatsCounter() {
+        @SideEffectFree
         @Override
         public void recordHits(int count) {}
 
+        @SideEffectFree
         @Override
         public void recordMisses(int count) {}
 
+        @SideEffectFree
         @Override
         public void recordLoadSuccess(long loadTime) {}
 
+        @SideEffectFree
         @Override
         public void recordLoadException(long loadTime) {}
 
+        @SideEffectFree
         @Override
         public void recordEviction() {}
 
+        @Pure
         @Override
         public CacheStats snapshot() {
           return EMPTY_STATS;
@@ -182,6 +191,8 @@ public final class CacheBuilder<K, V> {
 
   static final Supplier<StatsCounter> CACHE_STATS_COUNTER =
       new Supplier<StatsCounter>() {
+    @SideEffectFree
+    @Impure
     @Override
     public StatsCounter get() {
       return new SimpleStatsCounter();
@@ -191,6 +202,7 @@ public final class CacheBuilder<K, V> {
   enum NullListener implements RemovalListener<Object, Object> {
     INSTANCE;
 
+    @SideEffectFree
     @Override
     public void onRemoval(RemovalNotification<Object, Object> notification) {}
   }
@@ -198,6 +210,7 @@ public final class CacheBuilder<K, V> {
   enum OneWeigher implements Weigher<Object, Object> {
     INSTANCE;
 
+    @Pure
     @Override
     public int weigh(Object key, Object value) {
       return 1;
@@ -205,6 +218,7 @@ public final class CacheBuilder<K, V> {
   }
 
   static final Ticker NULL_TICKER = new Ticker() {
+    @Pure
     @Override
     public long read() {
       return 0;
@@ -245,6 +259,7 @@ public final class CacheBuilder<K, V> {
    * Constructs a new {@code CacheBuilder} instance with default settings, including strong keys,
    * strong values, and no automatic eviction of any kind.
    */
+  @Impure
   public static CacheBuilder<Object, Object> newBuilder() {
     return new CacheBuilder<Object, Object>();
   }
@@ -254,6 +269,7 @@ public final class CacheBuilder<K, V> {
    *
    * @since 12.0
    */
+  @Impure
   @Beta
   @GwtIncompatible("To be supported")
   public static CacheBuilder<Object, Object> from(CacheBuilderSpec spec) {
@@ -268,6 +284,7 @@ public final class CacheBuilder<K, V> {
    * @param spec a String in the format specified by {@link CacheBuilderSpec}
    * @since 12.0
    */
+  @Impure
   @Beta
   @GwtIncompatible("To be supported")
   public static CacheBuilder<Object, Object> from(String spec) {
@@ -277,6 +294,7 @@ public final class CacheBuilder<K, V> {
   /**
    * Enables lenient parsing. Useful for tests and spec parsing.
    */
+  @Impure
   @GwtIncompatible("To be supported")
   CacheBuilder<K, V> lenientParsing() {
     strictParsing = false;
@@ -289,6 +307,7 @@ public final class CacheBuilder<K, V> {
    * <p>By default, the cache uses {@link Equivalence#identity} to determine key equality when
    * {@link #weakKeys} is specified, and {@link Equivalence#equals()} otherwise.
    */
+  @Impure
   @GwtIncompatible("To be supported")
   CacheBuilder<K, V> keyEquivalence(Equivalence<Object> equivalence) {
     checkState(keyEquivalence == null, "key equivalence was already set to %s", keyEquivalence);
@@ -296,6 +315,7 @@ public final class CacheBuilder<K, V> {
     return this;
   }
 
+  @Impure
   Equivalence<Object> getKeyEquivalence() {
     return firstNonNull(keyEquivalence, getKeyStrength().defaultEquivalence());
   }
@@ -307,6 +327,7 @@ public final class CacheBuilder<K, V> {
    * {@link #weakValues} or {@link #softValues} is specified, and {@link Equivalence#equals()}
    * otherwise.
    */
+  @Impure
   @GwtIncompatible("To be supported")
   CacheBuilder<K, V> valueEquivalence(Equivalence<Object> equivalence) {
     checkState(valueEquivalence == null,
@@ -315,6 +336,7 @@ public final class CacheBuilder<K, V> {
     return this;
   }
 
+  @Impure
   Equivalence<Object> getValueEquivalence() {
     return firstNonNull(valueEquivalence, getValueStrength().defaultEquivalence());
   }
@@ -329,6 +351,7 @@ public final class CacheBuilder<K, V> {
    * @throws IllegalArgumentException if {@code initialCapacity} is negative
    * @throws IllegalStateException if an initial capacity was already set
    */
+  @Impure
   public CacheBuilder<K, V> initialCapacity(int initialCapacity) {
     checkState(this.initialCapacity == UNSET_INT, "initial capacity was already set to %s",
         this.initialCapacity);
@@ -337,6 +360,7 @@ public final class CacheBuilder<K, V> {
     return this;
   }
 
+  @Pure
   int getInitialCapacity() {
     return (initialCapacity == UNSET_INT) ? DEFAULT_INITIAL_CAPACITY : initialCapacity;
   }
@@ -371,6 +395,7 @@ public final class CacheBuilder<K, V> {
    * @throws IllegalArgumentException if {@code concurrencyLevel} is nonpositive
    * @throws IllegalStateException if a concurrency level was already set
    */
+  @Impure
   public CacheBuilder<K, V> concurrencyLevel(int concurrencyLevel) {
     checkState(this.concurrencyLevel == UNSET_INT, "concurrency level was already set to %s",
         this.concurrencyLevel);
@@ -379,6 +404,7 @@ public final class CacheBuilder<K, V> {
     return this;
   }
 
+  @Pure
   int getConcurrencyLevel() {
     return (concurrencyLevel == UNSET_INT) ? DEFAULT_CONCURRENCY_LEVEL : concurrencyLevel;
   }
@@ -398,6 +424,7 @@ public final class CacheBuilder<K, V> {
    * @throws IllegalArgumentException if {@code size} is negative
    * @throws IllegalStateException if a maximum size or weight was already set
    */
+  @Impure
   public CacheBuilder<K, V> maximumSize(long size) {
     checkState(this.maximumSize == UNSET_INT, "maximum size was already set to %s",
         this.maximumSize);
@@ -433,6 +460,7 @@ public final class CacheBuilder<K, V> {
    * @throws IllegalStateException if a maximum weight or size was already set
    * @since 11.0
    */
+  @Impure
   @GwtIncompatible("To be supported")
   public CacheBuilder<K, V> maximumWeight(long weight) {
     checkState(this.maximumWeight == UNSET_INT, "maximum weight was already set to %s",
@@ -472,6 +500,7 @@ public final class CacheBuilder<K, V> {
    * @throws IllegalStateException if a maximum size was already set
    * @since 11.0
    */
+  @Impure
   @GwtIncompatible("To be supported")
   public <K1 extends K, V1 extends V> CacheBuilder<K1, V1> weigher(
       Weigher<? super K1, ? super V1> weigher) {
@@ -488,6 +517,7 @@ public final class CacheBuilder<K, V> {
     return me;
   }
 
+  @Pure
   long getMaximumWeight() {
     if (expireAfterWriteNanos == 0 || expireAfterAccessNanos == 0) {
       return 0;
@@ -496,6 +526,7 @@ public final class CacheBuilder<K, V> {
   }
 
   // Make a safe contravariant cast now so we don't have to do it over and over.
+  @Impure
   @SuppressWarnings("unchecked")
   <K1 extends K, V1 extends V> Weigher<K1, V1> getWeigher() {
     return (Weigher<K1, V1>) Objects.firstNonNull(weigher, OneWeigher.INSTANCE);
@@ -514,17 +545,20 @@ public final class CacheBuilder<K, V> {
    *
    * @throws IllegalStateException if the key strength was already set
    */
+  @Impure
   @GwtIncompatible("java.lang.ref.WeakReference")
   public CacheBuilder<K, V> weakKeys() {
     return setKeyStrength(Strength.WEAK);
   }
 
+  @Impure
   CacheBuilder<K, V> setKeyStrength(Strength strength) {
     checkState(keyStrength == null, "Key strength was already set to %s", keyStrength);
     keyStrength = checkNotNull(strength);
     return this;
   }
 
+  @Impure
   Strength getKeyStrength() {
     return firstNonNull(keyStrength, Strength.STRONG);
   }
@@ -545,6 +579,7 @@ public final class CacheBuilder<K, V> {
    *
    * @throws IllegalStateException if the value strength was already set
    */
+  @Impure
   @GwtIncompatible("java.lang.ref.WeakReference")
   public CacheBuilder<K, V> weakValues() {
     return setValueStrength(Strength.WEAK);
@@ -569,17 +604,20 @@ public final class CacheBuilder<K, V> {
    *
    * @throws IllegalStateException if the value strength was already set
    */
+  @Impure
   @GwtIncompatible("java.lang.ref.SoftReference")
   public CacheBuilder<K, V> softValues() {
     return setValueStrength(Strength.SOFT);
   }
 
+  @Impure
   CacheBuilder<K, V> setValueStrength(Strength strength) {
     checkState(valueStrength == null, "Value strength was already set to %s", valueStrength);
     valueStrength = checkNotNull(strength);
     return this;
   }
 
+  @Impure
   Strength getValueStrength() {
     return firstNonNull(valueStrength, Strength.STRONG);
   }
@@ -603,6 +641,7 @@ public final class CacheBuilder<K, V> {
    * @throws IllegalArgumentException if {@code duration} is negative
    * @throws IllegalStateException if the time to live or time to idle was already set
    */
+  @Impure
   public CacheBuilder<K, V> expireAfterWrite(long duration, TimeUnit unit) {
     checkState(expireAfterWriteNanos == UNSET_INT, "expireAfterWrite was already set to %s ns",
         expireAfterWriteNanos);
@@ -611,6 +650,7 @@ public final class CacheBuilder<K, V> {
     return this;
   }
 
+  @Pure
   long getExpireAfterWriteNanos() {
     return (expireAfterWriteNanos == UNSET_INT) ? DEFAULT_EXPIRATION_NANOS : expireAfterWriteNanos;
   }
@@ -637,6 +677,7 @@ public final class CacheBuilder<K, V> {
    * @throws IllegalArgumentException if {@code duration} is negative
    * @throws IllegalStateException if the time to idle or time to live was already set
    */
+  @Impure
   public CacheBuilder<K, V> expireAfterAccess(long duration, TimeUnit unit) {
     checkState(expireAfterAccessNanos == UNSET_INT, "expireAfterAccess was already set to %s ns",
         expireAfterAccessNanos);
@@ -645,6 +686,7 @@ public final class CacheBuilder<K, V> {
     return this;
   }
 
+  @Pure
   long getExpireAfterAccessNanos() {
     return (expireAfterAccessNanos == UNSET_INT)
         ? DEFAULT_EXPIRATION_NANOS : expireAfterAccessNanos;
@@ -675,6 +717,7 @@ public final class CacheBuilder<K, V> {
    * @throws IllegalStateException if the refresh interval was already set
    * @since 11.0
    */
+  @Impure
   @Beta
   @GwtIncompatible("To be supported (synchronously).")
   public CacheBuilder<K, V> refreshAfterWrite(long duration, TimeUnit unit) {
@@ -685,6 +728,7 @@ public final class CacheBuilder<K, V> {
     return this;
   }
 
+  @Pure
   long getRefreshNanos() {
     return (refreshNanos == UNSET_INT) ? DEFAULT_REFRESH_NANOS : refreshNanos;
   }
@@ -698,12 +742,14 @@ public final class CacheBuilder<K, V> {
    *
    * @throws IllegalStateException if a ticker was already set
    */
+  @Impure
   public CacheBuilder<K, V> ticker(Ticker ticker) {
     checkState(this.ticker == null);
     this.ticker = checkNotNull(ticker);
     return this;
   }
 
+  @Impure
   Ticker getTicker(boolean recordsTime) {
     if (ticker != null) {
       return ticker;
@@ -732,6 +778,7 @@ public final class CacheBuilder<K, V> {
    *     remaining configuration and cache building
    * @throws IllegalStateException if a removal listener was already set
    */
+  @Impure
   @CheckReturnValue
   public <K1 extends K, V1 extends V> CacheBuilder<K1, V1> removalListener(
       RemovalListener<? super K1, ? super V1> listener) {
@@ -745,6 +792,7 @@ public final class CacheBuilder<K, V> {
   }
 
   // Make a safe contravariant cast now so we don't have to do it over and over.
+  @Impure
   @SuppressWarnings("unchecked")
   <K1 extends K, V1 extends V> RemovalListener<K1, V1> getRemovalListener() {
     return (RemovalListener<K1, V1>) Objects.firstNonNull(removalListener, NullListener.INSTANCE);
@@ -758,15 +806,18 @@ public final class CacheBuilder<K, V> {
    *
    * @since 12.0 (previously, stats collection was automatic)
    */
+  @Impure
   public CacheBuilder<K, V> recordStats() {
     statsCounterSupplier = CACHE_STATS_COUNTER;
     return this;
   }
   
+  @Pure
   boolean isRecordingStats() {
     return statsCounterSupplier == CACHE_STATS_COUNTER;
   }
 
+  @Pure
   Supplier<? extends StatsCounter> getStatsCounterSupplier() {
     return statsCounterSupplier;
   }
@@ -783,6 +834,7 @@ public final class CacheBuilder<K, V> {
    * @param loader the cache loader used to obtain new values
    * @return a cache having the requested features
    */
+  @Impure
   public <K1 extends K, V1 extends V> LoadingCache<K1, V1> build(
       CacheLoader<? super K1, V1> loader) {
     checkWeightWithWeigher();
@@ -801,16 +853,19 @@ public final class CacheBuilder<K, V> {
    * @return a cache having the requested features
    * @since 11.0
    */
+  @Impure
   public <K1 extends K, V1 extends V> Cache<K1, V1> build() {
     checkWeightWithWeigher();
     checkNonLoadingCache();
     return new LocalCache.LocalManualCache<K1, V1>(this);
   }
 
+  @Impure
   private void checkNonLoadingCache() {
     checkState(refreshNanos == UNSET_INT, "refreshAfterWrite requires a LoadingCache");
   }
 
+  @Impure
   private void checkWeightWithWeigher() {
     if (weigher == null) {
       checkState(maximumWeight == UNSET_INT, "maximumWeight requires weigher");
@@ -829,6 +884,7 @@ public final class CacheBuilder<K, V> {
    * Returns a string representation for this CacheBuilder instance. The exact form of the returned
    * string is not specified.
    */
+  @Impure
   @Override
   public String toString() {
     Objects.ToStringHelper s = Objects.toStringHelper(this);

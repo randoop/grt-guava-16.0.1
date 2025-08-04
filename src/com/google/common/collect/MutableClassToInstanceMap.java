@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.collect.MapConstraints.ConstrainedMap;
 import com.google.common.primitives.Primitives;
 
@@ -41,6 +42,7 @@ public final class MutableClassToInstanceMap<B>
    * Returns a new {@code MutableClassToInstanceMap} instance backed by a {@link
    * HashMap} using the default initial capacity and load factor.
    */
+  @Impure
   public static <B> MutableClassToInstanceMap<B> create() {
     return new MutableClassToInstanceMap<B>(
         new HashMap<Class<? extends B>, B>());
@@ -51,33 +53,39 @@ public final class MutableClassToInstanceMap<B>
    * empty {@code backingMap}. The caller surrenders control of the backing map,
    * and thus should not allow any direct references to it to remain accessible.
    */
+  @Impure
   public static <B> MutableClassToInstanceMap<B> create(
       Map<Class<? extends B>, B> backingMap) {
     return new MutableClassToInstanceMap<B>(backingMap);
   }
 
+  @Impure
   private MutableClassToInstanceMap(Map<Class<? extends B>, B> delegate) {
     super(delegate, VALUE_CAN_BE_CAST_TO_KEY);
   }
 
   private static final MapConstraint<Class<?>, Object> VALUE_CAN_BE_CAST_TO_KEY
       = new MapConstraint<Class<?>, Object>() {
+    @Impure
     @Override
     public void checkKeyValue(Class<?> key, Object value) {
       cast(key, value);
     }
   };
 
+  @Impure
   @Override
   public <T extends B> T putInstance(Class<T> type, T value) {
     return cast(type, put(type, value));
   }
 
+  @Impure
   @Override
   public <T extends B> T getInstance(Class<T> type) {
     return cast(type, get(type));
   }
 
+  @Impure
   private static <B, T extends B> T cast(Class<T> type, B value) {
     return Primitives.wrap(type).cast(value);
   }

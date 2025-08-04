@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -115,30 +117,35 @@ import javax.annotation.Nullable;
 public final class Range<C extends Comparable> implements Predicate<C>, Serializable {
 
   private static final Function<Range, Cut> LOWER_BOUND_FN = new Function<Range, Cut>() {
+    @Pure
     @Override
     public Cut apply(Range range) {
       return range.lowerBound;
     }
   };
 
+  @Pure
   @SuppressWarnings("unchecked")
   static <C extends Comparable<?>> Function<Range<C>, Cut<C>> lowerBoundFn() {
     return (Function) LOWER_BOUND_FN;
   }
 
   private static final Function<Range, Cut> UPPER_BOUND_FN = new Function<Range, Cut>() {
+    @Pure
     @Override
     public Cut apply(Range range) {
       return range.upperBound;
     }
   };
 
+  @Pure
   @SuppressWarnings("unchecked")
   static <C extends Comparable<?>> Function<Range<C>, Cut<C>> upperBoundFn() {
     return (Function) UPPER_BOUND_FN;
   }
 
   static final Ordering<Range<?>> RANGE_LEX_ORDERING = new Ordering<Range<?>>() {
+    @Impure
     @Override
     public int compare(Range<?> left, Range<?> right) {
       return ComparisonChain.start()
@@ -148,6 +155,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
     }
   };
 
+  @Impure
   static <C extends Comparable<?>> Range<C> create(
       Cut<C> lowerBound, Cut<C> upperBound) {
     return new Range<C>(lowerBound, upperBound);
@@ -161,6 +169,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *     equal to</i> {@code upper}
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> open(C lower, C upper) {
     return create(Cut.aboveValue(lower), Cut.belowValue(upper));
   }
@@ -173,6 +182,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *     upper}
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> closed(C lower, C upper) {
     return create(Cut.belowValue(lower), Cut.aboveValue(upper));
   }
@@ -185,6 +195,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *     upper}
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> closedOpen(
       C lower, C upper) {
     return create(Cut.belowValue(lower), Cut.belowValue(upper));
@@ -198,6 +209,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *     upper}
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> openClosed(
       C lower, C upper) {
     return create(Cut.aboveValue(lower), Cut.aboveValue(upper));
@@ -212,6 +224,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *     upper}
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> range(
       C lower, BoundType lowerType, C upper, BoundType upperType) {
     checkNotNull(lowerType);
@@ -232,6 +245,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> lessThan(C endpoint) {
     return create(Cut.<C>belowAll(), Cut.belowValue(endpoint));
   }
@@ -242,6 +256,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> atMost(C endpoint) {
     return create(Cut.<C>belowAll(), Cut.aboveValue(endpoint));
   }
@@ -252,6 +267,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> upTo(
       C endpoint, BoundType boundType) {
     switch (boundType) {
@@ -270,6 +286,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> greaterThan(C endpoint) {
     return create(Cut.aboveValue(endpoint), Cut.<C>aboveAll());
   }
@@ -280,6 +297,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> atLeast(C endpoint) {
     return create(Cut.belowValue(endpoint), Cut.<C>aboveAll());
   }
@@ -290,6 +308,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> downTo(
       C endpoint, BoundType boundType) {
     switch (boundType) {
@@ -310,6 +329,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *
    * @since 14.0
    */
+  @Pure
   @SuppressWarnings("unchecked")
   public static <C extends Comparable<?>> Range<C> all() {
     return (Range) ALL;
@@ -322,6 +342,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> singleton(C value) {
     return closed(value, value);
   }
@@ -337,6 +358,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * @throws NullPointerException if any of {@code values} is null
    * @since 14.0
    */
+  @Impure
   public static <C extends Comparable<?>> Range<C> encloseAll(
       Iterable<C> values) {
     checkNotNull(values);
@@ -357,6 +379,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
   final Cut<C> lowerBound;
   final Cut<C> upperBound;
 
+  @Impure
   private Range(Cut<C> lowerBound, Cut<C> upperBound) {
     if (lowerBound.compareTo(upperBound) > 0 || lowerBound == Cut.<C>aboveAll()
         || upperBound == Cut.<C>belowAll()) {
@@ -369,6 +392,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
   /**
    * Returns {@code true} if this range has a lower endpoint.
    */
+  @Impure
   public boolean hasLowerBound() {
     return lowerBound != Cut.belowAll();
   }
@@ -379,6 +403,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * @throws IllegalStateException if this range is unbounded below (that is, {@link
    *     #hasLowerBound()} returns {@code false})
    */
+  @Impure
   public C lowerEndpoint() {
     return lowerBound.endpoint();
   }
@@ -390,6 +415,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * @throws IllegalStateException if this range is unbounded below (that is, {@link
    *     #hasLowerBound()} returns {@code false})
    */
+  @Impure
   public BoundType lowerBoundType() {
     return lowerBound.typeAsLowerBound();
   }
@@ -397,6 +423,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
   /**
    * Returns {@code true} if this range has an upper endpoint.
    */
+  @Impure
   public boolean hasUpperBound() {
     return upperBound != Cut.aboveAll();
   }
@@ -407,6 +434,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * @throws IllegalStateException if this range is unbounded above (that is, {@link
    *     #hasUpperBound()} returns {@code false})
    */
+  @Impure
   public C upperEndpoint() {
     return upperBound.endpoint();
   }
@@ -418,6 +446,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * @throws IllegalStateException if this range is unbounded above (that is, {@link
    *     #hasUpperBound()} returns {@code false})
    */
+  @Impure
   public BoundType upperBoundType() {
     return upperBound.typeAsUpperBound();
   }
@@ -431,6 +460,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * considered empty, even though they contain no actual values.  In these cases, it may be 
    * helpful to preprocess ranges with {@link #canonical(DiscreteDomain)}.
    */
+  @Pure
   public boolean isEmpty() {
     return lowerBound.equals(upperBound);
   }
@@ -440,6 +470,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * range {@code [0..2)}, {@code contains(1)} returns {@code true}, while {@code contains(2)}
    * returns {@code false}.
    */
+  @Impure
   public boolean contains(C value) {
     checkNotNull(value);
     // let this throw CCE if there is some trickery going on
@@ -450,6 +481,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * @deprecated Provided only to satisfy the {@link Predicate} interface; use {@link #contains}
    *     instead.
    */
+  @Impure
   @Deprecated
   @Override
   public boolean apply(C input) {
@@ -460,6 +492,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * Returns {@code true} if every element in {@code values} is {@linkplain #contains contained} in
    * this range.
    */
+  @Impure
   public boolean containsAll(Iterable<? extends C> values) {
     if (Iterables.isEmpty(values)) {
       return true;
@@ -506,6 +539,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * according to this relation, and also numerous {@linkplain #isEmpty minimal} ranges. Enclosure
    * also implies {@linkplain #isConnected connectedness}.
    */
+  @Pure
   public boolean encloses(Range<C> other) {
     return lowerBound.compareTo(other.lowerBound) <= 0
         && upperBound.compareTo(other.upperBound) >= 0;
@@ -535,6 +569,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * [6, 10]}.  In these cases, it may be desirable for both input ranges to be preprocessed with
    * {@link #canonical(DiscreteDomain)} before testing for connectedness.
    */
+  @Pure
   public boolean isConnected(Range<C> other) {
     return lowerBound.compareTo(other.upperBound) <= 0
         && other.lowerBound.compareTo(upperBound) <= 0;
@@ -556,6 +591,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    *
    * @throws IllegalArgumentException if {@code isConnected(connectedRange)} is {@code false}
    */
+  @Impure
   public Range<C> intersection(Range<C> connectedRange) {
     int lowerCmp = lowerBound.compareTo(connectedRange.lowerBound);
     int upperCmp = upperBound.compareTo(connectedRange.upperBound);
@@ -581,6 +617,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * <p>Like {@link #intersection(Range) intersection}, this operation is commutative, associative
    * and idempotent. Unlike it, it is always well-defined for any two input ranges.
    */
+  @Impure
   public Range<C> span(Range<C> other) {
     int lowerCmp = lowerBound.compareTo(other.lowerBound);
     int upperCmp = upperBound.compareTo(other.upperBound);
@@ -619,6 +656,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * <li>(-∞..+∞) (only if type {@code C} is unbounded below)
    * </ul>
    */
+  @Impure
   public Range<C> canonical(DiscreteDomain<C> domain) {
     checkNotNull(domain);
     Cut<C> lower = lowerBound.canonical(domain);
@@ -633,6 +671,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * Similarly, empty ranges are not equal unless they have exactly the same representation, so
    * {@code [3..3)}, {@code (3..3]}, {@code (4..4]} are all unequal.
    */
+  @Pure
   @Override public boolean equals(@Nullable Object object) {
     if (object instanceof Range) {
       Range<?> other = (Range<?>) object;
@@ -643,6 +682,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
   }
 
   /** Returns a hash code for this range. */
+  @Pure
   @Override public int hashCode() {
     return lowerBound.hashCode() * 31 + upperBound.hashCode();
   }
@@ -651,10 +691,12 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
    * Returns a string representation of this range, such as {@code "[3..5)"} (other examples are
    * listed in the class documentation).
    */
+  @Impure
   @Override public String toString() {
     return toString(lowerBound, upperBound);
   }
 
+  @Impure
   private static String toString(Cut<?> lowerBound, Cut<?> upperBound) {
     StringBuilder sb = new StringBuilder(16);
     lowerBound.describeAsLowerBound(sb);
@@ -666,10 +708,13 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
   /**
    * Used to avoid http://bugs.sun.com/view_bug.do?bug_id=6558557
    */
+  @Pure
   private static <T> SortedSet<T> cast(Iterable<T> iterable) {
     return (SortedSet<T>) iterable;
   }
 
+  @Pure
+  @Impure
   Object readResolve() {
     if (this.equals(ALL)) {
       return all();
@@ -678,6 +723,7 @@ public final class Range<C extends Comparable> implements Predicate<C>, Serializ
     }
   }
 
+  @Pure
   @SuppressWarnings("unchecked") // this method may throw CCE
   static int compareOrThrow(Comparable left, Comparable right) {
     return left.compareTo(right);

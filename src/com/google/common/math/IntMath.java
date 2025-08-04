@@ -16,6 +16,9 @@
 
 package com.google.common.math;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.math.MathPreconditions.checkNoOverflow;
@@ -59,6 +62,7 @@ public final class IntMath {
    * {@code Integer.bitCount(Integer.MIN_VALUE) == 1}, but {@link Integer#MIN_VALUE} is not a power
    * of two.
    */
+  @Pure
   public static boolean isPowerOfTwo(int x) {
     return x > 0 & (x & (x - 1)) == 0;
   }
@@ -68,6 +72,7 @@ public final class IntMath {
    * a signed int. The implementation is branch-free, and benchmarks suggest it is measurably (if
    * narrowly) faster than the straightforward ternary expression.
    */
+  @Pure
   @VisibleForTesting
   static int lessThanBranchFree(int x, int y) {
     // The double negation is optimized away by normal Java, but is necessary for GWT
@@ -82,6 +87,7 @@ public final class IntMath {
    * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
    *         is not a power of two
    */
+  @Impure
   @SuppressWarnings("fallthrough")
   // TODO(kevinb): remove after this warning is disabled globally
   public static int log2(int x, RoundingMode mode) {
@@ -123,6 +129,7 @@ public final class IntMath {
    * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
    *         is not a power of ten
    */
+  @Impure
   @GwtIncompatible("need BigIntegerMath to adequately test")
   @SuppressWarnings("fallthrough")
   public static int log10(int x, RoundingMode mode) {
@@ -149,6 +156,7 @@ public final class IntMath {
     }
   }
 
+  @Impure
   private static int log10Floor(int x) {
     /*
      * Based on Hacker's Delight Fig. 11-5, the two-table-lookup, branch-free implementation.
@@ -185,6 +193,7 @@ public final class IntMath {
    *
    * @throws IllegalArgumentException if {@code k < 0}
    */
+  @Impure
   @GwtIncompatible("failing tests")
   public static int pow(int b, int k) {
     checkNonNegative("exponent", k);
@@ -226,6 +235,7 @@ public final class IntMath {
    * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
    *         {@code sqrt(x)} is not an integer
    */
+  @Impure
   @GwtIncompatible("need BigIntegerMath to adequately test")
   @SuppressWarnings("fallthrough")
   public static int sqrt(int x, RoundingMode mode) {
@@ -261,6 +271,7 @@ public final class IntMath {
     }
   }
 
+  @Pure
   private static int sqrtFloor(int x) {
     // There is no loss of precision in converting an int to a double, according to
     // http://java.sun.com/docs/books/jls/third_edition/html/conversions.html#5.1.2
@@ -274,6 +285,7 @@ public final class IntMath {
    * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
    *         is not an integer multiple of {@code b}
    */
+  @Impure
   @SuppressWarnings("fallthrough")
   public static int divide(int p, int q, RoundingMode mode) {
     checkNotNull(mode);
@@ -347,6 +359,7 @@ public final class IntMath {
    * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
    *      Remainder Operator</a>
    */
+  @Pure
   public static int mod(int x, int m) {
     if (m <= 0) {
       throw new ArithmeticException("Modulus " + m + " must be > 0");
@@ -361,6 +374,7 @@ public final class IntMath {
    *
    * @throws IllegalArgumentException if {@code a < 0} or {@code b < 0}
    */
+  @Impure
   public static int gcd(int a, int b) {
     /*
      * The reason we require both arguments to be >= 0 is because otherwise, what do you return on
@@ -411,6 +425,7 @@ public final class IntMath {
    *
    * @throws ArithmeticException if {@code a + b} overflows in signed {@code int} arithmetic
    */
+  @Impure
   public static int checkedAdd(int a, int b) {
     long result = (long) a + b;
     checkNoOverflow(result == (int) result);
@@ -422,6 +437,7 @@ public final class IntMath {
    *
    * @throws ArithmeticException if {@code a - b} overflows in signed {@code int} arithmetic
    */
+  @Impure
   public static int checkedSubtract(int a, int b) {
     long result = (long) a - b;
     checkNoOverflow(result == (int) result);
@@ -433,6 +449,7 @@ public final class IntMath {
    *
    * @throws ArithmeticException if {@code a * b} overflows in signed {@code int} arithmetic
    */
+  @Impure
   public static int checkedMultiply(int a, int b) {
     long result = (long) a * b;
     checkNoOverflow(result == (int) result);
@@ -447,6 +464,7 @@ public final class IntMath {
    * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed
    *         {@code int} arithmetic
    */
+  @Impure
   public static int checkedPow(int b, int k) {
     checkNonNegative("exponent", k);
     switch (b) {
@@ -494,6 +512,7 @@ public final class IntMath {
    *
    * @throws IllegalArgumentException if {@code n < 0}
    */
+  @Impure
   public static int factorial(int n) {
     checkNonNegative("n", n);
     return (n < factorials.length) ? factorials[n] : Integer.MAX_VALUE;
@@ -520,6 +539,7 @@ public final class IntMath {
    *
    * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0} or {@code k > n}
    */
+  @Impure
   @GwtIncompatible("need BigIntegerMath to adequately test")
   public static int binomial(int n, int k) {
     checkNonNegative("n", n);
@@ -573,6 +593,7 @@ public final class IntMath {
    *
    * @since 14.0
    */
+  @Pure
   public static int mean(int x, int y) {
     // Efficient method for computing the arithmetic mean.
     // The alternative (x + y) / 2 fails for large values.
@@ -580,5 +601,6 @@ public final class IntMath {
     return (x & y) + ((x ^ y) >> 1);
   }
 
+  @SideEffectFree
   private IntMath() {}
 }

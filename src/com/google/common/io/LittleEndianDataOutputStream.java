@@ -16,6 +16,7 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Longs;
@@ -48,19 +49,23 @@ public class LittleEndianDataOutputStream extends FilterOutputStream
    *
    * @param out the stream to delegate to
    */
+  @Impure
   public LittleEndianDataOutputStream(OutputStream out) {
     super(new DataOutputStream(Preconditions.checkNotNull(out)));
   }
 
+  @Impure
   @Override public void write(byte[] b, int off, int len) throws IOException {
     // Override slow FilterOutputStream impl
     out.write(b, off, len);
   }
 
+  @Impure
   @Override public void writeBoolean(boolean v) throws IOException {
     ((DataOutputStream) out).writeBoolean(v);
   }
 
+  @Impure
   @Override public void writeByte(int v) throws IOException {
     ((DataOutputStream) out).writeByte(v);
   }
@@ -70,6 +75,7 @@ public class LittleEndianDataOutputStream extends FilterOutputStream
    *             dangerous. Please use {@link #writeUTF(String s)},
    *             {@link #writeChars(String s)} or another write method instead.
    */
+  @Impure
   @Deprecated
   @Override public void writeBytes(String s) throws IOException {
     ((DataOutputStream) out).writeBytes(s);
@@ -81,6 +87,7 @@ public class LittleEndianDataOutputStream extends FilterOutputStream
    *
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override public void writeChar(int v) throws IOException {
     writeShort(v);
   }
@@ -92,6 +99,7 @@ public class LittleEndianDataOutputStream extends FilterOutputStream
    *
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override public void writeChars(String s) throws IOException {
     for (int i = 0; i < s.length(); i++) {
       writeChar(s.charAt(i));
@@ -105,6 +113,7 @@ public class LittleEndianDataOutputStream extends FilterOutputStream
    *
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override public void writeDouble(double v) throws IOException {
     writeLong(Double.doubleToLongBits(v));
   }
@@ -116,6 +125,7 @@ public class LittleEndianDataOutputStream extends FilterOutputStream
    *
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override public void writeFloat(float v) throws IOException {
     writeInt(Float.floatToIntBits(v));
   }
@@ -127,6 +137,7 @@ public class LittleEndianDataOutputStream extends FilterOutputStream
    *
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override public void writeInt(int v) throws IOException {
     out.write(0xFF & v);
     out.write(0xFF & (v >> 8));
@@ -141,6 +152,7 @@ public class LittleEndianDataOutputStream extends FilterOutputStream
    *
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override public void writeLong(long v) throws IOException {
     byte[] bytes = Longs.toByteArray(Long.reverseBytes(v));
     write(bytes, 0, bytes.length);
@@ -153,11 +165,13 @@ public class LittleEndianDataOutputStream extends FilterOutputStream
    *
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override public void writeShort(int v) throws IOException {
     out.write(0xFF & v);
     out.write(0xFF & (v >> 8));
   }
 
+  @Impure
   @Override public void writeUTF(String str) throws IOException {
     ((DataOutputStream) out).writeUTF(str);
   }

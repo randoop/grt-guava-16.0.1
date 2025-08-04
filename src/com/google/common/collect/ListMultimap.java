@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Collection;
@@ -49,6 +51,7 @@ public interface ListMultimap<K, V> extends Multimap<K, V> {
    * insertion ordering, this method returns a {@link List}, instead of the
    * {@link java.util.Collection} specified in the {@link Multimap} interface.
    */
+  @Impure
   @Override
   List<V> get(@Nullable K key);
 
@@ -59,6 +62,7 @@ public interface ListMultimap<K, V> extends Multimap<K, V> {
    * insertion ordering, this method returns a {@link List}, instead of the
    * {@link java.util.Collection} specified in the {@link Multimap} interface.
    */
+  @Impure
   @Override
   List<V> removeAll(@Nullable Object key);
 
@@ -69,6 +73,8 @@ public interface ListMultimap<K, V> extends Multimap<K, V> {
    * insertion ordering, this method returns a {@link List}, instead of the
    * {@link java.util.Collection} specified in the {@link Multimap} interface.
    */
+  @Pure
+  @Impure
   @Override
   List<V> replaceValues(K key, Iterable<? extends V> values);
 
@@ -80,6 +86,7 @@ public interface ListMultimap<K, V> extends Multimap<K, V> {
    * {@code Map<K, List<V>>}, call {@link Multimaps#asMap(ListMultimap)}
    * instead.
    */
+  @Pure
   @Override
   Map<K, Collection<V>> asMap();
 
@@ -93,6 +100,7 @@ public interface ListMultimap<K, V> extends Multimap<K, V> {
    * <p>An empty {@code ListMultimap} is equal to any other empty {@code
    * Multimap}, including an empty {@code SetMultimap}.
    */
+  @Pure
   @Override
   boolean equals(@Nullable Object obj);
 }

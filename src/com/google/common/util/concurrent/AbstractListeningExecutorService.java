@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 
 import java.util.concurrent.AbstractExecutorService;
@@ -38,22 +39,27 @@ import javax.annotation.Nullable;
 public abstract class AbstractListeningExecutorService
     extends AbstractExecutorService implements ListeningExecutorService {
 
+  @Impure
   @Override protected final <T> ListenableFutureTask<T> newTaskFor(Runnable runnable, T value) {
     return ListenableFutureTask.create(runnable, value);
   }
 
+  @Impure
   @Override protected final <T> ListenableFutureTask<T> newTaskFor(Callable<T> callable) {
     return ListenableFutureTask.create(callable);
   }
 
+  @Impure
   @Override public ListenableFuture<?> submit(Runnable task) {
     return (ListenableFuture<?>) super.submit(task);
   }
 
+  @Impure
   @Override public <T> ListenableFuture<T> submit(Runnable task, @Nullable T result) {
     return (ListenableFuture<T>) super.submit(task, result);
   }
 
+  @Impure
   @Override public <T> ListenableFuture<T> submit(Callable<T> task) {
     return (ListenableFuture<T>) super.submit(task);
   }

@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Iterator;
@@ -38,6 +40,7 @@ final class WellBehavedMap<K, V> extends ForwardingMap<K, V> {
   private final Map<K, V> delegate;
   private Set<Entry<K, V>> entrySet;
 
+  @Impure
   private WellBehavedMap(Map<K, V> delegate) {
     this.delegate = delegate;
   }
@@ -48,14 +51,17 @@ final class WellBehavedMap<K, V> extends ForwardingMap<K, V> {
    * {@code Set<K> keySet()} and transforming it to
    * {@code Set<Entry<K, V>>}. All other invocations are delegated as-is.
    */
+  @Impure
   static <K, V> WellBehavedMap<K, V> wrap(Map<K, V> delegate) {
     return new WellBehavedMap<K, V>(delegate);
   }
 
+  @Pure
   @Override protected Map<K, V> delegate() {
     return delegate;
   }
 
+  @Impure
   @Override public Set<Entry<K, V>> entrySet() {
     Set<Entry<K, V>> es = entrySet;
     if (es != null) {
@@ -65,27 +71,33 @@ final class WellBehavedMap<K, V> extends ForwardingMap<K, V> {
   }
 
   private final class EntrySet extends Maps.EntrySet<K, V> {
+    @Pure
     @Override
     Map<K, V> map() {
       return WellBehavedMap.this;
     }
 
+    @Impure
     @Override
     public Iterator<Entry<K, V>> iterator() {
       return new TransformedIterator<K, Entry<K, V>>(keySet().iterator()) {
+        @Impure
         @Override
         Entry<K, V> transform(final K key) {
           return new AbstractMapEntry<K, V>() {
+            @Pure
             @Override
             public K getKey() {
               return key;
             }
 
+            @Pure
             @Override
             public V getValue() {
               return get(key);
             }
 
+            @Impure
             @Override
             public V setValue(V value) {
               return put(key, value);

@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -300,6 +302,7 @@ public final class Monitor {
     @GuardedBy("monitor.lock")
     Guard next;
 
+    @Impure
     protected Guard(Monitor monitor) {
       this.monitor = checkNotNull(monitor, "monitor");
       this.condition = monitor.lock.newCondition();
@@ -310,6 +313,7 @@ public final class Monitor {
      * monitor already occupied. Implementations of this method must depend only on state protected
      * by the associated monitor, and must not modify that state.
      */
+    @Impure
     public abstract boolean isSatisfied();
 
   }
@@ -335,6 +339,7 @@ public final class Monitor {
    * Creates a monitor with a non-fair (but fast) ordering policy. Equivalent to {@code
    * Monitor(false)}.
    */
+  @Impure
   public Monitor() {
     this(false);
   }
@@ -345,6 +350,7 @@ public final class Monitor {
    * @param fair whether this monitor should use a fair ordering policy rather than a non-fair (but
    *        fast) one
    */
+  @Impure
   public Monitor(boolean fair) {
     this.fair = fair;
     this.lock = new ReentrantLock(fair);
@@ -353,6 +359,7 @@ public final class Monitor {
   /**
    * Enters this monitor. Blocks indefinitely.
    */
+  @Impure
   public void enter() {
     lock.lock();
   }
@@ -360,6 +367,7 @@ public final class Monitor {
   /**
    * Enters this monitor. Blocks indefinitely, but may be interrupted.
    */
+  @Impure
   public void enterInterruptibly() throws InterruptedException {
     lock.lockInterruptibly();
   }
@@ -369,6 +377,7 @@ public final class Monitor {
    *
    * @return whether the monitor was entered
    */
+  @Impure
   public boolean enter(long time, TimeUnit unit) {
     long timeoutNanos = unit.toNanos(time);
     final ReentrantLock lock = this.lock;
@@ -398,6 +407,7 @@ public final class Monitor {
    *
    * @return whether the monitor was entered
    */
+  @Impure
   public boolean enterInterruptibly(long time, TimeUnit unit) throws InterruptedException {
     return lock.tryLock(time, unit);
   }
@@ -409,6 +419,7 @@ public final class Monitor {
    *
    * @return whether the monitor was entered
    */
+  @Impure
   public boolean tryEnter() {
     return lock.tryLock();
   }
@@ -416,6 +427,7 @@ public final class Monitor {
   /**
    * Enters this monitor when the guard is satisfied. Blocks indefinitely, but may be interrupted.
    */
+  @Impure
   public void enterWhen(Guard guard) throws InterruptedException {
     if (guard.monitor != this) {
       throw new IllegalMonitorStateException();
@@ -440,6 +452,7 @@ public final class Monitor {
   /**
    * Enters this monitor when the guard is satisfied. Blocks indefinitely.
    */
+  @Impure
   public void enterWhenUninterruptibly(Guard guard) {
     if (guard.monitor != this) {
       throw new IllegalMonitorStateException();
@@ -468,6 +481,7 @@ public final class Monitor {
    *
    * @return whether the monitor was entered with the guard satisfied
    */
+  @Impure
   public boolean enterWhen(Guard guard, long time, TimeUnit unit) throws InterruptedException {
     long timeoutNanos = unit.toNanos(time);
     if (guard.monitor != this) {
@@ -509,6 +523,7 @@ public final class Monitor {
    *
    * @return whether the monitor was entered with the guard satisfied
    */
+  @Impure
   public boolean enterWhenUninterruptibly(Guard guard, long time, TimeUnit unit) {
     long timeoutNanos = unit.toNanos(time);
     if (guard.monitor != this) {
@@ -564,6 +579,7 @@ public final class Monitor {
    *
    * @return whether the monitor was entered with the guard satisfied
    */
+  @Impure
   public boolean enterIf(Guard guard) {
     if (guard.monitor != this) {
       throw new IllegalMonitorStateException();
@@ -587,6 +603,7 @@ public final class Monitor {
    *
    * @return whether the monitor was entered with the guard satisfied
    */
+  @Impure
   public boolean enterIfInterruptibly(Guard guard) throws InterruptedException {
     if (guard.monitor != this) {
       throw new IllegalMonitorStateException();
@@ -610,6 +627,7 @@ public final class Monitor {
    *
    * @return whether the monitor was entered with the guard satisfied
    */
+  @Impure
   public boolean enterIf(Guard guard, long time, TimeUnit unit) {
     if (guard.monitor != this) {
       throw new IllegalMonitorStateException();
@@ -634,6 +652,7 @@ public final class Monitor {
    *
    * @return whether the monitor was entered with the guard satisfied
    */
+  @Impure
   public boolean enterIfInterruptibly(Guard guard, long time, TimeUnit unit)
       throws InterruptedException {
     if (guard.monitor != this) {
@@ -662,6 +681,7 @@ public final class Monitor {
    *
    * @return whether the monitor was entered with the guard satisfied
    */
+  @Impure
   public boolean tryEnterIf(Guard guard) {
     if (guard.monitor != this) {
       throw new IllegalMonitorStateException();
@@ -685,6 +705,7 @@ public final class Monitor {
    * Waits for the guard to be satisfied. Waits indefinitely, but may be interrupted. May be
    * called only by a thread currently occupying this monitor.
    */
+  @Impure
   public void waitFor(Guard guard) throws InterruptedException {
     if (!((guard.monitor == this) & lock.isHeldByCurrentThread())) {
       throw new IllegalMonitorStateException();
@@ -698,6 +719,7 @@ public final class Monitor {
    * Waits for the guard to be satisfied. Waits indefinitely. May be called only by a thread
    * currently occupying this monitor.
    */
+  @Impure
   public void waitForUninterruptibly(Guard guard) {
     if (!((guard.monitor == this) & lock.isHeldByCurrentThread())) {
       throw new IllegalMonitorStateException();
@@ -713,6 +735,7 @@ public final class Monitor {
    *
    * @return whether the guard is now satisfied
    */
+  @Impure
   public boolean waitFor(Guard guard, long time, TimeUnit unit) throws InterruptedException {
     long timeoutNanos = unit.toNanos(time);
     if (!((guard.monitor == this) & lock.isHeldByCurrentThread())) {
@@ -727,6 +750,7 @@ public final class Monitor {
    *
    * @return whether the guard is now satisfied
    */
+  @Impure
   public boolean waitForUninterruptibly(Guard guard, long time, TimeUnit unit) {
     long timeoutNanos = unit.toNanos(time);
     if (!((guard.monitor == this) & lock.isHeldByCurrentThread())) {
@@ -761,6 +785,7 @@ public final class Monitor {
   /**
    * Leaves this monitor. May be called only by a thread currently occupying this monitor.
    */
+  @Impure
   public void leave() {
     final ReentrantLock lock = this.lock;
     try {
@@ -776,6 +801,7 @@ public final class Monitor {
   /**
    * Returns whether this monitor is using a fair ordering policy.
    */
+  @Pure
   public boolean isFair() {
     return fair;
   }
@@ -784,6 +810,7 @@ public final class Monitor {
    * Returns whether this monitor is occupied by any thread. This method is designed for use in
    * monitoring of the system state, not for synchronization control.
    */
+  @Impure
   public boolean isOccupied() {
     return lock.isLocked();
   }
@@ -792,6 +819,7 @@ public final class Monitor {
    * Returns whether the current thread is occupying this monitor (has entered more times than it
    * has left).
    */
+  @Impure
   public boolean isOccupiedByCurrentThread() {
     return lock.isHeldByCurrentThread();
   }
@@ -800,6 +828,7 @@ public final class Monitor {
    * Returns the number of times the current thread has entered this monitor in excess of the number
    * of times it has left. Returns 0 if the current thread is not occupying this monitor.
    */
+  @Impure
   public int getOccupiedDepth() {
     return lock.getHoldCount();
   }
@@ -810,6 +839,7 @@ public final class Monitor {
    * internal data structures. This method is designed for use in monitoring of the system state,
    * not for synchronization control.
    */
+  @Impure
   public int getQueueLength() {
     return lock.getQueueLength();
   }
@@ -820,6 +850,7 @@ public final class Monitor {
    * enter this monitor. This method is designed primarily for use in monitoring of the system
    * state.
    */
+  @Impure
   public boolean hasQueuedThreads() {
     return lock.hasQueuedThreads();
   }
@@ -830,6 +861,7 @@ public final class Monitor {
    * will ever enter this monitor. This method is designed primarily for use in monitoring of the
    * system state.
    */
+  @Impure
   public boolean hasQueuedThread(Thread thread) {
     return lock.hasQueuedThread(thread);
   }
@@ -840,6 +872,7 @@ public final class Monitor {
    * that the guard becoming satisfied in the future will awaken any threads. This method is
    * designed primarily for use in monitoring of the system state.
    */
+  @Impure
   public boolean hasWaiters(Guard guard) {
     return getWaitQueueLength(guard) > 0;
   }
@@ -850,6 +883,7 @@ public final class Monitor {
    * upper bound on the actual number of waiters. This method is designed for use in monitoring of
    * the system state, not for synchronization control.
    */
+  @Impure
   public int getWaitQueueLength(Guard guard) {
     if (guard.monitor != this) {
       throw new IllegalMonitorStateException();
@@ -886,6 +920,7 @@ public final class Monitor {
    * This method must not be called from within a beginWaitingFor/endWaitingFor block, or else the
    * current thread's guard might be mistakenly signalled, leading to a lost signal.
    */
+  @Impure
   @GuardedBy("lock")
   private void signalNextWaiter() {
     for (Guard guard = activeGuards; guard != null; guard = guard.next) {
@@ -918,6 +953,7 @@ public final class Monitor {
    * Exactly like guard.isSatisfied(), but in addition signals all waiting threads in the
    * (hopefully unlikely) event that isSatisfied() throws.
    */
+  @Impure
   @GuardedBy("lock")
   private boolean isSatisfied(Guard guard) {
     try {
@@ -931,6 +967,7 @@ public final class Monitor {
   /**
    * Signals all threads waiting on guards.
    */
+  @Impure
   @GuardedBy("lock")
   private void signalAllWaiters() {
     for (Guard guard = activeGuards; guard != null; guard = guard.next) {
@@ -941,6 +978,7 @@ public final class Monitor {
   /**
    * Records that the current thread is about to wait on the specified guard.
    */
+  @Impure
   @GuardedBy("lock")
   private void beginWaitingFor(Guard guard) {
     int waiters = guard.waiterCount++;
@@ -954,6 +992,7 @@ public final class Monitor {
   /**
    * Records that the current thread is no longer waiting on the specified guard.
    */
+  @Impure
   @GuardedBy("lock")
   private void endWaitingFor(Guard guard) {
     int waiters = --guard.waiterCount;
@@ -979,6 +1018,7 @@ public final class Monitor {
    * It's caller's responsibility to ensure that the guard is *not* currently satisfied.
    */
 
+  @Impure
   @GuardedBy("lock")
     private void await(Guard guard, boolean signalBeforeWaiting)
       throws InterruptedException {
@@ -995,6 +1035,7 @@ public final class Monitor {
     }
   }
 
+  @Impure
   @GuardedBy("lock")
   private void awaitUninterruptibly(Guard guard, boolean signalBeforeWaiting) {
     if (signalBeforeWaiting) {
@@ -1010,6 +1051,7 @@ public final class Monitor {
     }
   }
 
+  @Impure
   @GuardedBy("lock")
   private boolean awaitNanos(Guard guard, long nanos, boolean signalBeforeWaiting)
       throws InterruptedException {

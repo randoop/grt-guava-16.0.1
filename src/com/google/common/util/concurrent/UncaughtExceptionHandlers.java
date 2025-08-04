@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static java.util.logging.Level.SEVERE;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -30,6 +32,7 @@ import java.util.logging.Logger;
  * @since 8.0
  */
 public final class UncaughtExceptionHandlers {
+  @SideEffectFree
   private UncaughtExceptionHandlers() {}
 
   /**
@@ -46,6 +49,7 @@ public final class UncaughtExceptionHandlers {
    * <p>The returned handler logs any exception at severity {@code SEVERE} and then shuts down the
    * process with an exit status of 1, indicating abnormal termination.
    */
+  @Impure
   public static UncaughtExceptionHandler systemExit() {
     return new Exiter(Runtime.getRuntime());
   }
@@ -55,10 +59,12 @@ public final class UncaughtExceptionHandlers {
 
     private final Runtime runtime;
 
+    @SideEffectFree
     Exiter(Runtime runtime) {
       this.runtime = runtime;
     }
 
+    @Impure
     @Override public void uncaughtException(Thread t, Throwable e) {
       try {
         // cannot use FormattingLogger due to a dependency loop

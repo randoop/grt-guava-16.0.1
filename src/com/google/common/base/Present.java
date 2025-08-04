@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -32,46 +35,56 @@ import javax.annotation.Nullable;
 final class Present<T> extends Optional<T> {
   private final T reference;
 
+  @SideEffectFree
   Present(T reference) {
     this.reference = reference;
   }
 
+  @Pure
   @Override public boolean isPresent() {
     return true;
   }
 
+  @Pure
   @Override public T get() {
     return reference;
   }
 
+  @SideEffectFree
   @Override public T or(T defaultValue) {
     checkNotNull(defaultValue, "use Optional.orNull() instead of Optional.or(null)");
     return reference;
   }
 
+  @Pure
   @Override public Optional<T> or(Optional<? extends T> secondChoice) {
     checkNotNull(secondChoice);
     return this;
   }
 
+  @Pure
   @Override public T or(Supplier<? extends T> supplier) {
     checkNotNull(supplier);
     return reference;
   }
 
+  @Pure
   @Override public T orNull() {
     return reference;
   }
 
+  @Impure
   @Override public Set<T> asSet() {
     return Collections.singleton(reference);
   }
   
+  @Impure
   @Override public <V> Optional<V> transform(Function<? super T, V> function) {
     return new Present<V>(checkNotNull(function.apply(reference),
         "the Function passed to Optional.transform() must not return null."));
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object object) {
     if (object instanceof Present) {
       Present<?> other = (Present<?>) object;
@@ -80,10 +93,12 @@ final class Present<T> extends Optional<T> {
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     return 0x598df91c + reference.hashCode();
   }
 
+  @Pure
   @Override public String toString() {
     return "Optional.of(" + reference + ")";
   }

@@ -14,6 +14,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -134,6 +137,8 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    * Constructs a new {@code MapMaker} instance with default settings, including strong keys, strong
    * values, and no automatic eviction of any kind.
    */
+  @SideEffectFree
+  @Impure
   public MapMaker() {}
 
   /**
@@ -143,6 +148,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    * #weakKeys} is specified, and {@link Equivalence#equals()} otherwise. The only place this is
    * used is in {@link Interners.WeakInterner}.
    */
+  @Impure
   @GwtIncompatible("To be supported")
   @Override
   MapMaker keyEquivalence(Equivalence<Object> equivalence) {
@@ -152,6 +158,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
     return this;
   }
 
+  @Impure
   Equivalence<Object> getKeyEquivalence() {
     return firstNonNull(keyEquivalence, getKeyStrength().defaultEquivalence());
   }
@@ -166,6 +173,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    * @throws IllegalArgumentException if {@code initialCapacity} is negative
    * @throws IllegalStateException if an initial capacity was already set
    */
+  @Impure
   @Override
   public MapMaker initialCapacity(int initialCapacity) {
     checkState(this.initialCapacity == UNSET_INT, "initial capacity was already set to %s",
@@ -175,6 +183,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
     return this;
   }
 
+  @Pure
   int getInitialCapacity() {
     return (initialCapacity == UNSET_INT) ? DEFAULT_INITIAL_CAPACITY : initialCapacity;
   }
@@ -202,6 +211,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    *     CacheBuilder} is simply an enhanced API for an implementation which was branched from
    *     {@code MapMaker}.
    */
+  @Impure
   @Deprecated
   @Override
   MapMaker maximumSize(int size) {
@@ -236,6 +246,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    * @throws IllegalArgumentException if {@code concurrencyLevel} is nonpositive
    * @throws IllegalStateException if a concurrency level was already set
    */
+  @Impure
   @Override
   public MapMaker concurrencyLevel(int concurrencyLevel) {
     checkState(this.concurrencyLevel == UNSET_INT, "concurrency level was already set to %s",
@@ -245,6 +256,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
     return this;
   }
 
+  @Pure
   int getConcurrencyLevel() {
     return (concurrencyLevel == UNSET_INT) ? DEFAULT_CONCURRENCY_LEVEL : concurrencyLevel;
   }
@@ -260,12 +272,14 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    * @throws IllegalStateException if the key strength was already set
    * @see WeakReference
    */
+  @Impure
   @GwtIncompatible("java.lang.ref.WeakReference")
   @Override
   public MapMaker weakKeys() {
     return setKeyStrength(Strength.WEAK);
   }
 
+  @Impure
   MapMaker setKeyStrength(Strength strength) {
     checkState(keyStrength == null, "Key strength was already set to %s", keyStrength);
     keyStrength = checkNotNull(strength);
@@ -277,6 +291,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
     return this;
   }
 
+  @Impure
   Strength getKeyStrength() {
     return firstNonNull(keyStrength, Strength.STRONG);
   }
@@ -298,6 +313,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    * @throws IllegalStateException if the value strength was already set
    * @see WeakReference
    */
+  @Impure
   @GwtIncompatible("java.lang.ref.WeakReference")
   @Override
   public MapMaker weakValues() {
@@ -329,6 +345,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    *     an enhanced API for an implementation which was branched from {@code MapMaker}. <b>This
    *     method is scheduled for deletion in September 2014.</b>
    */
+  @Impure
   @Deprecated
   @GwtIncompatible("java.lang.ref.SoftReference")
   @Override
@@ -336,6 +353,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
     return setValueStrength(Strength.SOFT);
   }
 
+  @Impure
   MapMaker setValueStrength(Strength strength) {
     checkState(valueStrength == null, "Value strength was already set to %s", valueStrength);
     valueStrength = checkNotNull(strength);
@@ -346,6 +364,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
     return this;
   }
 
+  @Impure
   Strength getValueStrength() {
     return firstNonNull(valueStrength, Strength.STRONG);
   }
@@ -375,6 +394,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    *     CacheBuilder} is simply an enhanced API for an implementation which was branched from
    *     {@code MapMaker}.
    */
+  @Impure
   @Deprecated
   @Override
   MapMaker expireAfterWrite(long duration, TimeUnit unit) {
@@ -388,6 +408,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
     return this;
   }
 
+  @Impure
   private void checkExpiration(long duration, TimeUnit unit) {
     checkState(expireAfterWriteNanos == UNSET_INT, "expireAfterWrite was already set to %s ns",
         expireAfterWriteNanos);
@@ -396,6 +417,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
     checkArgument(duration >= 0, "duration cannot be negative: %s %s", duration, unit);
   }
 
+  @Pure
   long getExpireAfterWriteNanos() {
     return (expireAfterWriteNanos == UNSET_INT) ? DEFAULT_EXPIRATION_NANOS : expireAfterWriteNanos;
   }
@@ -425,6 +447,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    *     {@code CacheBuilder} is simply an enhanced API for an implementation which was branched
    *     from {@code MapMaker}.
    */
+  @Impure
   @Deprecated
   @GwtIncompatible("To be supported")
   @Override
@@ -439,11 +462,13 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
     return this;
   }
 
+  @Pure
   long getExpireAfterAccessNanos() {
     return (expireAfterAccessNanos == UNSET_INT)
         ? DEFAULT_EXPIRATION_NANOS : expireAfterAccessNanos;
   }
 
+  @Impure
   Ticker getTicker() {
     return firstNonNull(ticker, Ticker.systemTicker());
   }
@@ -477,6 +502,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    *     CacheBuilder} is simply an enhanced API for an implementation which was branched from
    *     {@code MapMaker}.
    */
+  @Impure
   @Deprecated
   @GwtIncompatible("To be supported")
   <K, V> GenericMapMaker<K, V> removalListener(RemovalListener<K, V> listener) {
@@ -502,6 +528,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    *
    * @return a serializable concurrent map having the requested features
    */
+  @Impure
   @Override
   public <K, V> ConcurrentMap<K, V> makeMap() {
     if (!useCustomMap) {
@@ -516,6 +543,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    * Returns a MapMakerInternalMap for the benefit of internal callers that use features of
    * that class not exposed through ConcurrentMap.
    */
+  @Impure
   @Override
   @GwtIncompatible("MapMakerInternalMap")
   <K, V> MapMakerInternalMap<K, V> makeCustomMap() {
@@ -579,6 +607,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
    *     <a href="http://code.google.com/p/guava-libraries/wiki/MapMakerMigration">MapMaker
    *     Migration Guide</a> for more details.
    */
+  @Impure
   @Deprecated
   @Override
   <K, V> ConcurrentMap<K, V> makeComputingMap(
@@ -644,6 +673,7 @@ public final class MapMaker extends GenericMapMaker<Object, Object> {
     /**
      * Notifies the listener that a removal occurred at some point in the past.
      */
+    @SideEffectFree
     void onRemoval(RemovalNotification<K, V> notification);
   }
 

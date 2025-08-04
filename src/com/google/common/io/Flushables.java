@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 
 import java.io.Flushable;
@@ -34,6 +36,7 @@ public final class Flushables {
   private static final Logger logger
       = Logger.getLogger(Flushables.class.getName());
 
+  @SideEffectFree
   private Flushables() {}
 
   /**
@@ -50,6 +53,7 @@ public final class Flushables {
    *     {@link Flushable#flush} throws an {@code IOException}.
    * @see Closeables#close
    */
+  @Impure
   public static void flush(Flushable flushable, boolean swallowIOException)
       throws IOException {
     try {
@@ -70,6 +74,7 @@ public final class Flushables {
    *
    * @param flushable the {@code Flushable} object to be flushed.
    */
+  @Impure
   public static void flushQuietly(Flushable flushable) {
     try {
       flush(flushable, true);

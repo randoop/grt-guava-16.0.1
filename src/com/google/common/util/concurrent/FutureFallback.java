@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 
 import java.util.concurrent.ExecutionException;
@@ -44,5 +45,6 @@ public interface FutureFallback<V> {
    *     cause is passed to this method. Any other thrown object is passed
    *     unaltered.
    */
+  @Pure
   ListenableFuture<V> create(Throwable t) throws Exception;
 }

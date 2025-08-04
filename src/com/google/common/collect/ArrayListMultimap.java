@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.collect.CollectPreconditions.checkNonnegative;
 
 import com.google.common.annotations.GwtCompatible;
@@ -74,6 +76,7 @@ public final class ArrayListMultimap<K, V> extends AbstractListMultimap<K, V> {
    * Creates a new, empty {@code ArrayListMultimap} with the default initial
    * capacities.
    */
+  @Impure
   public static <K, V> ArrayListMultimap<K, V> create() {
     return new ArrayListMultimap<K, V>();
   }
@@ -87,6 +90,7 @@ public final class ArrayListMultimap<K, V> extends AbstractListMultimap<K, V> {
    * @throws IllegalArgumentException if {@code expectedKeys} or {@code
    *      expectedValuesPerKey} is negative
    */
+  @Impure
   public static <K, V> ArrayListMultimap<K, V> create(
       int expectedKeys, int expectedValuesPerKey) {
     return new ArrayListMultimap<K, V>(expectedKeys, expectedValuesPerKey);
@@ -98,22 +102,26 @@ public final class ArrayListMultimap<K, V> extends AbstractListMultimap<K, V> {
    *
    * @param multimap the multimap whose contents are copied to this multimap
    */
+  @Impure
   public static <K, V> ArrayListMultimap<K, V> create(
       Multimap<? extends K, ? extends V> multimap) {
     return new ArrayListMultimap<K, V>(multimap);
   }
 
+  @Impure
   private ArrayListMultimap() {
     super(new HashMap<K, Collection<V>>());
     expectedValuesPerKey = DEFAULT_VALUES_PER_KEY;
   }
 
+  @Impure
   private ArrayListMultimap(int expectedKeys, int expectedValuesPerKey) {
     super(Maps.<K, Collection<V>>newHashMapWithExpectedSize(expectedKeys));
     checkNonnegative(expectedValuesPerKey, "expectedValuesPerKey");
     this.expectedValuesPerKey = expectedValuesPerKey;
   }
 
+  @Impure
   private ArrayListMultimap(Multimap<? extends K, ? extends V> multimap) {
     this(multimap.keySet().size(),
         (multimap instanceof ArrayListMultimap) ?
@@ -126,6 +134,7 @@ public final class ArrayListMultimap<K, V> extends AbstractListMultimap<K, V> {
    * Creates a new, empty {@code ArrayList} to hold the collection of values for
    * an arbitrary key.
    */
+  @SideEffectFree
   @Override List<V> createCollection() {
     return new ArrayList<V>(expectedValuesPerKey);
   }
@@ -133,6 +142,7 @@ public final class ArrayListMultimap<K, V> extends AbstractListMultimap<K, V> {
   /**
    * Reduces the memory used by this {@code ArrayListMultimap}, if feasible.
    */
+  @Impure
   public void trimToSize() {
     for (Collection<V> collection : backingMap().values()) {
       ArrayList<V> arrayList = (ArrayList<V>) collection;
@@ -145,6 +155,7 @@ public final class ArrayListMultimap<K, V> extends AbstractListMultimap<K, V> {
    *     each distinct key: the key, number of values for that key, and the
    *     key's values
    */
+  @Impure
   @GwtIncompatible("java.io.ObjectOutputStream")
   private void writeObject(ObjectOutputStream stream) throws IOException {
     stream.defaultWriteObject();
@@ -152,6 +163,7 @@ public final class ArrayListMultimap<K, V> extends AbstractListMultimap<K, V> {
     Serialization.writeMultimap(this, stream);
   }
 
+  @Impure
   @GwtIncompatible("java.io.ObjectOutputStream")
   private void readObject(ObjectInputStream stream)
       throws IOException, ClassNotFoundException {

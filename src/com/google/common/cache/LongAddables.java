@@ -16,6 +16,7 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Supplier;
 
@@ -36,6 +37,7 @@ final class LongAddables {
     try {
       new LongAdder();
       supplier = new Supplier<LongAddable>() {
+        @Impure
         @Override
         public LongAddable get() {
           return new LongAdder();
@@ -43,6 +45,7 @@ final class LongAddables {
       };
     } catch (Throwable t) { // we really want to catch *everything*
       supplier = new Supplier<LongAddable>() {
+        @Impure
         @Override
         public LongAddable get() {
           return new PureJavaLongAddable();
@@ -52,21 +55,25 @@ final class LongAddables {
     SUPPLIER = supplier;
   }
   
+  @Impure
   public static LongAddable create() {
     return SUPPLIER.get();
   }
   
   private static final class PureJavaLongAddable extends AtomicLong implements LongAddable {
+    @Impure
     @Override
     public void increment() {
       getAndIncrement();
     }
 
+    @Impure
     @Override
     public void add(long x) {
       getAndAdd(x);
     }
 
+    @Impure
     @Override
     public long sum() {
       return get();

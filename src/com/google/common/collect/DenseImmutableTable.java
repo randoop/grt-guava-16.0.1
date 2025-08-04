@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.annotations.GwtCompatible;
@@ -40,6 +42,7 @@ final class DenseImmutableTable<R, C, V>
   private final int[] iterationOrderRow;
   private final int[] iterationOrderColumn;
 
+  @Impure
   private static <E> ImmutableMap<E, Integer> makeIndex(ImmutableSet<E> set) {
     ImmutableMap.Builder<E, Integer> indexBuilder = ImmutableMap.builder();
     int i = 0;
@@ -50,6 +53,7 @@ final class DenseImmutableTable<R, C, V>
     return indexBuilder.build();
   }
 
+  @Impure
   DenseImmutableTable(ImmutableList<Cell<R, C, V>> cellList,
       ImmutableSet<R> rowSpace, ImmutableSet<C> columnSpace) {
     @SuppressWarnings("unchecked")
@@ -87,52 +91,65 @@ final class DenseImmutableTable<R, C, V>
   private abstract static class ImmutableArrayMap<K, V> extends ImmutableMap<K, V> {
     private final int size;
   
+    @Impure
     ImmutableArrayMap(int size) {
       this.size = size;
     }
   
+    @Pure
     abstract ImmutableMap<K, Integer> keyToIndex();
   
     // True if getValue never returns null.
+    @Pure
+    @Impure
     private boolean isFull() {
       return size == keyToIndex().size();
     }
   
+    @Impure
     K getKey(int index) {
       return keyToIndex().keySet().asList().get(index);
     }
   
+    @Impure
     @Nullable abstract V getValue(int keyIndex);
   
+    @Impure
     @Override
     ImmutableSet<K> createKeySet() {
       return isFull() ? keyToIndex().keySet() : super.createKeySet();
     }
   
+    @Pure
     @Override
     public int size() {
       return size;
     }
   
+    @Impure
     @Override
     public V get(@Nullable Object key) {
       Integer keyIndex = keyToIndex().get(key);
       return (keyIndex == null) ? null : getValue(keyIndex);
     }
   
+    @Impure
     @Override
     ImmutableSet<Entry<K, V>> createEntrySet() {
       return new ImmutableMapEntrySet<K, V>() {
+        @Pure
         @Override ImmutableMap<K, V> map() {
           return ImmutableArrayMap.this;
         }
 
+        @Impure
         @Override
         public UnmodifiableIterator<Entry<K, V>> iterator() {
           return new AbstractIterator<Entry<K, V>>() {
             private int index = -1;
             private final int maxIndex = keyToIndex().size();
 
+            @Impure
             @Override
             protected Entry<K, V> computeNext() {
               for (index++; index < maxIndex; index++) {
@@ -152,21 +169,25 @@ final class DenseImmutableTable<R, C, V>
   private final class Row extends ImmutableArrayMap<C, V> {
     private final int rowIndex;
 
+    @Impure
     Row(int rowIndex) {
       super(rowCounts[rowIndex]);
       this.rowIndex = rowIndex;
     }
 
+    @Pure
     @Override
     ImmutableMap<C, Integer> keyToIndex() {
       return columnKeyToIndex;
     }
 
+    @Pure
     @Override
     V getValue(int keyIndex) {
       return values[rowIndex][keyIndex];
     }
 
+    @Pure
     @Override
     boolean isPartialView() {
       return true;
@@ -176,21 +197,25 @@ final class DenseImmutableTable<R, C, V>
   private final class Column extends ImmutableArrayMap<R, V> {
     private final int columnIndex;
 
+    @Impure
     Column(int columnIndex) {
       super(columnCounts[columnIndex]);
       this.columnIndex = columnIndex;
     }
 
+    @Pure
     @Override
     ImmutableMap<R, Integer> keyToIndex() {
       return rowKeyToIndex;
     }
 
+    @Pure
     @Override
     V getValue(int keyIndex) {
       return values[keyIndex][columnIndex];
     }
 
+    @Pure
     @Override
     boolean isPartialView() {
       return true;
@@ -198,20 +223,24 @@ final class DenseImmutableTable<R, C, V>
   }
 
   private final class RowMap extends ImmutableArrayMap<R, Map<C, V>> {
+    @Impure
     private RowMap() {
       super(rowCounts.length);
     }
 
+    @Pure
     @Override
     ImmutableMap<R, Integer> keyToIndex() {
       return rowKeyToIndex;
     }
 
+    @Impure
     @Override
     Map<C, V> getValue(int keyIndex) {
       return new Row(keyIndex);
     }
 
+    @Pure
     @Override
     boolean isPartialView() {
       return false;
@@ -219,35 +248,42 @@ final class DenseImmutableTable<R, C, V>
   }
 
   private final class ColumnMap extends ImmutableArrayMap<C, Map<R, V>> {
+    @Impure
     private ColumnMap() {
       super(columnCounts.length);
     }
 
+    @Pure
     @Override
     ImmutableMap<C, Integer> keyToIndex() {
       return columnKeyToIndex;
     }
 
+    @Impure
     @Override
     Map<R, V> getValue(int keyIndex) {
       return new Column(keyIndex);
     }
 
+    @Pure
     @Override
     boolean isPartialView() {
       return false;
     }
   }
 
+  @Pure
   @Override public ImmutableMap<C, Map<R, V>> columnMap() {
     return columnMap;
   }
 
+  @Pure
   @Override
   public ImmutableMap<R, Map<C, V>> rowMap() {
     return rowMap;
   }
 
+  @Pure
   @Override public V get(@Nullable Object rowKey,
       @Nullable Object columnKey) {
     Integer rowIndex = rowKeyToIndex.get(rowKey);
@@ -256,11 +292,13 @@ final class DenseImmutableTable<R, C, V>
         : values[rowIndex][columnIndex];
   }
 
+  @Pure
   @Override
   public int size() {
     return iterationOrderRow.length;
   }
 
+  @Impure
   @Override
   Cell<R, C, V> getCell(int index) {
     int rowIndex = iterationOrderRow[index];
@@ -271,6 +309,7 @@ final class DenseImmutableTable<R, C, V>
     return cellOf(rowKey, columnKey, value);
   }
 
+  @Pure
   @Override
   V getValue(int index) {
     return values[iterationOrderRow[index]][iterationOrderColumn[index]];

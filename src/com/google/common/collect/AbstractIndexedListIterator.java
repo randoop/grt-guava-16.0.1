@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkPositionIndex;
 
 import com.google.common.annotations.GwtCompatible;
@@ -40,6 +42,7 @@ abstract class AbstractIndexedListIterator<E>
    * Returns the element with the specified index. This method is called by
    * {@link #next()}.
    */
+  @Pure
   protected abstract E get(int index);
 
   /**
@@ -50,6 +53,7 @@ abstract class AbstractIndexedListIterator<E>
    *
    * @throws IllegalArgumentException if {@code size} is negative
    */
+  @Impure
   protected AbstractIndexedListIterator(int size) {
     this(size, 0);
   }
@@ -65,17 +69,20 @@ abstract class AbstractIndexedListIterator<E>
    *         greater than {@code size}
    * @throws IllegalArgumentException if {@code size} is negative
    */
+  @Impure
   protected AbstractIndexedListIterator(int size, int position) {
     checkPositionIndex(position, size);
     this.size = size;
     this.position = position;
   }
 
+  @Pure
   @Override
   public final boolean hasNext() {
     return position < size;
   }
 
+  @Impure
   @Override
   public final E next() {
     if (!hasNext()) {
@@ -84,16 +91,19 @@ abstract class AbstractIndexedListIterator<E>
     return get(position++);
   }
 
+  @Pure
   @Override
   public final int nextIndex() {
     return position;
   }
 
+  @Pure
   @Override
   public final boolean hasPrevious() {
     return position > 0;
   }
 
+  @Impure
   @Override
   public final E previous() {
     if (!hasPrevious()) {
@@ -102,6 +112,7 @@ abstract class AbstractIndexedListIterator<E>
     return get(--position);
   }
 
+  @Pure
   @Override
   public final int previousIndex() {
     return position - 1;

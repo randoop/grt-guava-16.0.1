@@ -16,6 +16,9 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.collect.ImmutableMap;
@@ -45,11 +48,13 @@ import java.util.concurrent.ExecutionException;
 public abstract class AbstractCache<K, V> implements Cache<K, V> {
 
   /** Constructor for use by subclasses. */
+  @SideEffectFree
   protected AbstractCache() {}
 
   /**
    * @since 11.0
    */
+  @Pure
   @Override
   public V get(K key, Callable<? extends V> valueLoader) throws ExecutionException {
     throw new UnsupportedOperationException();
@@ -64,6 +69,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
    *
    * @since 11.0
    */
+  @Impure
   @Override
   public ImmutableMap<K, V> getAllPresent(Iterable<?> keys) {
     Map<K, V> result = Maps.newLinkedHashMap();
@@ -80,6 +86,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
   /**
    * @since 11.0
    */
+  @SideEffectFree
   @Override
   public void put(K key, V value) {
     throw new UnsupportedOperationException();
@@ -88,6 +95,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
   /**
    * @since 12.0
    */
+  @SideEffectFree
+  @Impure
   @Override
   public void putAll(Map<? extends K, ? extends V> m) {
     for (Map.Entry<? extends K, ? extends V> entry : m.entrySet()) {
@@ -95,14 +104,17 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     }
   }
 
+  @SideEffectFree
   @Override
   public void cleanUp() {}
 
+  @Pure
   @Override
   public long size() {
     throw new UnsupportedOperationException();
   }
 
+  @SideEffectFree
   @Override
   public void invalidate(Object key) {
     throw new UnsupportedOperationException();
@@ -111,6 +123,8 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
   /**
    * @since 11.0
    */
+  @SideEffectFree
+  @Impure
   @Override
   public void invalidateAll(Iterable<?> keys) {
     for (Object key : keys) {
@@ -118,16 +132,19 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     }
   }
 
+  @SideEffectFree
   @Override
   public void invalidateAll() {
     throw new UnsupportedOperationException();
   }
 
+  @Pure
   @Override
   public CacheStats stats() {
     throw new UnsupportedOperationException();
   }
 
+  @Pure
   @Override
   public ConcurrentMap<K, V> asMap() {
     throw new UnsupportedOperationException();
@@ -147,6 +164,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * @param count the number of hits to record
      * @since 11.0
      */
+    @Impure
     public void recordHits(int count);
 
     /**
@@ -160,6 +178,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * @param count the number of misses to record
      * @since 11.0
      */
+    @Impure
     public void recordMisses(int count);
 
     /**
@@ -170,6 +189,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * @param loadTime the number of nanoseconds the cache spent computing or retrieving the new
      *     value
      */
+    @Impure
     public void recordLoadSuccess(long loadTime);
 
     /**
@@ -180,6 +200,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * @param loadTime the number of nanoseconds the cache spent computing or retrieving the new
      *     value prior to an exception being thrown
      */
+    @Impure
     public void recordLoadException(long loadTime);
 
     /**
@@ -187,12 +208,14 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
      * is evicted due to the cache's eviction strategy, and not as a result of manual {@linkplain
      * Cache#invalidate invalidations}.
      */
+    @Impure
     public void recordEviction();
 
     /**
      * Returns a snapshot of this counter's values. Note that this may be an inconsistent view, as
      * it may be interleaved with update operations.
      */
+    @Impure
     public CacheStats snapshot();
   }
 
@@ -213,11 +236,13 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Constructs an instance with all counts initialized to zero.
      */
+    @SideEffectFree
     public SimpleStatsCounter() {}
 
     /**
      * @since 11.0
      */
+    @Impure
     @Override
     public void recordHits(int count) {
       hitCount.add(count);
@@ -226,28 +251,33 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * @since 11.0
      */
+    @Impure
     @Override
     public void recordMisses(int count) {
       missCount.add(count);
     }
 
+    @Impure
     @Override
     public void recordLoadSuccess(long loadTime) {
       loadSuccessCount.increment();
       totalLoadTime.add(loadTime);
     }
 
+    @Impure
     @Override
     public void recordLoadException(long loadTime) {
       loadExceptionCount.increment();
       totalLoadTime.add(loadTime);
     }
 
+    @Impure
     @Override
     public void recordEviction() {
       evictionCount.increment();
     }
 
+    @Impure
     @Override
     public CacheStats snapshot() {
       return new CacheStats(
@@ -262,6 +292,7 @@ public abstract class AbstractCache<K, V> implements Cache<K, V> {
     /**
      * Increments all counters by the values in {@code other}.
      */
+    @Impure
     public void incrementBy(StatsCounter other) {
       CacheStats otherStats = other.snapshot();
       hitCount.add(otherStats.hitCount());

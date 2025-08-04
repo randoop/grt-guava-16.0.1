@@ -16,6 +16,8 @@
 
 package com.google.common.escape;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Function;
@@ -84,10 +86,14 @@ public abstract class Escaper {
    * @throws IllegalArgumentException if {@code string} contains badly formed UTF-16 or cannot be
    *         escaped for any other reason
    */
+  @Impure
+  @Pure
   public abstract String escape(String string);
 
   private final Function<String, String> asFunction =
       new Function<String, String>() {
+        @Pure
+        @Impure
         @Override
         public String apply(String from) {
           return escape(from);
@@ -97,6 +103,7 @@ public abstract class Escaper {
   /**
    * Returns a {@link Function} that invokes {@link #escape(String)} on this escaper.
    */
+  @Pure
   public final Function<String, String> asFunction() {
     return asFunction;
   }

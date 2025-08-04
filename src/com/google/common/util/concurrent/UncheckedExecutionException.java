@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 
 import javax.annotation.Nullable;
@@ -42,11 +43,13 @@ public class UncheckedExecutionException extends RuntimeException {
   /**
    * Creates a new instance with {@code null} as its detail message.
    */
+  @SideEffectFree
   protected UncheckedExecutionException() {}
 
   /**
    * Creates a new instance with the given detail message.
    */
+  @SideEffectFree
   protected UncheckedExecutionException(@Nullable String message) {
     super(message);
   }
@@ -54,6 +57,7 @@ public class UncheckedExecutionException extends RuntimeException {
   /**
    * Creates a new instance with the given detail message and cause.
    */
+  @SideEffectFree
   public UncheckedExecutionException(@Nullable String message, @Nullable Throwable cause) {
     super(message, cause);
   }
@@ -61,6 +65,7 @@ public class UncheckedExecutionException extends RuntimeException {
   /**
    * Creates a new instance with the given cause.
    */
+  @SideEffectFree
   public UncheckedExecutionException(@Nullable Throwable cause) {
     super(cause);
   }

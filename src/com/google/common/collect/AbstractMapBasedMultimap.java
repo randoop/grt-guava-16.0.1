@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.CollectPreconditions.checkRemove;
@@ -119,12 +122,14 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    *     values
    * @throws IllegalArgumentException if {@code map} is not empty
    */
+  @Impure
   protected AbstractMapBasedMultimap(Map<K, Collection<V>> map) {
     checkArgument(map.isEmpty());
     this.map = map;
   }
 
   /** Used during deserialization only. */
+  @Impure
   final void setMap(Map<K, Collection<V>> map) {
     this.map = map;
     totalSize = 0;
@@ -139,6 +144,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    *
    * <p>This is used in {@link #removeAll} on an empty key.
    */
+  @Impure
   Collection<V> createUnmodifiableEmptyCollection() {
     return unmodifiableCollectionSubclass(createCollection());
   }
@@ -154,6 +160,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    *
    * @return an empty collection of values
    */
+  @Pure
   abstract Collection<V> createCollection();
 
   /**
@@ -165,21 +172,26 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    * @param key key to associate with values in the collection
    * @return an empty collection of values
    */
+  @Pure
+  @Impure
   Collection<V> createCollection(@Nullable K key) {
     return createCollection();
   }
 
+  @Pure
   Map<K, Collection<V>> backingMap() {
     return map;
   }
 
   // Query Operations
 
+  @Pure
   @Override
   public int size() {
     return totalSize;
   }
 
+  @Pure
   @Override
   public boolean containsKey(@Nullable Object key) {
     return map.containsKey(key);
@@ -187,6 +199,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
 
   // Modification Operations
 
+  @Impure
   @Override
   public boolean put(@Nullable K key, @Nullable V value) {
     Collection<V> collection = map.get(key);
@@ -207,6 +220,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
     }
   }
 
+  @Impure
   private Collection<V> getOrCreateCollection(@Nullable K key) {
     Collection<V> collection = map.get(key);
     if (collection == null) {
@@ -223,6 +237,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    *
    * <p>The returned collection is immutable.
    */
+  @Impure
   @Override
   public Collection<V> replaceValues(@Nullable K key, Iterable<? extends V> values) {
     Iterator<? extends V> iterator = values.iterator();
@@ -252,6 +267,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    *
    * <p>The returned collection is immutable.
    */
+  @Impure
   @Override
   public Collection<V> removeAll(@Nullable Object key) {
     Collection<V> collection = map.remove(key);
@@ -268,6 +284,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
     return unmodifiableCollectionSubclass(output);
   }
 
+  @Impure
   Collection<V> unmodifiableCollectionSubclass(Collection<V> collection) {
     // We don't deal with NavigableSet here yet for GWT reasons -- instead,
     // non-GWT TreeMultimap explicitly overrides this and uses NavigableSet.
@@ -282,6 +299,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
     }
   }
 
+  @Impure
   @Override
   public void clear() {
     // Clear each collection, to make previously returned collections empty.
@@ -299,6 +317,8 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    *
    * <p>The returned collection is not serializable.
    */
+  @SideEffectFree
+  @Impure
   @Override
   public Collection<V> get(@Nullable K key) {
     Collection<V> collection = map.get(key);
@@ -313,6 +333,8 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    * the multimap for the provided key. Changes to the multimap may alter the
    * returned collection, and vice versa.
    */
+  @SideEffectFree
+  @Impure
   Collection<V> wrapCollection(@Nullable K key, Collection<V> collection) {
     // We don't deal with NavigableSet here yet for GWT reasons -- instead,
     // non-GWT TreeMultimap explicitly overrides this and uses NavigableSet.
@@ -327,6 +349,8 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
     }
   }
 
+  @SideEffectFree
+  @Impure
   private List<V> wrapList(
       @Nullable K key, List<V> list, @Nullable WrappedCollection ancestor) {
     return (list instanceof RandomAccess)
@@ -357,6 +381,8 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
     final WrappedCollection ancestor;
     final Collection<V> ancestorDelegate;
 
+    @SideEffectFree
+    @Impure
     WrappedCollection(@Nullable K key, Collection<V> delegate,
         @Nullable WrappedCollection ancestor) {
       this.key = key;
@@ -373,6 +399,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
      * <p>For a subcollection, refresh its ancestor and validate that the
      * ancestor delegate hasn't changed.
      */
+    @Impure
     void refreshIfEmpty() {
       if (ancestor != null) {
         ancestor.refreshIfEmpty();
@@ -391,6 +418,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
      * If collection is empty, remove it from {@code AbstractMapBasedMultimap.this.map}.
      * For subcollections, check whether the ancestor collection is empty.
      */
+    @Impure
     void removeIfEmpty() {
       if (ancestor != null) {
         ancestor.removeIfEmpty();
@@ -399,6 +427,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       }
     }
 
+    @Pure
     K getKey() {
       return key;
     }
@@ -410,6 +439,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
      *
      * <p>Subcollection add the ancestor's delegate instead.
      */
+    @Impure
     void addToMap() {
       if (ancestor != null) {
         ancestor.addToMap();
@@ -418,11 +448,13 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       }
     }
 
+    @Impure
     @Override public int size() {
       refreshIfEmpty();
       return delegate.size();
     }
 
+    @Impure
     @Override public boolean equals(@Nullable Object object) {
       if (object == this) {
         return true;
@@ -431,20 +463,24 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return delegate.equals(object);
     }
 
+    @Impure
     @Override public int hashCode() {
       refreshIfEmpty();
       return delegate.hashCode();
     }
 
+    @Impure
     @Override public String toString() {
       refreshIfEmpty();
       return delegate.toString();
     }
 
+    @Pure
     Collection<V> getDelegate() {
       return delegate;
     }
 
+    @Impure
     @Override public Iterator<V> iterator() {
       refreshIfEmpty();
       return new WrappedIterator();
@@ -455,10 +491,12 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       final Iterator<V> delegateIterator;
       final Collection<V> originalDelegate = delegate;
 
+      @Impure
       WrappedIterator() {
         delegateIterator = iteratorOrListIterator(delegate);
       }
 
+      @SideEffectFree
       WrappedIterator(Iterator<V> delegateIterator) {
         this.delegateIterator = delegateIterator;
       }
@@ -467,6 +505,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
        * If the delegate changed since the iterator was created, the iterator is
        * no longer valid.
        */
+      @Impure
       void validateIterator() {
         refreshIfEmpty();
         if (delegate != originalDelegate) {
@@ -474,18 +513,21 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
         }
       }
 
+      @Impure
       @Override
       public boolean hasNext() {
         validateIterator();
         return delegateIterator.hasNext();
       }
 
+      @Impure
       @Override
       public V next() {
         validateIterator();
         return delegateIterator.next();
       }
 
+      @Impure
       @Override
       public void remove() {
         delegateIterator.remove();
@@ -493,12 +535,14 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
         removeIfEmpty();
       }
 
+      @Impure
       Iterator<V> getDelegateIterator() {
         validateIterator();
         return delegateIterator;
       }
     }
 
+    @Impure
     @Override public boolean add(V value) {
       refreshIfEmpty();
       boolean wasEmpty = delegate.isEmpty();
@@ -512,12 +556,14 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return changed;
     }
 
+    @Pure
     WrappedCollection getAncestor() {
       return ancestor;
     }
 
     // The following methods are provided for better performance.
 
+    @Impure
     @Override public boolean addAll(Collection<? extends V> collection) {
       if (collection.isEmpty()) {
         return false;
@@ -534,16 +580,19 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return changed;
     }
 
+    @Impure
     @Override public boolean contains(Object o) {
       refreshIfEmpty();
       return delegate.contains(o);
     }
 
+    @Impure
     @Override public boolean containsAll(Collection<?> c) {
       refreshIfEmpty();
       return delegate.containsAll(c);
     }
 
+    @Impure
     @Override public void clear() {
       int oldSize = size();  // calls refreshIfEmpty
       if (oldSize == 0) {
@@ -554,6 +603,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       removeIfEmpty();       // maybe shouldn't be removed if this is a sublist
     }
 
+    @Impure
     @Override public boolean remove(Object o) {
       refreshIfEmpty();
       boolean changed = delegate.remove(o);
@@ -564,6 +614,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return changed;
     }
 
+    @Impure
     @Override public boolean removeAll(Collection<?> c) {
       if (c.isEmpty()) {
         return false;
@@ -578,6 +629,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return changed;
     }
 
+    @Impure
     @Override public boolean retainAll(Collection<?> c) {
       checkNotNull(c);
       int oldSize = size();  // calls refreshIfEmpty
@@ -591,6 +643,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
     }
   }
 
+  @Impure
   private Iterator<V> iteratorOrListIterator(Collection<V> collection) {
     return (collection instanceof List)
         ? ((List<V>) collection).listIterator()
@@ -599,10 +652,13 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
 
   /** Set decorator that stays in sync with the multimap values for a key. */
   private class WrappedSet extends WrappedCollection implements Set<V> {
+    @SideEffectFree
+    @Impure
     WrappedSet(@Nullable K key, Set<V> delegate) {
       super(key, delegate, null);
     }
 
+    @Impure
     @Override
     public boolean removeAll(Collection<?> c) {
       if (c.isEmpty()) {
@@ -628,32 +684,39 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    */
   private class WrappedSortedSet extends WrappedCollection
       implements SortedSet<V> {
+    @SideEffectFree
+    @Impure
     WrappedSortedSet(@Nullable K key, SortedSet<V> delegate,
         @Nullable WrappedCollection ancestor) {
       super(key, delegate, ancestor);
     }
 
+    @Impure
     SortedSet<V> getSortedSetDelegate() {
       return (SortedSet<V>) getDelegate();
     }
 
+    @Impure
     @Override
     public Comparator<? super V> comparator() {
       return getSortedSetDelegate().comparator();
     }
 
+    @Impure
     @Override
     public V first() {
       refreshIfEmpty();
       return getSortedSetDelegate().first();
     }
 
+    @Impure
     @Override
     public V last() {
       refreshIfEmpty();
       return getSortedSetDelegate().last();
     }
 
+    @Impure
     @Override
     public SortedSet<V> headSet(V toElement) {
       refreshIfEmpty();
@@ -662,6 +725,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
           (getAncestor() == null) ? this : getAncestor());
     }
 
+    @Impure
     @Override
     public SortedSet<V> subSet(V fromElement, V toElement) {
       refreshIfEmpty();
@@ -670,6 +734,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
           (getAncestor() == null) ? this : getAncestor());
     }
 
+    @Impure
     @Override
     public SortedSet<V> tailSet(V fromElement) {
       refreshIfEmpty();
@@ -681,61 +746,75 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
 
   @GwtIncompatible("NavigableSet")
   class WrappedNavigableSet extends WrappedSortedSet implements NavigableSet<V> {
+    @SideEffectFree
+    @Impure
     WrappedNavigableSet(
         @Nullable K key, NavigableSet<V> delegate, @Nullable WrappedCollection ancestor) {
       super(key, delegate, ancestor);
     }
 
+    @Impure
     @Override
     NavigableSet<V> getSortedSetDelegate() {
       return (NavigableSet<V>) super.getSortedSetDelegate();
     }
 
+    @Impure
     @Override
     public V lower(V v) {
       return getSortedSetDelegate().lower(v);
     }
 
+    @Impure
     @Override
     public V floor(V v) {
       return getSortedSetDelegate().floor(v);
     }
 
+    @Impure
     @Override
     public V ceiling(V v) {
       return getSortedSetDelegate().ceiling(v);
     }
 
+    @Impure
     @Override
     public V higher(V v) {
       return getSortedSetDelegate().higher(v);
     }
 
+    @Impure
     @Override
     public V pollFirst() {
       return Iterators.pollNext(iterator());
     }
 
+    @Impure
     @Override
     public V pollLast() {
       return Iterators.pollNext(descendingIterator());
     }
 
+    @SideEffectFree
+    @Impure
     private NavigableSet<V> wrap(NavigableSet<V> wrapped) {
       return new WrappedNavigableSet(key, wrapped,
           (getAncestor() == null) ? this : getAncestor());
     }
 
+    @Impure
     @Override
     public NavigableSet<V> descendingSet() {
       return wrap(getSortedSetDelegate().descendingSet());
     }
 
+    @Impure
     @Override
     public Iterator<V> descendingIterator() {
       return new WrappedIterator(getSortedSetDelegate().descendingIterator());
     }
 
+    @Impure
     @Override
     public NavigableSet<V> subSet(
         V fromElement, boolean fromInclusive, V toElement, boolean toInclusive) {
@@ -743,11 +822,13 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
           getSortedSetDelegate().subSet(fromElement, fromInclusive, toElement, toInclusive));
     }
 
+    @Impure
     @Override
     public NavigableSet<V> headSet(V toElement, boolean inclusive) {
       return wrap(getSortedSetDelegate().headSet(toElement, inclusive));
     }
 
+    @Impure
     @Override
     public NavigableSet<V> tailSet(V fromElement, boolean inclusive) {
       return wrap(getSortedSetDelegate().tailSet(fromElement, inclusive));
@@ -756,15 +837,20 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
 
   /** List decorator that stays in sync with the multimap values for a key. */
   private class WrappedList extends WrappedCollection implements List<V> {
+    @SideEffectFree
+    @Impure
     WrappedList(@Nullable K key, List<V> delegate,
         @Nullable WrappedCollection ancestor) {
       super(key, delegate, ancestor);
     }
 
+    @Pure
+    @Impure
     List<V> getListDelegate() {
       return (List<V>) getDelegate();
     }
 
+    @Impure
     @Override
     public boolean addAll(int index, Collection<? extends V> c) {
       if (c.isEmpty()) {
@@ -782,18 +868,21 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return changed;
     }
 
+    @Impure
     @Override
     public V get(int index) {
       refreshIfEmpty();
       return getListDelegate().get(index);
     }
 
+    @Impure
     @Override
     public V set(int index, V element) {
       refreshIfEmpty();
       return getListDelegate().set(index, element);
     }
 
+    @Impure
     @Override
     public void add(int index, V element) {
       refreshIfEmpty();
@@ -805,6 +894,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       }
     }
 
+    @Impure
     @Override
     public V remove(int index) {
       refreshIfEmpty();
@@ -814,30 +904,35 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return value;
     }
 
+    @Impure
     @Override
     public int indexOf(Object o) {
       refreshIfEmpty();
       return getListDelegate().indexOf(o);
     }
 
+    @Impure
     @Override
     public int lastIndexOf(Object o) {
       refreshIfEmpty();
       return getListDelegate().lastIndexOf(o);
     }
 
+    @Impure
     @Override
     public ListIterator<V> listIterator() {
       refreshIfEmpty();
       return new WrappedListIterator();
     }
 
+    @Impure
     @Override
     public ListIterator<V> listIterator(int index) {
       refreshIfEmpty();
       return new WrappedListIterator(index);
     }
 
+    @Impure
     @Override
     public List<V> subList(int fromIndex, int toIndex) {
       refreshIfEmpty();
@@ -849,41 +944,50 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
     /** ListIterator decorator. */
     private class WrappedListIterator extends WrappedIterator
         implements ListIterator<V> {
+      @Impure
       WrappedListIterator() {}
 
+      @Impure
       public WrappedListIterator(int index) {
         super(getListDelegate().listIterator(index));
       }
 
+      @Impure
       private ListIterator<V> getDelegateListIterator() {
         return (ListIterator<V>) getDelegateIterator();
       }
 
+      @Impure
       @Override
       public boolean hasPrevious() {
         return getDelegateListIterator().hasPrevious();
       }
 
+      @Impure
       @Override
       public V previous() {
         return getDelegateListIterator().previous();
       }
 
+      @Impure
       @Override
       public int nextIndex() {
         return getDelegateListIterator().nextIndex();
       }
 
+      @Impure
       @Override
       public int previousIndex() {
         return getDelegateListIterator().previousIndex();
       }
 
+      @Impure
       @Override
       public void set(V value) {
         getDelegateListIterator().set(value);
       }
 
+      @Impure
       @Override
       public void add(V value) {
         boolean wasEmpty = isEmpty();
@@ -902,12 +1006,15 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    */
   private class RandomAccessWrappedList extends WrappedList
       implements RandomAccess {
+    @SideEffectFree
+    @Impure
     RandomAccessWrappedList(@Nullable K key, List<V> delegate,
         @Nullable WrappedCollection ancestor) {
       super(key, delegate, ancestor);
     }
   }
 
+  @Impure
   @Override
   Set<K> createKeySet() {
     // TreeMultimap uses NavigableKeySet explicitly, but we don't handle that here for GWT
@@ -917,25 +1024,30 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
   }
 
   private class KeySet extends Maps.KeySet<K, Collection<V>> {
+    @Impure
     KeySet(final Map<K, Collection<V>> subMap) {
       super(subMap);
     }
 
+    @Impure
     @Override public Iterator<K> iterator() {
       final Iterator<Map.Entry<K, Collection<V>>> entryIterator
           = map().entrySet().iterator();
       return new Iterator<K>() {
         Map.Entry<K, Collection<V>> entry;
 
+        @Pure
         @Override
         public boolean hasNext() {
           return entryIterator.hasNext();
         }
+        @Impure
         @Override
         public K next() {
           entry = entryIterator.next();
           return entry.getKey();
         }
+        @Impure
         @Override
         public void remove() {
           checkRemove(entry != null);
@@ -949,6 +1061,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
 
     // The following methods are included for better performance.
 
+    @Impure
     @Override public boolean remove(Object key) {
       int count = 0;
       Collection<V> collection = map().remove(key);
@@ -960,19 +1073,23 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return count > 0;
     }
 
+    @Impure
     @Override
     public void clear() {
       Iterators.clear(iterator());
     }
 
+    @Impure
     @Override public boolean containsAll(Collection<?> c) {
       return map().keySet().containsAll(c);
     }
 
+    @Impure
     @Override public boolean equals(@Nullable Object object) {
       return this == object || this.map().keySet().equals(object);
     }
 
+    @Impure
     @Override public int hashCode() {
       return map().keySet().hashCode();
     }
@@ -980,39 +1097,47 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
 
   private class SortedKeySet extends KeySet implements SortedSet<K> {
 
+    @Impure
     SortedKeySet(SortedMap<K, Collection<V>> subMap) {
       super(subMap);
     }
 
+    @Impure
     SortedMap<K, Collection<V>> sortedMap() {
       return (SortedMap<K, Collection<V>>) super.map();
     }
 
+    @Impure
     @Override
     public Comparator<? super K> comparator() {
       return sortedMap().comparator();
     }
 
+    @Impure
     @Override
     public K first() {
       return sortedMap().firstKey();
     }
 
+    @Impure
     @Override
     public SortedSet<K> headSet(K toElement) {
       return new SortedKeySet(sortedMap().headMap(toElement));
     }
 
+    @Impure
     @Override
     public K last() {
       return sortedMap().lastKey();
     }
 
+    @Impure
     @Override
     public SortedSet<K> subSet(K fromElement, K toElement) {
       return new SortedKeySet(sortedMap().subMap(fromElement, toElement));
     }
 
+    @Impure
     @Override
     public SortedSet<K> tailSet(K fromElement) {
       return new SortedKeySet(sortedMap().tailMap(fromElement));
@@ -1021,70 +1146,84 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
 
   @GwtIncompatible("NavigableSet")
   class NavigableKeySet extends SortedKeySet implements NavigableSet<K> {
+    @Impure
     NavigableKeySet(NavigableMap<K, Collection<V>> subMap) {
       super(subMap);
     }
 
+    @Impure
     @Override
     NavigableMap<K, Collection<V>> sortedMap() {
       return (NavigableMap<K, Collection<V>>) super.sortedMap();
     }
 
+    @Impure
     @Override
     public K lower(K k) {
       return sortedMap().lowerKey(k);
     }
 
+    @Impure
     @Override
     public K floor(K k) {
       return sortedMap().floorKey(k);
     }
 
+    @Impure
     @Override
     public K ceiling(K k) {
       return sortedMap().ceilingKey(k);
     }
 
+    @Impure
     @Override
     public K higher(K k) {
       return sortedMap().higherKey(k);
     }
 
+    @Impure
     @Override
     public K pollFirst() {
       return Iterators.pollNext(iterator());
     }
 
+    @Impure
     @Override
     public K pollLast() {
       return Iterators.pollNext(descendingIterator());
     }
 
+    @Impure
     @Override
     public NavigableSet<K> descendingSet() {
       return new NavigableKeySet(sortedMap().descendingMap());
     }
 
+    @Impure
     @Override
     public Iterator<K> descendingIterator() {
       return descendingSet().iterator();
     }
 
+    @SideEffectFree
     @Override
     public NavigableSet<K> headSet(K toElement) {
       return headSet(toElement, false);
     }
 
+    @Impure
     @Override
     public NavigableSet<K> headSet(K toElement, boolean inclusive) {
       return new NavigableKeySet(sortedMap().headMap(toElement, inclusive));
     }
 
+    @SideEffectFree
     @Override
     public NavigableSet<K> subSet(K fromElement, K toElement) {
       return subSet(fromElement, true, toElement, false);
     }
 
+    @Impure
     @Override
     public NavigableSet<K> subSet(
         K fromElement, boolean fromInclusive, K toElement, boolean toInclusive) {
@@ -1092,11 +1231,13 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
           sortedMap().subMap(fromElement, fromInclusive, toElement, toInclusive));
     }
 
+    @SideEffectFree
     @Override
     public NavigableSet<K> tailSet(K fromElement) {
       return tailSet(fromElement, true);
     }
 
+    @Impure
     @Override
     public NavigableSet<K> tailSet(K fromElement, boolean inclusive) {
       return new NavigableKeySet(sortedMap().tailMap(fromElement, inclusive));
@@ -1107,6 +1248,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    * Removes all values for the provided key. Unlike {@link #removeAll}, it
    * returns the number of removed mappings.
    */
+  @Impure
   private int removeValuesForKey(Object key) {
     Collection<V> collection = Maps.safeRemove(map, key);
 
@@ -1125,6 +1267,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
     Collection<V> collection;
     Iterator<V> valueIterator;
 
+    @Impure
     Itr() {
       keyIterator = map.entrySet().iterator();
       key = null;
@@ -1132,13 +1275,16 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       valueIterator = Iterators.emptyModifiableIterator();
     }
 
+    @Impure
     abstract T output(K key, V value);
 
+    @Pure
     @Override
     public boolean hasNext() {
       return keyIterator.hasNext() || valueIterator.hasNext();
     }
 
+    @Impure
     @Override
     public T next() {
       if (!valueIterator.hasNext()) {
@@ -1150,6 +1296,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return output(key, valueIterator.next());
     }
 
+    @Impure
     @Override
     public void remove() {
       valueIterator.remove();
@@ -1166,10 +1313,12 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    * <p>The iterator generated by the returned collection traverses the values
    * for one key, followed by the values of a second key, and so on.
    */
+  @Impure
   @Override public Collection<V> values() {
     return super.values();
   }
 
+  @Impure
   @Override
   Iterator<V> valueIterator() {
     return new Itr<V>() {
@@ -1196,6 +1345,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    * multimap, taken at the time the entry is returned by a method call to the
    * collection or its iterator.
    */
+  @Impure
   @Override
   public Collection<Map.Entry<K, V>> entries() {
     return super.entries();
@@ -1209,6 +1359,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
    *
    * @return an iterator across map entries
    */
+  @Impure
   @Override
   Iterator<Map.Entry<K, V>> entryIterator() {
     return new Itr<Map.Entry<K, V>>() {
@@ -1219,6 +1370,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
     };
   }
 
+  @Impure
   @Override
   Map<K, Collection<V>> createAsMap() {
     // TreeMultimap uses NavigableAsMap explicitly, but we don't handle that here for GWT
@@ -1234,10 +1386,12 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
      */
     final transient Map<K, Collection<V>> submap;
 
+    @Impure
     AsMap(Map<K, Collection<V>> submap) {
       this.submap = submap;
     }
 
+    @Impure
     @Override
     protected Set<Entry<K, Collection<V>>> createEntrySet() {
       return new AsMapEntries();
@@ -1245,10 +1399,12 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
 
     // The following methods are included for performance.
 
+    @Impure
     @Override public boolean containsKey(Object key) {
       return Maps.safeContainsKey(submap, key);
     }
 
+    @Impure
     @Override public Collection<V> get(Object key) {
       Collection<V> collection = Maps.safeGet(submap, key);
       if (collection == null) {
@@ -1259,15 +1415,18 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return wrapCollection(k, collection);
     }
 
+    @Impure
     @Override public Set<K> keySet() {
       return AbstractMapBasedMultimap.this.keySet();
     }
 
+    @Pure
     @Override
     public int size() {
       return submap.size();
     }
 
+    @Impure
     @Override public Collection<V> remove(Object key) {
       Collection<V> collection = submap.remove(key);
       if (collection == null) {
@@ -1281,18 +1440,22 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return output;
     }
 
+    @Pure
     @Override public boolean equals(@Nullable Object object) {
       return this == object || submap.equals(object);
     }
 
+    @Pure
     @Override public int hashCode() {
       return submap.hashCode();
     }
 
+    @SideEffectFree
     @Override public String toString() {
       return submap.toString();
     }
 
+    @Impure
     @Override
     public void clear() {
       if (submap == map) {
@@ -1303,27 +1466,32 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       }
     }
 
+    @Impure
     Entry<K, Collection<V>> wrapEntry(Entry<K, Collection<V>> entry) {
       K key = entry.getKey();
       return Maps.immutableEntry(key, wrapCollection(key, entry.getValue()));
     }
 
     class AsMapEntries extends Maps.EntrySet<K, Collection<V>> {
+      @Pure
       @Override
       Map<K, Collection<V>> map() {
         return AsMap.this;
       }
 
+      @Impure
       @Override public Iterator<Map.Entry<K, Collection<V>>> iterator() {
         return new AsMapIterator();
       }
 
       // The following methods are included for performance.
 
+      @Impure
       @Override public boolean contains(Object o) {
         return Collections2.safeContains(submap.entrySet(), o);
       }
 
+      @Impure
       @Override public boolean remove(Object o) {
         if (!contains(o)) {
           return false;
@@ -1340,11 +1508,13 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
           = submap.entrySet().iterator();
       Collection<V> collection;
 
+      @Pure
       @Override
       public boolean hasNext() {
         return delegateIterator.hasNext();
       }
 
+      @Impure
       @Override
       public Map.Entry<K, Collection<V>> next() {
         Map.Entry<K, Collection<V>> entry = delegateIterator.next();
@@ -1352,6 +1522,7 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
         return wrapEntry(entry);
       }
 
+      @Impure
       @Override
       public void remove() {
         delegateIterator.remove();
@@ -1363,39 +1534,47 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
 
   private class SortedAsMap extends AsMap
       implements SortedMap<K, Collection<V>> {
+    @Impure
     SortedAsMap(SortedMap<K, Collection<V>> submap) {
       super(submap);
     }
 
+    @Impure
     SortedMap<K, Collection<V>> sortedMap() {
       return (SortedMap<K, Collection<V>>) submap;
     }
 
+    @Impure
     @Override
     public Comparator<? super K> comparator() {
       return sortedMap().comparator();
     }
 
+    @Impure
     @Override
     public K firstKey() {
       return sortedMap().firstKey();
     }
 
+    @Impure
     @Override
     public K lastKey() {
       return sortedMap().lastKey();
     }
 
+    @Impure
     @Override
     public SortedMap<K, Collection<V>> headMap(K toKey) {
       return new SortedAsMap(sortedMap().headMap(toKey));
     }
 
+    @Impure
     @Override
     public SortedMap<K, Collection<V>> subMap(K fromKey, K toKey) {
       return new SortedAsMap(sortedMap().subMap(fromKey, toKey));
     }
 
+    @Impure
     @Override
     public SortedMap<K, Collection<V>> tailMap(K fromKey) {
       return new SortedAsMap(sortedMap().tailMap(fromKey));
@@ -1405,11 +1584,13 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
 
     // returns a SortedSet, even though returning a Set would be sufficient to
     // satisfy the SortedMap.keySet() interface
+    @Impure
     @Override public SortedSet<K> keySet() {
       SortedSet<K> result = sortedKeySet;
       return (result == null) ? sortedKeySet = createKeySet() : result;
     }
 
+    @Impure
     @Override
     SortedSet<K> createKeySet() {
       return new SortedKeySet(sortedMap());
@@ -1419,81 +1600,96 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
   @GwtIncompatible("NavigableAsMap")
   class NavigableAsMap extends SortedAsMap implements NavigableMap<K, Collection<V>> {
 
+    @Impure
     NavigableAsMap(NavigableMap<K, Collection<V>> submap) {
       super(submap);
     }
 
+    @Impure
     @Override
     NavigableMap<K, Collection<V>> sortedMap() {
       return (NavigableMap<K, Collection<V>>) super.sortedMap();
     }
 
+    @Impure
     @Override
     public Entry<K, Collection<V>> lowerEntry(K key) {
       Entry<K, Collection<V>> entry = sortedMap().lowerEntry(key);
       return (entry == null) ? null : wrapEntry(entry);
     }
 
+    @Impure
     @Override
     public K lowerKey(K key) {
       return sortedMap().lowerKey(key);
     }
 
+    @Impure
     @Override
     public Entry<K, Collection<V>> floorEntry(K key) {
       Entry<K, Collection<V>> entry = sortedMap().floorEntry(key);
       return (entry == null) ? null : wrapEntry(entry);
     }
 
+    @Impure
     @Override
     public K floorKey(K key) {
       return sortedMap().floorKey(key);
     }
 
+    @Impure
     @Override
     public Entry<K, Collection<V>> ceilingEntry(K key) {
       Entry<K, Collection<V>> entry = sortedMap().ceilingEntry(key);
       return (entry == null) ? null : wrapEntry(entry);
     }
 
+    @Impure
     @Override
     public K ceilingKey(K key) {
       return sortedMap().ceilingKey(key);
     }
 
+    @Impure
     @Override
     public Entry<K, Collection<V>> higherEntry(K key) {
       Entry<K, Collection<V>> entry = sortedMap().higherEntry(key);
       return (entry == null) ? null : wrapEntry(entry);
     }
 
+    @Impure
     @Override
     public K higherKey(K key) {
       return sortedMap().higherKey(key);
     }
 
+    @Impure
     @Override
     public Entry<K, Collection<V>> firstEntry() {
       Entry<K, Collection<V>> entry = sortedMap().firstEntry();
       return (entry == null) ? null : wrapEntry(entry);
     }
 
+    @Impure
     @Override
     public Entry<K, Collection<V>> lastEntry() {
       Entry<K, Collection<V>> entry = sortedMap().lastEntry();
       return (entry == null) ? null : wrapEntry(entry);
     }
 
+    @Impure
     @Override
     public Entry<K, Collection<V>> pollFirstEntry() {
       return pollAsMapEntry(entrySet().iterator());
     }
 
+    @Impure
     @Override
     public Entry<K, Collection<V>> pollLastEntry() {
       return pollAsMapEntry(descendingMap().entrySet().iterator());
     }
 
+    @Impure
     Map.Entry<K, Collection<V>> pollAsMapEntry(Iterator<Entry<K, Collection<V>>> entryIterator) {
       if (!entryIterator.hasNext()) {
         return null;
@@ -1505,57 +1701,68 @@ abstract class AbstractMapBasedMultimap<K, V> extends AbstractMultimap<K, V>
       return Maps.immutableEntry(entry.getKey(), unmodifiableCollectionSubclass(output));
     }
 
+    @Impure
     @Override
     public NavigableMap<K, Collection<V>> descendingMap() {
       return new NavigableAsMap(sortedMap().descendingMap());
     }
 
+    @SideEffectFree
     @Override
     public NavigableSet<K> keySet() {
       return (NavigableSet<K>) super.keySet();
     }
 
+    @Impure
     @Override
     NavigableSet<K> createKeySet() {
       return new NavigableKeySet(sortedMap());
     }
 
+    @SideEffectFree
     @Override
     public NavigableSet<K> navigableKeySet() {
       return keySet();
     }
 
+    @SideEffectFree
     @Override
     public NavigableSet<K> descendingKeySet() {
       return descendingMap().navigableKeySet();
     }
 
+    @SideEffectFree
     @Override
     public NavigableMap<K, Collection<V>> subMap(K fromKey, K toKey) {
       return subMap(fromKey, true, toKey, false);
     }
 
+    @Impure
     @Override
     public NavigableMap<K, Collection<V>> subMap(
         K fromKey, boolean fromInclusive, K toKey, boolean toInclusive) {
       return new NavigableAsMap(sortedMap().subMap(fromKey, fromInclusive, toKey, toInclusive));
     }
 
+    @SideEffectFree
     @Override
     public NavigableMap<K, Collection<V>> headMap(K toKey) {
       return headMap(toKey, false);
     }
 
+    @Impure
     @Override
     public NavigableMap<K, Collection<V>> headMap(K toKey, boolean inclusive) {
       return new NavigableAsMap(sortedMap().headMap(toKey, inclusive));
     }
 
+    @SideEffectFree
     @Override
     public NavigableMap<K, Collection<V>> tailMap(K fromKey) {
       return tailMap(fromKey, true);
     }
 
+    @Impure
     @Override
     public NavigableMap<K, Collection<V>> tailMap(K fromKey, boolean inclusive) {
       return new NavigableAsMap(sortedMap().tailMap(fromKey, inclusive));

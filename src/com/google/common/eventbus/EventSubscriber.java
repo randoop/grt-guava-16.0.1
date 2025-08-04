@@ -16,6 +16,8 @@
 
 package com.google.common.eventbus;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
@@ -50,6 +52,7 @@ class EventSubscriber {
    * @param target  object to which the method applies.
    * @param method  subscriber method.
    */
+  @Impure
   EventSubscriber(Object target, Method method) {
     Preconditions.checkNotNull(target,
         "EventSubscriber target cannot be null.");
@@ -68,6 +71,7 @@ class EventSubscriber {
    *     {@link Throwable} that is not an {@link Error} ({@code Error} instances are
    *     propagated as-is).
    */
+  @Impure
   public void handleEvent(Object event) throws InvocationTargetException {
     checkNotNull(event);
     try {
@@ -84,16 +88,19 @@ class EventSubscriber {
     }
   }
 
+  @Pure
   @Override public String toString() {
     return "[wrapper " + method + "]";
   }
 
+  @Pure
   @Override public int hashCode() {
     final int PRIME = 31;
     return (PRIME + method.hashCode()) * PRIME
         + System.identityHashCode(target);
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object obj) {
     if (obj instanceof EventSubscriber) {
       EventSubscriber that = (EventSubscriber) obj;
@@ -105,10 +112,12 @@ class EventSubscriber {
     return false;
   }
 
+  @Pure
   public Object getSubscriber() {
     return target;
   }
 
+  @Pure
   public Method getMethod() {
     return method;
   }

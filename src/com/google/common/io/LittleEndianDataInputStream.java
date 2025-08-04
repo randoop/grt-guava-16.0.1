@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
@@ -49,6 +51,7 @@ public final class LittleEndianDataInputStream extends FilterInputStream
    *
    * @param in the stream to delegate to
    */
+  @Impure
   public LittleEndianDataInputStream(InputStream in) {
     super(Preconditions.checkNotNull(in));
   }
@@ -56,26 +59,31 @@ public final class LittleEndianDataInputStream extends FilterInputStream
   /**
    * This method will throw an {@link UnsupportedOperationException}.
    */
+  @Pure
   @Override
   public String readLine() {
     throw new UnsupportedOperationException("readLine is not supported");
   }
 
+  @Impure
   @Override
   public void readFully(byte[] b) throws IOException {
     ByteStreams.readFully(this, b);
   }
 
+  @Impure
   @Override
   public void readFully(byte[] b, int off, int len) throws IOException {
     ByteStreams.readFully(this, b, off, len);
   }
 
+  @Impure
   @Override
   public int skipBytes(int n) throws IOException {
     return (int) in.skip(n);
   }
 
+  @Impure
   @Override
   public int readUnsignedByte() throws IOException {
     int b1 = in.read();
@@ -95,6 +103,7 @@ public final class LittleEndianDataInputStream extends FilterInputStream
    *         unsigned 16-bit integer in little-endian byte order
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override
   public int readUnsignedShort() throws IOException {
     byte b1 = readAndCheckByte();
@@ -111,6 +120,7 @@ public final class LittleEndianDataInputStream extends FilterInputStream
    *         {@code int} in little-endian byte order
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override
   public int readInt() throws IOException {
     byte b1 = readAndCheckByte();
@@ -129,6 +139,7 @@ public final class LittleEndianDataInputStream extends FilterInputStream
    *         {@code long} in little-endian byte order
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override
   public long readLong() throws IOException {
     byte b1 = readAndCheckByte();
@@ -151,6 +162,7 @@ public final class LittleEndianDataInputStream extends FilterInputStream
    *         {@code float} in little-endian byte order
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override
   public float readFloat() throws IOException {
     return Float.intBitsToFloat(readInt());
@@ -165,11 +177,13 @@ public final class LittleEndianDataInputStream extends FilterInputStream
    *         {@code double} in little-endian byte order
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override
   public double readDouble() throws IOException {
     return Double.longBitsToDouble(readLong());
   }
 
+  @Impure
   @Override
   public String readUTF() throws IOException {
     return new DataInputStream(in).readUTF();
@@ -183,6 +197,7 @@ public final class LittleEndianDataInputStream extends FilterInputStream
    *         {@code short} in little-endian byte order.
    * @throws IOException if an I/O error occurs.
    */
+  @Impure
   @Override
   public short readShort() throws IOException {
     return (short) readUnsignedShort();
@@ -196,16 +211,19 @@ public final class LittleEndianDataInputStream extends FilterInputStream
    *         {@code char} in little-endian byte order
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   @Override
   public char readChar() throws IOException {
     return (char) readUnsignedShort();
   }
 
+  @Impure
   @Override
   public byte readByte() throws IOException {
     return (byte) readUnsignedByte();
   }
 
+  @Impure
   @Override
   public boolean readBoolean() throws IOException {
     return readUnsignedByte() != 0;
@@ -219,6 +237,7 @@ public final class LittleEndianDataInputStream extends FilterInputStream
    * @throws IOException if an error is encountered while reading
    * @throws EOFException if the end of file (EOF) is encountered.
    */
+  @Impure
   private byte readAndCheckByte() throws IOException, EOFException {
     int b1 = in.read();
 

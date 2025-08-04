@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.CollectPreconditions.checkNonnegative;
 
@@ -100,6 +103,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * the technically correct {@code <C extends Comparable<? super C>>}, to
    * support legacy types from before Java 5.
    */
+  @Pure
   @GwtCompatible(serializable = true)
   @SuppressWarnings("unchecked") // TODO(kevinb): right way to explain this??
   public static <C extends Comparable> Ordering<C> natural() {
@@ -118,6 +122,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @return comparator itself if it is already an {@code Ordering}; otherwise
    *     an ordering that wraps that comparator
    */
+  @Impure
   @GwtCompatible(serializable = true)
   public static <T> Ordering<T> from(Comparator<T> comparator) {
     return (comparator instanceof Ordering)
@@ -130,6 +135,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    *
    * @deprecated no need to use this
    */
+  @Impure
   @GwtCompatible(serializable = true)
   @Deprecated public static <T> Ordering<T> from(Ordering<T> ordering) {
     return checkNotNull(ordering);
@@ -156,6 +162,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws IllegalArgumentException if {@code valuesInOrder} contains any
    *     duplicate values (according to {@link Object#equals})
    */
+  @Impure
   @GwtCompatible(serializable = true)
   public static <T> Ordering<T> explicit(List<T> valuesInOrder) {
     return new ExplicitOrdering<T>(valuesInOrder);
@@ -184,6 +191,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws IllegalArgumentException if any duplicate values (according to
    *     {@link Object#equals(Object)}) are present among the method arguments
    */
+  @Impure
   @GwtCompatible(serializable = true)
   public static <T> Ordering<T> explicit(
       T leastValue, T... remainingValuesInOrder) {
@@ -216,6 +224,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    *
    * <p>The returned comparator is serializable.
    */
+  @Pure
   @GwtCompatible(serializable = true)
   @SuppressWarnings("unchecked")
   public static Ordering<Object> allEqual() {
@@ -229,6 +238,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    *
    * <p>The comparator is serializable.
    */
+  @Pure
   @GwtCompatible(serializable = true)
   public static Ordering<Object> usingToString() {
     return UsingToStringOrdering.INSTANCE;
@@ -250,6 +260,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    *
    * @since 2.0
    */
+  @Pure
   public static Ordering<Object> arbitrary() {
     return ArbitraryOrderingHolder.ARBITRARY_ORDERING;
   }
@@ -264,12 +275,15 @@ public abstract class Ordering<T> implements Comparator<T> {
         Platform.tryWeakKeys(new MapMaker()).makeComputingMap(
             new Function<Object, Integer>() {
               final AtomicInteger counter = new AtomicInteger(0);
+              @Impure
               @Override
               public Integer apply(Object from) {
                 return counter.getAndIncrement();
               }
             });
 
+    @Pure
+    @Impure
     @Override public int compare(Object left, Object right) {
       if (left == right) {
         return 0;
@@ -292,6 +306,7 @@ public abstract class Ordering<T> implements Comparator<T> {
       return result;
     }
 
+    @Pure
     @Override public String toString() {
       return "Ordering.arbitrary()";
     }
@@ -304,6 +319,7 @@ public abstract class Ordering<T> implements Comparator<T> {
      * recognize that the call is 1-morphic and should still be willing to
      * inline it if necessary.
      */
+    @Pure
     int identityHashCode(Object object) {
       return System.identityHashCode(object);
     }
@@ -315,6 +331,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * Constructs a new instance of this class (only invokable by the subclass
    * constructor, typically implicit).
    */
+  @SideEffectFree
   protected Ordering() {}
 
   // Instance-based factories (and any static equivalents)
@@ -325,6 +342,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    */
   // type parameter <S> lets us avoid the extra <String> in statements like:
   // Ordering<String> o = Ordering.<String>natural().reverse();
+  @Impure
   @GwtCompatible(serializable = true)
   public <S extends T> Ordering<S> reverse() {
     return new ReverseOrdering<S>(this);
@@ -336,6 +354,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    */
   // type parameter <S> lets us avoid the extra <String> in statements like:
   // Ordering<String> o = Ordering.<String>natural().nullsFirst();
+  @Impure
   @GwtCompatible(serializable = true)
   public <S extends T> Ordering<S> nullsFirst() {
     return new NullsFirstOrdering<S>(this);
@@ -347,6 +366,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    */
   // type parameter <S> lets us avoid the extra <String> in statements like:
   // Ordering<String> o = Ordering.<String>natural().nullsLast();
+  @Impure
   @GwtCompatible(serializable = true)
   public <S extends T> Ordering<S> nullsLast() {
     return new NullsLastOrdering<S>(this);
@@ -361,11 +381,13 @@ public abstract class Ordering<T> implements Comparator<T> {
    *   Ordering.from(String.CASE_INSENSITIVE_ORDER)
    *       .onResultOf(Functions.toStringFunction())}</pre>
    */
+  @Impure
   @GwtCompatible(serializable = true)
   public <F> Ordering<F> onResultOf(Function<F, ? extends T> function) {
     return new ByFunctionOrdering<F, T>(function, this);
   }
   
+  @Impure
   <T2 extends T> Ordering<Map.Entry<T2, ?>> onKeys() {
     return onResultOf(Maps.<T2>keyFunction());
   }
@@ -381,6 +403,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * is equivalent to one created using {@link Ordering#compound(Iterable)} on
    * the same component comparators.
    */
+  @Impure
   @GwtCompatible(serializable = true)
   public <U extends T> Ordering<U> compound(
       Comparator<? super U> secondaryComparator) {
@@ -402,6 +425,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    *
    * @param comparators the comparators to try in order
    */
+  @Impure
   @GwtCompatible(serializable = true)
   public static <T> Ordering<T> compound(
       Iterable<? extends Comparator<? super T>> comparators) {
@@ -422,6 +446,8 @@ public abstract class Ordering<T> implements Comparator<T> {
    *
    * @since 2.0
    */
+  @SideEffectFree
+  @Impure
   @GwtCompatible(serializable = true)
   // type parameter <S> lets us avoid the extra <String> in statements like:
   // Ordering<Iterable<String>> o =
@@ -440,6 +466,7 @@ public abstract class Ordering<T> implements Comparator<T> {
   // Regular instance methods
 
   // Override to add @Nullable
+  @Impure
   @Override public abstract int compare(@Nullable T left, @Nullable T right);
 
   /**
@@ -455,6 +482,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    *
    * @since 11.0
    */
+  @Impure
   public <E extends T> E min(Iterator<E> iterator) {
     // let this throw NoSuchElementException as necessary
     E minSoFar = iterator.next();
@@ -475,6 +503,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws ClassCastException if the parameters are not <i>mutually
    *     comparable</i> under this ordering.
    */
+  @Impure
   public <E extends T> E min(Iterable<E> iterable) {
     return min(iterable.iterator());
   }
@@ -492,6 +521,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws ClassCastException if the parameters are not <i>mutually
    *     comparable</i> under this ordering.
    */
+  @Impure
   public <E extends T> E min(@Nullable E a, @Nullable E b) {
     return (compare(a, b) <= 0) ? a : b;
   }
@@ -507,6 +537,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws ClassCastException if the parameters are not <i>mutually
    *     comparable</i> under this ordering.
    */
+  @Impure
   public <E extends T> E min(
       @Nullable E a, @Nullable E b, @Nullable E c, E... rest) {
     E minSoFar = min(min(a, b), c);
@@ -531,6 +562,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    *
    * @since 11.0
    */
+  @Impure
   public <E extends T> E max(Iterator<E> iterator) {
     // let this throw NoSuchElementException as necessary
     E maxSoFar = iterator.next();
@@ -551,6 +583,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws ClassCastException if the parameters are not <i>mutually
    *     comparable</i> under this ordering.
    */
+  @Impure
   public <E extends T> E max(Iterable<E> iterable) {
     return max(iterable.iterator());
   }
@@ -568,6 +601,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws ClassCastException if the parameters are not <i>mutually
    *     comparable</i> under this ordering.
    */
+  @Impure
   public <E extends T> E max(@Nullable E a, @Nullable E b) {
     return (compare(a, b) >= 0) ? a : b;
   }
@@ -583,6 +617,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws ClassCastException if the parameters are not <i>mutually
    *     comparable</i> under this ordering.
    */
+  @Impure
   public <E extends T> E max(
       @Nullable E a, @Nullable E b, @Nullable E c, E... rest) {
     E maxSoFar = max(max(a, b), c);
@@ -608,6 +643,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws IllegalArgumentException if {@code k} is negative
    * @since 8.0
    */
+  @Impure
   public <E extends T> List<E> leastOf(Iterable<E> iterable, int k) {
     if (iterable instanceof Collection) {
       Collection<E> collection = (Collection<E>) iterable;
@@ -642,6 +678,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws IllegalArgumentException if {@code k} is negative
    * @since 14.0
    */
+  @Impure
   public <E extends T> List<E> leastOf(Iterator<E> elements, int k) {
     checkNotNull(elements);
     checkNonnegative(k, "k");
@@ -734,6 +771,7 @@ public abstract class Ordering<T> implements Comparator<T> {
     // We can't use ImmutableList; we have to be null-friendly!
   }
 
+  @Impure
   private <E extends T> int partition(
       E[] values, int left, int right, int pivotIndex) {
     E pivotValue = values[pivotIndex];
@@ -766,6 +804,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws IllegalArgumentException if {@code k} is negative
    * @since 8.0
    */
+  @Impure
   public <E extends T> List<E> greatestOf(Iterable<E> iterable, int k) {
     // TODO(kevinb): see if delegation is hurting performance noticeably
     // TODO(kevinb): if we change this implementation, add full unit tests.
@@ -786,6 +825,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @throws IllegalArgumentException if {@code k} is negative
    * @since 14.0
    */
+  @Impure
   public <E extends T> List<E> greatestOf(Iterator<E> iterator, int k) {
     return reverse().leastOf(iterator, k);
   }
@@ -810,6 +850,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @param iterable the elements to be copied and sorted
    * @return a new list containing the given elements in sorted order
    */
+  @Impure
   public <E extends T> List<E> sortedCopy(Iterable<E> iterable) {
     @SuppressWarnings("unchecked") // does not escape, and contains only E's
     E[] array = (E[]) Iterables.toArray(iterable);
@@ -839,6 +880,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    *     null
    * @since 3.0
    */
+  @Impure
   public <E extends T> ImmutableList<E> immutableSortedCopy(
       Iterable<E> iterable) {
     @SuppressWarnings("unchecked") // we'll only ever have E's in here
@@ -856,6 +898,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * ordering. Note that this is always true when the iterable has fewer than
    * two elements.
    */
+  @Impure
   public boolean isOrdered(Iterable<? extends T> iterable) {
     Iterator<? extends T> it = iterable.iterator();
     if (it.hasNext()) {
@@ -877,6 +920,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * this ordering. Note that this is always true when the iterable has fewer
    * than two elements.
    */
+  @Impure
   public boolean isStrictlyOrdered(Iterable<? extends T> iterable) {
     Iterator<? extends T> it = iterable.iterator();
     if (it.hasNext()) {
@@ -900,6 +944,7 @@ public abstract class Ordering<T> implements Comparator<T> {
    * @param sortedList the list to be searched
    * @param key the key to be searched for
    */
+  @Impure
   public int binarySearch(List<? extends T> sortedList, @Nullable T key) {
     return Collections.binarySearch(sortedList, key, this);
   }
@@ -915,6 +960,7 @@ public abstract class Ordering<T> implements Comparator<T> {
   static class IncomparableValueException extends ClassCastException {
     final Object value;
 
+    @SideEffectFree
     IncomparableValueException(Object value) {
       super("Cannot compare value: " + value);
       this.value = value;

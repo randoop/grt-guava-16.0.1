@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -50,16 +52,19 @@ public final class FileBackedOutputStream extends OutputStream {
 
   /** ByteArrayOutputStream that exposes its internals. */
   private static class MemoryOutput extends ByteArrayOutputStream {
+    @Pure
     byte[] getBuffer() {
       return buf;
     }
 
+    @Pure
     int getCount() {
       return count;
     }
   }
 
   /** Returns the file holding the data (possibly null). */
+  @Pure
   @VisibleForTesting synchronized File getFile() {
     return file;
   }
@@ -72,6 +77,7 @@ public final class FileBackedOutputStream extends OutputStream {
    * @param fileThreshold the number of bytes before the stream should
    *     switch to buffering to a file
    */
+  @Impure
   public FileBackedOutputStream(int fileThreshold) {
     this(fileThreshold, false);
   }
@@ -87,6 +93,7 @@ public final class FileBackedOutputStream extends OutputStream {
    *     be called when the {@link ByteSource} returned by {@link
    *     #asByteSource} is finalized
    */
+  @Impure
   public FileBackedOutputStream(int fileThreshold, boolean resetOnFinalize) {
     this.fileThreshold = fileThreshold;
     this.resetOnFinalize = resetOnFinalize;
@@ -95,11 +102,13 @@ public final class FileBackedOutputStream extends OutputStream {
 
     if (resetOnFinalize) {
       source = new ByteSource() {
+        @Impure
         @Override
         public InputStream openStream() throws IOException {
           return openInputStream();
         }
 
+        @Impure
         @Override protected void finalize() {
           try {
             reset();
@@ -110,6 +119,7 @@ public final class FileBackedOutputStream extends OutputStream {
       };
     } else {
       source = new ByteSource() {
+        @Impure
         @Override
         public InputStream openStream() throws IOException {
           return openInputStream();
@@ -124,10 +134,12 @@ public final class FileBackedOutputStream extends OutputStream {
    *
    * @since 15.0
    */
+  @Pure
   public ByteSource asByteSource() {
     return source;
   }
 
+  @Impure
   private synchronized InputStream openInputStream() throws IOException {
     if (file != null) {
       return new FileInputStream(file);
@@ -144,6 +156,7 @@ public final class FileBackedOutputStream extends OutputStream {
    *
    * @throws IOException if an I/O error occurred while deleting the file buffer
    */
+  @Impure
   public synchronized void reset() throws IOException {
     try {
       close();
@@ -164,25 +177,30 @@ public final class FileBackedOutputStream extends OutputStream {
     }
   }
 
+  @Impure
   @Override public synchronized void write(int b) throws IOException {
     update(1);
     out.write(b);
   }
 
+  @Impure
   @Override public synchronized void write(byte[] b) throws IOException {
     write(b, 0, b.length);
   }
 
+  @Impure
   @Override public synchronized void write(byte[] b, int off, int len)
       throws IOException {
     update(len);
     out.write(b, off, len);
   }
 
+  @Impure
   @Override public synchronized void close() throws IOException {
     out.close();
   }
 
+  @Impure
   @Override public synchronized void flush() throws IOException {
     out.flush();
   }
@@ -191,6 +209,7 @@ public final class FileBackedOutputStream extends OutputStream {
    * Checks if writing {@code len} bytes would go over threshold, and
    * switches to file buffering if so.
    */
+  @Impure
   private void update(int len) throws IOException {
     if (file == null && (memory.getCount() + len > fileThreshold)) {
       File temp = File.createTempFile("FileBackedOutputStream", null);

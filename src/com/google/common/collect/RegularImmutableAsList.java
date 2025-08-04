@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 
@@ -31,36 +33,43 @@ class RegularImmutableAsList<E> extends ImmutableAsList<E> {
   private final ImmutableCollection<E> delegate;
   private final ImmutableList<? extends E> delegateList;
 
+  @Impure
   RegularImmutableAsList(ImmutableCollection<E> delegate, ImmutableList<? extends E> delegateList) {
     this.delegate = delegate;
     this.delegateList = delegateList;
   }
 
+  @Impure
   RegularImmutableAsList(ImmutableCollection<E> delegate, Object[] array) {
     this(delegate, ImmutableList.<E>asImmutableList(array));
   }
 
+  @Pure
   @Override
   ImmutableCollection<E> delegateCollection() {
     return delegate;
   }
 
+  @Pure
   ImmutableList<? extends E> delegateList() {
     return delegateList;
   }
 
+  @Impure
   @SuppressWarnings("unchecked")  // safe covariant cast!
   @Override
   public UnmodifiableListIterator<E> listIterator(int index) {
     return (UnmodifiableListIterator<E>) delegateList.listIterator(index);
   }
 
+  @Impure
   @GwtIncompatible("not present in emulated superclass")
   @Override
   int copyIntoArray(Object[] dst, int offset) {
     return delegateList.copyIntoArray(dst, offset);
   }
 
+  @Pure
   @Override
   public E get(int index) {
     return delegateList.get(index);

@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 
 import java.io.FilterOutputStream;
@@ -40,20 +42,24 @@ public final class CountingOutputStream extends FilterOutputStream {
    *
    * @param out the output stream to be wrapped
    */
+  @Impure
   public CountingOutputStream(@Nullable OutputStream out) {
     super(out);
   }
 
   /** Returns the number of bytes written. */
+  @Pure
   public long getCount() {
     return count;
   }
 
+  @Impure
   @Override public void write(byte[] b, int off, int len) throws IOException {
     out.write(b, off, len);
     count += len;
   }
 
+  @Impure
   @Override public void write(int b) throws IOException {
     out.write(b);
     count++;

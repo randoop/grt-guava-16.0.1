@@ -16,6 +16,9 @@
 
 package com.google.common.net;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.CharMatcher.ASCII;
 import static com.google.common.base.CharMatcher.JAVA_ISO_CONTROL;
 import static com.google.common.base.Charsets.UTF_8;
@@ -107,14 +110,17 @@ public final class MediaType {
 
   private static final Map<MediaType, MediaType> KNOWN_TYPES = Maps.newHashMap();
 
+  @Impure
   private static MediaType createConstant(String type, String subtype) {
     return addKnownType(new MediaType(type, subtype, ImmutableListMultimap.<String, String>of()));
   }
 
+  @Impure
   private static MediaType createConstantUtf8(String type, String subtype) {
     return addKnownType(new MediaType(type, subtype, UTF_8_CONSTANT_PARAMETERS));
   }
 
+  @Impure
   private static MediaType addKnownType(MediaType mediaType) {
     KNOWN_TYPES.put(mediaType, mediaType);
     return mediaType;
@@ -320,6 +326,7 @@ public final class MediaType {
   private final String subtype;
   private final ImmutableListMultimap<String, String> parameters;
 
+  @SideEffectFree
   private MediaType(String type, String subtype,
       ImmutableListMultimap<String, String> parameters) {
     this.type = type;
@@ -328,23 +335,28 @@ public final class MediaType {
   }
 
   /** Returns the top-level media type.  For example, {@code "text"} in {@code "text/plain"}. */
+  @Pure
   public String type() {
     return type;
   }
 
   /** Returns the media subtype.  For example, {@code "plain"} in {@code "text/plain"}. */
+  @Pure
   public String subtype() {
     return subtype;
   }
 
   /** Returns a multimap containing the parameters of this media type. */
+  @Pure
   public ImmutableListMultimap<String, String> parameters() {
     return parameters;
   }
 
+  @Impure
   private Map<String, ImmutableMultiset<String>> parametersAsMap() {
     return Maps.transformValues(parameters.asMap(),
         new Function<Collection<String>, ImmutableMultiset<String>>() {
+          @Impure
           @Override public ImmutableMultiset<String> apply(Collection<String> input) {
             return ImmutableMultiset.copyOf(input);
           }
@@ -359,6 +371,7 @@ public final class MediaType {
    * @throws UnsupportedCharsetException if a charset value is present, but no support is available
    *     in this instance of the Java virtual machine
    */
+  @Impure
   public Optional<Charset> charset() {
     ImmutableSet<String> charsetValues = ImmutableSet.copyOf(parameters.get(CHARSET_ATTRIBUTE));
     switch (charsetValues.size()) {
@@ -375,6 +388,7 @@ public final class MediaType {
    * Returns a new instance with the same type and subtype as this instance, but without any
    * parameters.
    */
+  @Impure
   public MediaType withoutParameters() {
     return parameters.isEmpty() ? this : create(type, subtype);
   }
@@ -384,6 +398,7 @@ public final class MediaType {
    *
    * @throws IllegalArgumentException if any parameter or value is invalid
    */
+  @Impure
   public MediaType withParameters(Multimap<String, String> parameters) {
     return create(type, subtype, parameters);
   }
@@ -396,6 +411,7 @@ public final class MediaType {
    *
    * @throws IllegalArgumentException if either {@code attribute} or {@code value} is invalid
    */
+  @Impure
   public MediaType withParameter(String attribute, String value) {
     checkNotNull(attribute);
     checkNotNull(value);
@@ -422,12 +438,14 @@ public final class MediaType {
    * <p>If a charset must be specified that is not supported on this JVM (and thus is not
    * representable as a {@link Charset} instance, use {@link #withParameter}.
    */
+  @Impure
   public MediaType withCharset(Charset charset) {
     checkNotNull(charset);
     return withParameter(CHARSET_ATTRIBUTE, charset.name());
   }
 
   /** Returns true if either the type or subtype is the wildcard. */
+  @Pure
   public boolean hasWildcard() {
     return WILDCARD.equals(type) || WILDCARD.equals(subtype);
   }
@@ -458,6 +476,7 @@ public final class MediaType {
    * example, {@code "text/plain; charset=UTF-8"} satisfies
    * {@code "text/plain; charset=UTF-8; charset=UTF-8"}.
    */
+  @Impure
   public boolean is(MediaType mediaTypeRange) {
     return (mediaTypeRange.type.equals(WILDCARD) || mediaTypeRange.type.equals(this.type))
         && (mediaTypeRange.subtype.equals(WILDCARD) || mediaTypeRange.subtype.equals(this.subtype))
@@ -470,6 +489,7 @@ public final class MediaType {
    * @throws IllegalArgumentException if type or subtype is invalid or if a wildcard is used for the
    * type, but not the subtype.
    */
+  @Impure
   public static MediaType create(String type, String subtype) {
     return create(type, subtype, ImmutableListMultimap.<String, String>of());
   }
@@ -479,6 +499,7 @@ public final class MediaType {
    *
    * @throws IllegalArgumentException if subtype is invalid
    */
+  @Impure
   static MediaType createApplicationType(String subtype) {
     return create(APPLICATION_TYPE, subtype);
   }
@@ -488,6 +509,7 @@ public final class MediaType {
    *
    * @throws IllegalArgumentException if subtype is invalid
    */
+  @Impure
   static MediaType createAudioType(String subtype) {
     return create(AUDIO_TYPE, subtype);
   }
@@ -497,6 +519,7 @@ public final class MediaType {
    *
    * @throws IllegalArgumentException if subtype is invalid
    */
+  @Impure
   static MediaType createImageType(String subtype) {
     return create(IMAGE_TYPE, subtype);
   }
@@ -506,6 +529,7 @@ public final class MediaType {
    *
    * @throws IllegalArgumentException if subtype is invalid
    */
+  @Impure
   static MediaType createTextType(String subtype) {
     return create(TEXT_TYPE, subtype);
   }
@@ -515,10 +539,12 @@ public final class MediaType {
    *
    * @throws IllegalArgumentException if subtype is invalid
    */
+  @Impure
   static MediaType createVideoType(String subtype) {
     return create(VIDEO_TYPE, subtype);
   }
 
+  @Impure
   private static MediaType create(String type, String subtype,
       Multimap<String, String> parameters) {
     checkNotNull(type);
@@ -538,11 +564,13 @@ public final class MediaType {
     return Objects.firstNonNull(KNOWN_TYPES.get(mediaType), mediaType);
   }
 
+  @Impure
   private static String normalizeToken(String token) {
     checkArgument(TOKEN_MATCHER.matchesAllOf(token));
     return Ascii.toLowerCase(token);
   }
 
+  @Impure
   private static String normalizeParameterValue(String attribute, String value) {
     return CHARSET_ATTRIBUTE.equals(attribute) ? Ascii.toLowerCase(value) : value;
   }
@@ -552,6 +580,7 @@ public final class MediaType {
    *
    * @throws IllegalArgumentException if the input is not parsable
    */
+  @Impure
   public static MediaType parse(String input) {
     checkNotNull(input);
     Tokenizer tokenizer = new Tokenizer(input);
@@ -594,10 +623,12 @@ public final class MediaType {
     final String input;
     int position = 0;
 
+    @SideEffectFree
     Tokenizer(String input) {
       this.input = input;
     }
 
+    @Impure
     String consumeTokenIfPresent(CharMatcher matcher) {
       checkState(hasMore());
       int startPosition = position;
@@ -605,6 +636,7 @@ public final class MediaType {
       return hasMore() ? input.substring(startPosition, position) : input.substring(startPosition);
     }
 
+    @Impure
     String consumeToken(CharMatcher matcher) {
       int startPosition = position;
       String token = consumeTokenIfPresent(matcher);
@@ -612,6 +644,7 @@ public final class MediaType {
       return token;
     }
 
+    @Impure
     char consumeCharacter(CharMatcher matcher) {
       checkState(hasMore());
       char c = previewChar();
@@ -620,6 +653,7 @@ public final class MediaType {
       return c;
     }
 
+    @Impure
     char consumeCharacter(char c) {
       checkState(hasMore());
       checkState(previewChar() == c);
@@ -627,16 +661,19 @@ public final class MediaType {
       return c;
     }
 
+    @Impure
     char previewChar() {
       checkState(hasMore());
       return input.charAt(position);
     }
 
+    @Pure
     boolean hasMore() {
       return (position >= 0) && (position < input.length());
     }
   }
 
+  @Impure
   @Override public boolean equals(@Nullable Object obj) {
     if (obj == this) {
       return true;
@@ -651,6 +688,7 @@ public final class MediaType {
     }
   }
 
+  @Impure
   @Override public int hashCode() {
     return Objects.hashCode(type, subtype, parametersAsMap());
   }
@@ -661,12 +699,14 @@ public final class MediaType {
    * Returns the string representation of this media type in the format described in <a
    * href="http://www.ietf.org/rfc/rfc2045.txt">RFC 2045</a>.
    */
+  @Impure
   @Override public String toString() {
     StringBuilder builder = new StringBuilder().append(type).append('/').append(subtype);
     if (!parameters.isEmpty()) {
       builder.append("; ");
       Multimap<String, String> quotedParameters = Multimaps.transformValues(parameters,
           new Function<String, String>() {
+            @Impure
             @Override public String apply(String value) {
               return TOKEN_MATCHER.matchesAllOf(value) ? value : escapeAndQuote(value);
             }
@@ -676,6 +716,7 @@ public final class MediaType {
     return builder.toString();
   }
 
+  @Impure
   private static String escapeAndQuote(String value) {
     StringBuilder escaped = new StringBuilder(value.length() + 16).append('"');
     for (char ch : value.toCharArray()) {

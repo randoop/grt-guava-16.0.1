@@ -16,6 +16,9 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ForwardingMap;
 import com.google.common.collect.ImmutableMap;
@@ -34,11 +37,13 @@ public final class ImmutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken
     implements TypeToInstanceMap<B> {
 
   /** Returns an empty type to instance map. */
+  @Impure
   public static <B> ImmutableTypeToInstanceMap<B> of() {
     return new ImmutableTypeToInstanceMap<B>(ImmutableMap.<TypeToken<? extends B>, B>of());
   }
 
   /** Returns a new builder. */
+  @Impure
   public static <B> Builder<B> builder() {
     return new Builder<B>();
   }
@@ -64,12 +69,14 @@ public final class ImmutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken
     private final ImmutableMap.Builder<TypeToken<? extends B>, B> mapBuilder
         = ImmutableMap.builder();
 
+    @SideEffectFree
     private Builder() {}
 
     /**
      * Associates {@code key} with {@code value} in the built map. Duplicate
      * keys are not allowed, and will cause {@link #build} to fail.
      */
+    @Impure
     public <T extends B> Builder<B> put(Class<T> key, T value) {
       mapBuilder.put(TypeToken.of(key), value);
       return this;
@@ -79,6 +86,7 @@ public final class ImmutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken
      * Associates {@code key} with {@code value} in the built map. Duplicate
      * keys are not allowed, and will cause {@link #build} to fail.
      */
+    @Impure
     public <T extends B> Builder<B> put(TypeToken<T> key, T value) {
       mapBuilder.put(key.rejectTypeVariables(), value);
       return this;
@@ -90,6 +98,7 @@ public final class ImmutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken
      *
      * @throws IllegalArgumentException if duplicate keys were added
      */
+    @Impure
     public ImmutableTypeToInstanceMap<B> build() {
       return new ImmutableTypeToInstanceMap<B>(mapBuilder.build());
     }
@@ -97,10 +106,12 @@ public final class ImmutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken
 
   private final ImmutableMap<TypeToken<? extends B>, B> delegate;
 
+  @Impure
   private ImmutableTypeToInstanceMap(ImmutableMap<TypeToken<? extends B>, B> delegate) {
     this.delegate = delegate;
   }
 
+  @Impure
   @Override public <T extends B> T getInstance(TypeToken<T> type) {
     return trustedGet(type.rejectTypeVariables());
   }
@@ -110,10 +121,12 @@ public final class ImmutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken
    *
    * @throws UnsupportedOperationException always
    */
+  @Pure
   @Override public <T extends B> T putInstance(TypeToken<T> type, T value) {
     throw new UnsupportedOperationException();
   }
 
+  @Impure
   @Override public <T extends B> T getInstance(Class<T> type) {
     return trustedGet(TypeToken.of(type));
   }
@@ -123,14 +136,17 @@ public final class ImmutableTypeToInstanceMap<B> extends ForwardingMap<TypeToken
    *
    * @throws UnsupportedOperationException always
    */
+  @Pure
   @Override public <T extends B> T putInstance(Class<T> type, T value) {
     throw new UnsupportedOperationException();
   }
 
+  @Pure
   @Override protected Map<TypeToken<? extends B>, B> delegate() {
     return delegate;
   }
 
+  @Pure
   @SuppressWarnings("unchecked") // value could not get in if not a T
   private <T extends B> T trustedGet(TypeToken<T> type) {
     return (T) delegate.get(type);

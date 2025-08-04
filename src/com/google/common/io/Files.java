@@ -16,6 +16,9 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.io.FileWriteMode.APPEND;
@@ -79,6 +82,7 @@ public final class Files {
    *     Charsets} for helpful predefined constants
    * @return the buffered reader
    */
+  @Impure
   public static BufferedReader newReader(File file, Charset charset)
       throws FileNotFoundException {
     checkNotNull(file);
@@ -96,6 +100,7 @@ public final class Files {
    *     Charsets} for helpful predefined constants
    * @return the buffered writer
    */
+  @Impure
   public static BufferedWriter newWriter(File file, Charset charset)
       throws FileNotFoundException {
     checkNotNull(file);
@@ -109,6 +114,8 @@ public final class Files {
    *
    * @since 14.0
    */
+  @SideEffectFree
+  @Impure
   public static ByteSource asByteSource(File file) {
     return new FileByteSource(file);
   }
@@ -117,15 +124,19 @@ public final class Files {
 
     private final File file;
 
+    @SideEffectFree
+    @Impure
     private FileByteSource(File file) {
       this.file = checkNotNull(file);
     }
 
+    @Impure
     @Override
     public FileInputStream openStream() throws IOException {
       return new FileInputStream(file);
     }
 
+    @Impure
     @Override
     public long size() throws IOException {
       if (!file.isFile()) {
@@ -134,6 +145,7 @@ public final class Files {
       return file.length();
     }
 
+    @Impure
     @Override
     public byte[] read() throws IOException {
       Closer closer = Closer.create();
@@ -147,6 +159,7 @@ public final class Files {
       }
     }
 
+    @Pure
     @Override
     public String toString() {
       return "Files.asByteSource(" + file + ")";
@@ -159,6 +172,7 @@ public final class Files {
    * size changes between when the size is read and when the contents are read
    * from the stream.
    */
+  @Impure
   static byte[] readFile(
       InputStream in, long expectedSize) throws IOException {
     if (expectedSize > Integer.MAX_VALUE) {
@@ -182,6 +196,7 @@ public final class Files {
    *
    * @since 14.0
    */
+  @Impure
   public static ByteSink asByteSink(File file, FileWriteMode... modes) {
     return new FileByteSink(file, modes);
   }
@@ -191,16 +206,19 @@ public final class Files {
     private final File file;
     private final ImmutableSet<FileWriteMode> modes;
 
+    @Impure
     private FileByteSink(File file, FileWriteMode... modes) {
       this.file = checkNotNull(file);
       this.modes = ImmutableSet.copyOf(modes);
     }
 
+    @Impure
     @Override
     public FileOutputStream openStream() throws IOException {
       return new FileOutputStream(file, modes.contains(APPEND));
     }
 
+    @Pure
     @Override
     public String toString() {
       return "Files.asByteSink(" + file + ", " + modes + ")";
@@ -213,6 +231,8 @@ public final class Files {
    *
    * @since 14.0
    */
+  @SideEffectFree
+  @Impure
   public static CharSource asCharSource(File file, Charset charset) {
     return asByteSource(file).asCharSource(charset);
   }
@@ -227,6 +247,7 @@ public final class Files {
    *
    * @since 14.0
    */
+  @Impure
   public static CharSink asCharSink(File file, Charset charset,
       FileWriteMode... modes) {
     return asByteSink(file, modes).asCharSink(charset);
@@ -241,6 +262,8 @@ public final class Files {
    * @deprecated Use {@link #asByteSource(File)}. This method is scheduled for
    *     removal in Guava 18.0.
    */
+  @SideEffectFree
+  @Impure
   @Deprecated
   public static InputSupplier<FileInputStream> newInputStreamSupplier(
       final File file) {
@@ -256,6 +279,7 @@ public final class Files {
    * @deprecated Use {@link #asByteSink(File)}. This method is scheduled for
    *     removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static OutputSupplier<FileOutputStream> newOutputStreamSupplier(
       File file) {
@@ -274,12 +298,14 @@ public final class Files {
    *     {@link FileWriteMode#APPEND} for append. This method is scheduled for
    *     removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static OutputSupplier<FileOutputStream> newOutputStreamSupplier(
       final File file, final boolean append) {
     return ByteStreams.asOutputSupplier(asByteSink(file, modes(append)));
   }
 
+  @Pure
   private static FileWriteMode[] modes(boolean append) {
     return append
         ? new FileWriteMode[]{ FileWriteMode.APPEND }
@@ -297,6 +323,7 @@ public final class Files {
    * @deprecated Use {@link #asCharSource(File, Charset)}. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static InputSupplier<InputStreamReader> newReaderSupplier(File file,
       Charset charset) {
@@ -314,6 +341,7 @@ public final class Files {
    * @deprecated Use {@link #asCharSink(File, Charset)}. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static OutputSupplier<OutputStreamWriter> newWriterSupplier(File file,
       Charset charset) {
@@ -334,6 +362,7 @@ public final class Files {
    *     passing {@link FileWriteMode#APPEND} for append. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static OutputSupplier<OutputStreamWriter> newWriterSupplier(File file,
       Charset charset, boolean append) {
@@ -349,6 +378,7 @@ public final class Files {
    *     possible byte array (2^31 - 1)
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static byte[] toByteArray(File file) throws IOException {
     return asByteSource(file).read();
   }
@@ -363,6 +393,7 @@ public final class Files {
    * @return a string containing all the characters from the file
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static String toString(File file, Charset charset) throws IOException {
     return asCharSource(file, charset).read();
   }
@@ -378,6 +409,7 @@ public final class Files {
    *     {@code from} to a {@code ByteSource} if necessary. This method is
    *     scheduled to be removed in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static void copy(InputSupplier<? extends InputStream> from, File to)
       throws IOException {
@@ -391,6 +423,7 @@ public final class Files {
    * @param to the destination file
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static void write(byte[] from, File to) throws IOException {
     asByteSink(to).write(from);
   }
@@ -406,6 +439,7 @@ public final class Files {
    *     {@code to} to a {@code ByteSink} if necessary. This method is
    *     scheduled to be removed in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static void copy(File from, OutputSupplier<? extends OutputStream> to)
       throws IOException {
@@ -419,6 +453,7 @@ public final class Files {
    * @param to the output stream
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static void copy(File from, OutputStream to) throws IOException {
     asByteSource(from).copyTo(to);
   }
@@ -436,6 +471,7 @@ public final class Files {
    * @throws IOException if an I/O error occurs
    * @throws IllegalArgumentException if {@code from.equals(to)}
    */
+  @Impure
   public static void copy(File from, File to) throws IOException {
     checkArgument(!from.equals(to),
         "Source %s and destination %s must be different", from, to);
@@ -456,6 +492,7 @@ public final class Files {
    *     changing {@code from} to a {@code CharSource} if necessary. This
    *     method is scheduled to be removed in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <R extends Readable & Closeable> void copy(
       InputSupplier<R> from, File to, Charset charset) throws IOException {
@@ -472,6 +509,7 @@ public final class Files {
    *     Charsets} for helpful predefined constants
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static void write(CharSequence from, File to, Charset charset)
       throws IOException {
     asCharSink(to, charset).write(from);
@@ -487,6 +525,7 @@ public final class Files {
    *     Charsets} for helpful predefined constants
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static void append(CharSequence from, File to, Charset charset)
       throws IOException {
     write(from, to, charset, true);
@@ -503,6 +542,7 @@ public final class Files {
    * @param append true to append, false to overwrite
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   private static void write(CharSequence from, File to, Charset charset,
       boolean append) throws IOException {
     asCharSink(to, charset, modes(append)).write(from);
@@ -522,6 +562,7 @@ public final class Files {
    *     changing {@code to} to a {@code CharSink} if necessary. This method is
    *     scheduled to be removed in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <W extends Appendable & Closeable> void copy(File from,
       Charset charset, OutputSupplier<W> to) throws IOException {
@@ -538,6 +579,7 @@ public final class Files {
    * @param to the appendable object
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static void copy(File from, Charset charset, Appendable to)
       throws IOException {
     asCharSource(from, charset).copyTo(to);
@@ -548,6 +590,7 @@ public final class Files {
    *
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static boolean equal(File file1, File file2) throws IOException {
     checkNotNull(file1);
     checkNotNull(file2);
@@ -587,6 +630,7 @@ public final class Files {
    * @return the newly-created directory
    * @throws IllegalStateException if the directory could not be created
    */
+  @Impure
   public static File createTempDir() {
     File baseDir = new File(System.getProperty("java.io.tmpdir"));
     String baseName = System.currentTimeMillis() + "-";
@@ -609,6 +653,7 @@ public final class Files {
    * @param file the file to create or update
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static void touch(File file) throws IOException {
     checkNotNull(file);
     if (!file.createNewFile()
@@ -627,6 +672,7 @@ public final class Files {
    *     created.
    * @since 4.0
    */
+  @Impure
   public static void createParentDirs(File file) throws IOException {
     checkNotNull(file);
     File parent = file.getCanonicalFile().getParentFile();
@@ -655,6 +701,7 @@ public final class Files {
    * @throws IOException if an I/O error occurs
    * @throws IllegalArgumentException if {@code from.equals(to)}
    */
+  @Impure
   public static void move(File from, File to) throws IOException {
     checkNotNull(from);
     checkNotNull(to);
@@ -683,6 +730,7 @@ public final class Files {
    * @return the first line, or null if the file is empty
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static String readFirstLine(File file, Charset charset)
       throws IOException {
     return asCharSource(file, charset).readFirstLine();
@@ -703,6 +751,7 @@ public final class Files {
    * @return a mutable {@link List} containing all the lines
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static List<String> readLines(File file, Charset charset)
       throws IOException {
     // don't use asCharSource(file, charset).readLines() because that returns
@@ -710,12 +759,14 @@ public final class Files {
     return readLines(file, charset, new LineProcessor<List<String>>() {
       final List<String> result = Lists.newArrayList();
 
+      @Impure
       @Override
       public boolean processLine(String line) {
         result.add(line);
         return true;
       }
 
+      @Pure
       @Override
       public List<String> getResult() {
         return result;
@@ -734,6 +785,7 @@ public final class Files {
    * @return the output of processing the lines
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static <T> T readLines(File file, Charset charset,
       LineProcessor<T> callback) throws IOException {
     return CharStreams.readLines(newReaderSupplier(file, charset), callback);
@@ -750,6 +802,7 @@ public final class Files {
    * @return the result of the byte processor
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static <T> T readBytes(File file, ByteProcessor<T> processor)
       throws IOException {
     return ByteStreams.readBytes(newInputStreamSupplier(file), processor);
@@ -764,6 +817,7 @@ public final class Files {
    * @throws IOException if an I/O error occurs
    * @since 12.0
    */
+  @Impure
   public static HashCode hash(File file, HashFunction hashFunction)
       throws IOException {
     return asByteSource(file).hash(hashFunction);
@@ -785,6 +839,7 @@ public final class Files {
    * @see FileChannel#map(MapMode, long, long)
    * @since 2.0
    */
+  @Impure
   public static MappedByteBuffer map(File file) throws IOException {
     checkNotNull(file);
     return map(file, MapMode.READ_ONLY);
@@ -808,6 +863,7 @@ public final class Files {
    * @see FileChannel#map(MapMode, long, long)
    * @since 2.0
    */
+  @Impure
   public static MappedByteBuffer map(File file, MapMode mode)
       throws IOException {
     checkNotNull(file);
@@ -839,6 +895,7 @@ public final class Files {
    * @see FileChannel#map(MapMode, long, long)
    * @since 2.0
    */
+  @Impure
   public static MappedByteBuffer map(File file, MapMode mode, long size)
       throws FileNotFoundException, IOException {
     checkNotNull(file);
@@ -856,6 +913,7 @@ public final class Files {
     }
   }
 
+  @Impure
   private static MappedByteBuffer map(RandomAccessFile raf, MapMode mode,
       long size) throws IOException {
     Closer closer = Closer.create();
@@ -890,6 +948,7 @@ public final class Files {
    *
    * @since 11.0
    */
+  @Impure
   public static String simplifyPath(String pathname) {
     checkNotNull(pathname);
     if (pathname.length() == 0) {
@@ -941,6 +1000,8 @@ public final class Files {
    *
    * @since 11.0
    */
+  @SideEffectFree
+  @Impure
   public static String getFileExtension(String fullName) {
     checkNotNull(fullName);
     String fileName = new File(fullName).getName();
@@ -958,6 +1019,8 @@ public final class Files {
    * @return The file name without its path or extension.
    * @since 14.0
    */
+  @SideEffectFree
+  @Impure
   public static String getNameWithoutExtension(String file) {
     checkNotNull(file);
     String fileName = new File(file).getName();
@@ -975,11 +1038,13 @@ public final class Files {
    *
    * @since 15.0
    */
+  @Pure
   public static TreeTraverser<File> fileTreeTraverser() {
     return FILE_TREE_TRAVERSER;
   }
 
   private static final TreeTraverser<File> FILE_TREE_TRAVERSER = new TreeTraverser<File>() {
+    @Impure
     @Override
     public Iterable<File> children(File file) {
       // check isDirectory() just because it may be faster than listFiles() on a non-directory
@@ -993,6 +1058,7 @@ public final class Files {
       return Collections.emptyList();
     }
 
+    @Pure
     @Override
     public String toString() {
       return "Files.fileTreeTraverser()";
@@ -1004,6 +1070,7 @@ public final class Files {
    *
    * @since 15.0
    */
+  @Pure
   public static Predicate<File> isDirectory() {
     return FilePredicate.IS_DIRECTORY;
   }
@@ -1013,17 +1080,20 @@ public final class Files {
    *
    * @since 15.0
    */
+  @Pure
   public static Predicate<File> isFile() {
     return FilePredicate.IS_FILE;
   }
 
   private enum FilePredicate implements Predicate<File> {
     IS_DIRECTORY {
+      @SideEffectFree
       @Override
       public boolean apply(File file) {
         return file.isDirectory();
       }
 
+      @Pure
       @Override
       public String toString() {
         return "Files.isDirectory()";
@@ -1031,11 +1101,13 @@ public final class Files {
     },
 
     IS_FILE {
+      @SideEffectFree
       @Override
       public boolean apply(File file) {
         return file.isFile();
       }
 
+      @Pure
       @Override
       public String toString() {
         return "Files.isFile()";

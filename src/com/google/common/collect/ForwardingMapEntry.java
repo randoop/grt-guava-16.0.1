@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Objects;
@@ -57,29 +60,40 @@ public abstract class ForwardingMapEntry<K, V>
   // TODO(user): identify places where thread safety is actually lost
 
   /** Constructor for use by subclasses. */
+  @SideEffectFree
+  @Impure
   protected ForwardingMapEntry() {}
 
+  @Pure
   @Override protected abstract Map.Entry<K, V> delegate();
 
+  @Pure
+  @Impure
   @Override
   public K getKey() {
     return delegate().getKey();
   }
 
+  @Impure
   @Override
   public V getValue() {
     return delegate().getValue();
   }
 
+  @Impure
   @Override
   public V setValue(V value) {
     return delegate().setValue(value);
   }
 
+  @Pure
+  @Impure
   @Override public boolean equals(@Nullable Object object) {
     return delegate().equals(object);
   }
 
+  @Pure
+  @Impure
   @Override public int hashCode() {
     return delegate().hashCode();
   }
@@ -92,6 +106,7 @@ public abstract class ForwardingMapEntry<K, V>
    *
    * @since 7.0
    */
+  @Impure
   protected boolean standardEquals(@Nullable Object object) {
     if (object instanceof Entry) {
       Entry<?, ?> that = (Entry<?, ?>) object;
@@ -108,6 +123,7 @@ public abstract class ForwardingMapEntry<K, V>
    *
    * @since 7.0
    */
+  @Pure
   protected int standardHashCode() {
     K k = getKey();
     V v = getValue();
@@ -122,6 +138,7 @@ public abstract class ForwardingMapEntry<K, V>
    *
    * @since 7.0
    */
+  @Pure
   @Beta protected String standardToString() {
     return getKey() + "=" + getValue();
   }

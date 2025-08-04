@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkElementIndex;
 
 import com.google.common.annotations.GwtCompatible;
@@ -37,6 +39,7 @@ final class CartesianList<E> extends AbstractList<List<E>> implements RandomAcce
   private transient final ImmutableList<List<E>> axes;
   private transient final int[] axesSizeProduct;
   
+  @Impure
   static <E> List<List<E>> create(List<? extends List<? extends E>> lists) {
     ImmutableList.Builder<List<E>> axesBuilder =
         new ImmutableList.Builder<List<E>>(lists.size());
@@ -50,6 +53,7 @@ final class CartesianList<E> extends AbstractList<List<E>> implements RandomAcce
     return new CartesianList<E>(axesBuilder.build());
   }
 
+  @Impure
   CartesianList(ImmutableList<List<E>> axes) {
     this.axes = axes;
     int[] axesSizeProduct = new int[axes.size() + 1];
@@ -66,20 +70,24 @@ final class CartesianList<E> extends AbstractList<List<E>> implements RandomAcce
     this.axesSizeProduct = axesSizeProduct;
   }
 
+  @Pure
   private int getAxisIndexForProductIndex(int index, int axis) {
     return (index / axesSizeProduct[axis + 1]) % axes.get(axis).size();
   }
 
+  @Impure
   @Override
   public ImmutableList<E> get(final int index) {
     checkElementIndex(index, size());
     return new ImmutableList<E>() {
 
+      @Pure
       @Override
       public int size() {
         return axes.size();
       }
 
+      @Impure
       @Override
       public E get(int axis) {
         checkElementIndex(axis, size());
@@ -87,6 +95,7 @@ final class CartesianList<E> extends AbstractList<List<E>> implements RandomAcce
         return axes.get(axis).get(axisIndex);
       }
 
+      @Pure
       @Override
       boolean isPartialView() {
         return true;
@@ -94,11 +103,13 @@ final class CartesianList<E> extends AbstractList<List<E>> implements RandomAcce
     };
   }
 
+  @Pure
   @Override
   public int size() {
     return axesSizeProduct[0];
   }
 
+  @Impure
   @Override
   public boolean contains(@Nullable Object o) {
     if (!(o instanceof List)) {

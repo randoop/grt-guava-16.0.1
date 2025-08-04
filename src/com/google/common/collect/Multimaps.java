@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.CollectPreconditions.checkNonnegative;
 import static com.google.common.collect.CollectPreconditions.checkRemove;
@@ -63,6 +66,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible(emulated = true)
 public final class Multimaps {
+  @SideEffectFree
   private Multimaps() {}
 
   /**
@@ -108,6 +112,7 @@ public final class Multimaps {
    *     values for a given key
    * @throws IllegalArgumentException if {@code map} is not empty
    */
+  @Impure
   public static <K, V> Multimap<K, V> newMultimap(Map<K, Collection<V>> map,
       final Supplier<? extends Collection<V>> factory) {
     return new CustomMultimap<K, V>(map, factory);
@@ -116,12 +121,14 @@ public final class Multimaps {
   private static class CustomMultimap<K, V> extends AbstractMapBasedMultimap<K, V> {
     transient Supplier<? extends Collection<V>> factory;
 
+    @Impure
     CustomMultimap(Map<K, Collection<V>> map,
         Supplier<? extends Collection<V>> factory) {
       super(map);
       this.factory = checkNotNull(factory);
     }
 
+    @Impure
     @Override protected Collection<V> createCollection() {
       return factory.get();
     }
@@ -130,6 +137,7 @@ public final class Multimaps {
     // there's no way to generate the empty backing map.
 
     /** @serialData the factory and the backing map */
+    @Impure
     @GwtIncompatible("java.io.ObjectOutputStream")
     private void writeObject(ObjectOutputStream stream) throws IOException {
       stream.defaultWriteObject();
@@ -137,6 +145,7 @@ public final class Multimaps {
       stream.writeObject(backingMap());
     }
 
+    @Impure
     @GwtIncompatible("java.io.ObjectInputStream")
     @SuppressWarnings("unchecked") // reading data stored by writeObject
     private void readObject(ObjectInputStream stream)
@@ -189,6 +198,7 @@ public final class Multimaps {
    *     for a given key
    * @throws IllegalArgumentException if {@code map} is not empty
    */
+  @Impure
   public static <K, V> ListMultimap<K, V> newListMultimap(
       Map<K, Collection<V>> map, final Supplier<? extends List<V>> factory) {
     return new CustomListMultimap<K, V>(map, factory);
@@ -198,17 +208,20 @@ public final class Multimaps {
       extends AbstractListMultimap<K, V> {
     transient Supplier<? extends List<V>> factory;
 
+    @Impure
     CustomListMultimap(Map<K, Collection<V>> map,
         Supplier<? extends List<V>> factory) {
       super(map);
       this.factory = checkNotNull(factory);
     }
 
+    @Impure
     @Override protected List<V> createCollection() {
       return factory.get();
     }
 
     /** @serialData the factory and the backing map */
+    @Impure
     @GwtIncompatible("java.io.ObjectOutputStream")
     private void writeObject(ObjectOutputStream stream) throws IOException {
       stream.defaultWriteObject();
@@ -216,6 +229,7 @@ public final class Multimaps {
       stream.writeObject(backingMap());
     }
 
+    @Impure
     @GwtIncompatible("java.io.ObjectInputStream")
     @SuppressWarnings("unchecked") // reading data stored by writeObject
     private void readObject(ObjectInputStream stream)
@@ -267,6 +281,7 @@ public final class Multimaps {
    *     for a given key
    * @throws IllegalArgumentException if {@code map} is not empty
    */
+  @Impure
   public static <K, V> SetMultimap<K, V> newSetMultimap(
       Map<K, Collection<V>> map, final Supplier<? extends Set<V>> factory) {
     return new CustomSetMultimap<K, V>(map, factory);
@@ -276,17 +291,20 @@ public final class Multimaps {
       extends AbstractSetMultimap<K, V> {
     transient Supplier<? extends Set<V>> factory;
 
+    @Impure
     CustomSetMultimap(Map<K, Collection<V>> map,
         Supplier<? extends Set<V>> factory) {
       super(map);
       this.factory = checkNotNull(factory);
     }
 
+    @Impure
     @Override protected Set<V> createCollection() {
       return factory.get();
     }
 
     /** @serialData the factory and the backing map */
+    @Impure
     @GwtIncompatible("java.io.ObjectOutputStream")
     private void writeObject(ObjectOutputStream stream) throws IOException {
       stream.defaultWriteObject();
@@ -294,6 +312,7 @@ public final class Multimaps {
       stream.writeObject(backingMap());
     }
 
+    @Impure
     @GwtIncompatible("java.io.ObjectInputStream")
     @SuppressWarnings("unchecked") // reading data stored by writeObject
     private void readObject(ObjectInputStream stream)
@@ -344,6 +363,7 @@ public final class Multimaps {
    *     all values for a given key
    * @throws IllegalArgumentException if {@code map} is not empty
    */
+  @Impure
   public static <K, V> SortedSetMultimap<K, V> newSortedSetMultimap(
       Map<K, Collection<V>> map,
       final Supplier<? extends SortedSet<V>> factory) {
@@ -355,6 +375,7 @@ public final class Multimaps {
     transient Supplier<? extends SortedSet<V>> factory;
     transient Comparator<? super V> valueComparator;
 
+    @Impure
     CustomSortedSetMultimap(Map<K, Collection<V>> map,
         Supplier<? extends SortedSet<V>> factory) {
       super(map);
@@ -362,15 +383,18 @@ public final class Multimaps {
       valueComparator = factory.get().comparator();
     }
 
+    @Impure
     @Override protected SortedSet<V> createCollection() {
       return factory.get();
     }
 
+    @Pure
     @Override public Comparator<? super V> valueComparator() {
       return valueComparator;
     }
 
     /** @serialData the factory and the backing map */
+    @Impure
     @GwtIncompatible("java.io.ObjectOutputStream")
     private void writeObject(ObjectOutputStream stream) throws IOException {
       stream.defaultWriteObject();
@@ -378,6 +402,7 @@ public final class Multimaps {
       stream.writeObject(backingMap());
     }
 
+    @Impure
     @GwtIncompatible("java.io.ObjectInputStream")
     @SuppressWarnings("unchecked") // reading data stored by writeObject
     private void readObject(ObjectInputStream stream)
@@ -404,6 +429,7 @@ public final class Multimaps {
    * @param dest the multimap to copy into; usually empty
    * @return {@code dest}
    */
+  @Impure
   public static <K, V, M extends Multimap<K, V>> M invertFrom(
       Multimap<? extends V, ? extends K> source, M dest) {
     checkNotNull(dest);
@@ -446,6 +472,7 @@ public final class Multimaps {
    * @param multimap the multimap to be wrapped in a synchronized view
    * @return a synchronized view of the specified multimap
    */
+  @Impure
   public static <K, V> Multimap<K, V> synchronizedMultimap(
       Multimap<K, V> multimap) {
     return Synchronized.multimap(multimap, null);
@@ -468,6 +495,7 @@ public final class Multimaps {
    *     returned
    * @return an unmodifiable view of the specified multimap
    */
+  @Impure
   public static <K, V> Multimap<K, V> unmodifiableMultimap(
       Multimap<K, V> delegate) {
     if (delegate instanceof UnmodifiableMultimap ||
@@ -483,6 +511,7 @@ public final class Multimaps {
    * @deprecated no need to use this
    * @since 10.0
    */
+  @Impure
   @Deprecated public static <K, V> Multimap<K, V> unmodifiableMultimap(
       ImmutableMultimap<K, V> delegate) {
     return checkNotNull(delegate);
@@ -497,23 +526,28 @@ public final class Multimaps {
     transient Collection<V> values;
     transient Map<K, Collection<V>> map;
 
+    @Impure
     UnmodifiableMultimap(final Multimap<K, V> delegate) {
       this.delegate = checkNotNull(delegate);
     }
 
+    @Impure
     @Override protected Multimap<K, V> delegate() {
       return delegate;
     }
 
+    @SideEffectFree
     @Override public void clear() {
       throw new UnsupportedOperationException();
     }
 
+    @Impure
     @Override public Map<K, Collection<V>> asMap() {
       Map<K, Collection<V>> result = map;
       if (result == null) {
         result = map = Collections.unmodifiableMap(
             Maps.transformValues(delegate.asMap(), new Function<Collection<V>, Collection<V>>() {
+              @Impure
               @Override
               public Collection<V> apply(Collection<V> collection) {
                 return unmodifiableValueCollection(collection);
@@ -523,6 +557,7 @@ public final class Multimaps {
       return result;
     }
 
+    @Impure
     @Override public Collection<Entry<K, V>> entries() {
       Collection<Entry<K, V>> result = entries;
       if (result == null) {
@@ -531,10 +566,12 @@ public final class Multimaps {
       return result;
     }
 
+    @Impure
     @Override public Collection<V> get(K key) {
       return unmodifiableValueCollection(delegate.get(key));
     }
 
+    @Impure
     @Override public Multiset<K> keys() {
       Multiset<K> result = keys;
       if (result == null) {
@@ -543,6 +580,7 @@ public final class Multimaps {
       return result;
     }
 
+    @Impure
     @Override public Set<K> keySet() {
       Set<K> result = keySet;
       if (result == null) {
@@ -551,32 +589,39 @@ public final class Multimaps {
       return result;
     }
 
+    @Pure
     @Override public boolean put(K key, V value) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public boolean putAll(K key, Iterable<? extends V> values) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override
     public boolean putAll(Multimap<? extends K, ? extends V> multimap) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public boolean remove(Object key, Object value) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public Collection<V> removeAll(Object key) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public Collection<V> replaceValues(
         K key, Iterable<? extends V> values) {
       throw new UnsupportedOperationException();
     }
 
+    @Impure
     @Override public Collection<V> values() {
       Collection<V> result = values;
       if (result == null) {
@@ -590,18 +635,23 @@ public final class Multimaps {
 
   private static class UnmodifiableListMultimap<K, V>
       extends UnmodifiableMultimap<K, V> implements ListMultimap<K, V> {
+    @Impure
     UnmodifiableListMultimap(ListMultimap<K, V> delegate) {
       super(delegate);
     }
+    @Impure
     @Override public ListMultimap<K, V> delegate() {
       return (ListMultimap<K, V>) super.delegate();
     }
+    @Impure
     @Override public List<V> get(K key) {
       return Collections.unmodifiableList(delegate().get(key));
     }
+    @Pure
     @Override public List<V> removeAll(Object key) {
       throw new UnsupportedOperationException();
     }
+    @Pure
     @Override public List<V> replaceValues(
         K key, Iterable<? extends V> values) {
       throw new UnsupportedOperationException();
@@ -611,12 +661,15 @@ public final class Multimaps {
 
   private static class UnmodifiableSetMultimap<K, V>
       extends UnmodifiableMultimap<K, V> implements SetMultimap<K, V> {
+    @Impure
     UnmodifiableSetMultimap(SetMultimap<K, V> delegate) {
       super(delegate);
     }
+    @Impure
     @Override public SetMultimap<K, V> delegate() {
       return (SetMultimap<K, V>) super.delegate();
     }
+    @Impure
     @Override public Set<V> get(K key) {
       /*
        * Note that this doesn't return a SortedSet when delegate is a
@@ -624,12 +677,15 @@ public final class Multimaps {
        */
       return Collections.unmodifiableSet(delegate().get(key));
     }
+    @Impure
     @Override public Set<Map.Entry<K, V>> entries() {
       return Maps.unmodifiableEntrySet(delegate().entries());
     }
+    @Pure
     @Override public Set<V> removeAll(Object key) {
       throw new UnsupportedOperationException();
     }
+    @Pure
     @Override public Set<V> replaceValues(
         K key, Iterable<? extends V> values) {
       throw new UnsupportedOperationException();
@@ -639,22 +695,28 @@ public final class Multimaps {
 
   private static class UnmodifiableSortedSetMultimap<K, V>
       extends UnmodifiableSetMultimap<K, V> implements SortedSetMultimap<K, V> {
+    @Impure
     UnmodifiableSortedSetMultimap(SortedSetMultimap<K, V> delegate) {
       super(delegate);
     }
+    @Impure
     @Override public SortedSetMultimap<K, V> delegate() {
       return (SortedSetMultimap<K, V>) super.delegate();
     }
+    @Impure
     @Override public SortedSet<V> get(K key) {
       return Collections.unmodifiableSortedSet(delegate().get(key));
     }
+    @Pure
     @Override public SortedSet<V> removeAll(Object key) {
       throw new UnsupportedOperationException();
     }
+    @Pure
     @Override public SortedSet<V> replaceValues(
         K key, Iterable<? extends V> values) {
       throw new UnsupportedOperationException();
     }
+    @Impure
     @Override
     public Comparator<? super V> valueComparator() {
       return delegate().valueComparator();
@@ -674,6 +736,7 @@ public final class Multimaps {
    * @param multimap the multimap to be wrapped
    * @return a synchronized view of the specified multimap
    */
+  @Impure
   public static <K, V> SetMultimap<K, V> synchronizedSetMultimap(
       SetMultimap<K, V> multimap) {
     return Synchronized.setMultimap(multimap, null);
@@ -697,6 +760,7 @@ public final class Multimaps {
    *     returned
    * @return an unmodifiable view of the specified multimap
    */
+  @Impure
   public static <K, V> SetMultimap<K, V> unmodifiableSetMultimap(
       SetMultimap<K, V> delegate) {
     if (delegate instanceof UnmodifiableSetMultimap ||
@@ -712,6 +776,7 @@ public final class Multimaps {
    * @deprecated no need to use this
    * @since 10.0
    */
+  @Impure
   @Deprecated public static <K, V> SetMultimap<K, V> unmodifiableSetMultimap(
       ImmutableSetMultimap<K, V> delegate) {
     return checkNotNull(delegate);
@@ -729,6 +794,7 @@ public final class Multimaps {
    * @param multimap the multimap to be wrapped
    * @return a synchronized view of the specified multimap
    */
+  @Impure
   public static <K, V> SortedSetMultimap<K, V>
       synchronizedSortedSetMultimap(SortedSetMultimap<K, V> multimap) {
     return Synchronized.sortedSetMultimap(multimap, null);
@@ -752,6 +818,7 @@ public final class Multimaps {
    *     returned
    * @return an unmodifiable view of the specified multimap
    */
+  @Impure
   public static <K, V> SortedSetMultimap<K, V> unmodifiableSortedSetMultimap(
       SortedSetMultimap<K, V> delegate) {
     if (delegate instanceof UnmodifiableSortedSetMultimap) {
@@ -769,6 +836,7 @@ public final class Multimaps {
    * @param multimap the multimap to be wrapped
    * @return a synchronized view of the specified multimap
    */
+  @Impure
   public static <K, V> ListMultimap<K, V> synchronizedListMultimap(
       ListMultimap<K, V> multimap) {
     return Synchronized.listMultimap(multimap, null);
@@ -792,6 +860,7 @@ public final class Multimaps {
    *     returned
    * @return an unmodifiable view of the specified multimap
    */
+  @Impure
   public static <K, V> ListMultimap<K, V> unmodifiableListMultimap(
       ListMultimap<K, V> delegate) {
     if (delegate instanceof UnmodifiableListMultimap ||
@@ -807,6 +876,7 @@ public final class Multimaps {
    * @deprecated no need to use this
    * @since 10.0
    */
+  @Impure
   @Deprecated public static <K, V> ListMultimap<K, V> unmodifiableListMultimap(
       ImmutableListMultimap<K, V> delegate) {
     return checkNotNull(delegate);
@@ -820,6 +890,7 @@ public final class Multimaps {
    * @param collection the collection for which to return an unmodifiable view
    * @return an unmodifiable view of the collection
    */
+  @Impure
   private static <V> Collection<V> unmodifiableValueCollection(
       Collection<V> collection) {
     if (collection instanceof SortedSet) {
@@ -841,6 +912,7 @@ public final class Multimaps {
    * @param entries the entries for which to return an unmodifiable view
    * @return an unmodifiable view of the entries
    */
+  @Impure
   private static <K, V> Collection<Entry<K, V>> unmodifiableEntries(
       Collection<Entry<K, V>> entries) {
     if (entries instanceof Set) {
@@ -856,6 +928,7 @@ public final class Multimaps {
    *
    * @since 15.0
    */
+  @Pure
   @Beta
   @SuppressWarnings("unchecked")
   // safe by specification of ListMultimap.asMap()
@@ -869,6 +942,7 @@ public final class Multimaps {
    *
    * @since 15.0
    */
+  @Impure
   @Beta
   @SuppressWarnings("unchecked")
   // safe by specification of SetMultimap.asMap()
@@ -883,6 +957,7 @@ public final class Multimaps {
    *
    * @since 15.0
    */
+  @Impure
   @Beta
   @SuppressWarnings("unchecked")
   // safe by specification of SortedSetMultimap.asMap()
@@ -897,6 +972,7 @@ public final class Multimaps {
    *
    * @since 15.0
    */
+  @Impure
   @Beta
   public static <K, V> Map<K, Collection<V>> asMap(Multimap<K, V> multimap) {
     return multimap.asMap();
@@ -919,6 +995,7 @@ public final class Multimaps {
    *
    * @param map the backing map for the returned multimap view
    */
+  @Impure
   public static <K, V> SetMultimap<K, V> forMap(Map<K, V> map) {
     return new MapMultimap<K, V>(map);
   }
@@ -928,42 +1005,51 @@ public final class Multimaps {
       extends AbstractMultimap<K, V> implements SetMultimap<K, V>, Serializable {
     final Map<K, V> map;
 
+    @Impure
     MapMultimap(Map<K, V> map) {
       this.map = checkNotNull(map);
     }
 
+    @Pure
     @Override
     public int size() {
       return map.size();
     }
 
+    @Pure
     @Override
     public boolean containsKey(Object key) {
       return map.containsKey(key);
     }
 
+    @Pure
     @Override
     public boolean containsValue(Object value) {
       return map.containsValue(value);
     }
 
+    @Impure
     @Override
     public boolean containsEntry(Object key, Object value) {
       return map.entrySet().contains(Maps.immutableEntry(key, value));
     }
 
+    @Impure
     @Override
     public Set<V> get(final K key) {
       return new Sets.ImprovedAbstractSet<V>() {
+        @Impure
         @Override public Iterator<V> iterator() {
           return new Iterator<V>() {
             int i;
 
+            @Pure
             @Override
             public boolean hasNext() {
               return (i == 0) && map.containsKey(key);
             }
 
+            @Impure
             @Override
             public V next() {
               if (!hasNext()) {
@@ -973,6 +1059,7 @@ public final class Multimaps {
               return map.get(key);
             }
 
+            @Impure
             @Override
             public void remove() {
               checkRemove(i == 1);
@@ -982,37 +1069,44 @@ public final class Multimaps {
           };
         }
 
+        @Pure
         @Override public int size() {
           return map.containsKey(key) ? 1 : 0;
         }
       };
     }
 
+    @Pure
     @Override
     public boolean put(K key, V value) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override
     public boolean putAll(K key, Iterable<? extends V> values) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override
     public boolean putAll(Multimap<? extends K, ? extends V> multimap) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override
     public Set<V> replaceValues(K key, Iterable<? extends V> values) {
       throw new UnsupportedOperationException();
     }
 
+    @Impure
     @Override
     public boolean remove(Object key, Object value) {
       return map.entrySet().remove(Maps.immutableEntry(key, value));
     }
 
+    @Impure
     @Override
     public Set<V> removeAll(Object key) {
       Set<V> values = new HashSet<V>(2);
@@ -1023,36 +1117,43 @@ public final class Multimaps {
       return values;
     }
 
+    @Impure
     @Override
     public void clear() {
       map.clear();
     }
 
+    @SideEffectFree
     @Override
     public Set<K> keySet() {
       return map.keySet();
     }
 
+    @SideEffectFree
     @Override
     public Collection<V> values() {
       return map.values();
     }
 
+    @SideEffectFree
     @Override
     public Set<Entry<K, V>> entries() {
       return map.entrySet();
     }
     
+    @SideEffectFree
     @Override
     Iterator<Entry<K, V>> entryIterator() {
       return map.entrySet().iterator();
     }
 
+    @Impure
     @Override
     Map<K, Collection<V>> createAsMap() {
       return new AsMap<K, V>(this);
     }
 
+    @Pure
     @Override public int hashCode() {
       return map.hashCode();
     }
@@ -1104,6 +1205,7 @@ public final class Multimaps {
    *
    * @since 7.0
    */
+  @Impure
   public static <K, V1, V2> Multimap<K, V2> transformValues(
       Multimap<K, V1> fromMultimap, final Function<? super V1, V2> function) {
     checkNotNull(function);
@@ -1166,6 +1268,7 @@ public final class Multimaps {
    *
    * @since 7.0
    */
+  @Impure
   public static <K, V1, V2> Multimap<K, V2> transformEntries(
       Multimap<K, V1> fromMap,
       EntryTransformer<? super K, ? super V1, V2> transformer) {
@@ -1177,12 +1280,14 @@ public final class Multimaps {
     final Multimap<K, V1> fromMultimap;
     final EntryTransformer<? super K, ? super V1, V2> transformer;
 
+    @Impure
     TransformedEntriesMultimap(Multimap<K, V1> fromMultimap,
         final EntryTransformer<? super K, ? super V1, V2> transformer) {
       this.fromMultimap = checkNotNull(fromMultimap);
       this.transformer = checkNotNull(transformer);
     }
 
+    @Impure
     Collection<V2> transform(K key, Collection<V1> values) {
       Function<? super V1, V2> function = 
           Maps.asValueToValueFunction(transformer, key);
@@ -1193,10 +1298,12 @@ public final class Multimaps {
       }
     }
 
+    @Impure
     @Override
     Map<K, Collection<V2>> createAsMap() {
       return Maps.transformEntries(fromMultimap.asMap(),
           new EntryTransformer<K, Collection<V1>, Collection<V2>>() {
+        @Impure
         @Override public Collection<V2> transformEntry(
             K key, Collection<V1> value) {
           return transform(key, value);
@@ -1204,68 +1311,83 @@ public final class Multimaps {
       });
     }
 
+    @Impure
     @Override public void clear() {
       fromMultimap.clear();
     }
 
+    @Impure
     @Override public boolean containsKey(Object key) {
       return fromMultimap.containsKey(key);
     }
 
+    @Impure
     @Override
     Iterator<Entry<K, V2>> entryIterator() {
       return Iterators.transform(fromMultimap.entries().iterator(), 
           Maps.<K, V1, V2>asEntryToEntryFunction(transformer));
     }
 
+    @Impure
     @Override public Collection<V2> get(final K key) {
       return transform(key, fromMultimap.get(key));
     }
 
+    @Impure
     @Override public boolean isEmpty() {
       return fromMultimap.isEmpty();
     }
 
+    @Impure
     @Override public Set<K> keySet() {
       return fromMultimap.keySet();
     }
 
+    @Impure
     @Override public Multiset<K> keys() {
       return fromMultimap.keys();
     }
 
+    @Pure
     @Override public boolean put(K key, V2 value) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public boolean putAll(K key, Iterable<? extends V2> values) {
       throw new UnsupportedOperationException();
     }
 
+    @Pure
     @Override public boolean putAll(
         Multimap<? extends K, ? extends V2> multimap) {
       throw new UnsupportedOperationException();
     }
 
+    @Impure
     @SuppressWarnings("unchecked")
     @Override public boolean remove(Object key, Object value) {
       return get((K) key).remove(value);
     }
 
+    @Impure
     @SuppressWarnings("unchecked")
     @Override public Collection<V2> removeAll(Object key) {
       return transform((K) key, fromMultimap.removeAll(key));
     }
 
+    @Pure
     @Override public Collection<V2> replaceValues(
         K key, Iterable<? extends V2> values) {
       throw new UnsupportedOperationException();
     }
 
+    @Impure
     @Override public int size() {
       return fromMultimap.size();
     }
     
+    @Impure
     @Override
     Collection<V2> createValues() {
       return Collections2.transform(
@@ -1314,6 +1436,7 @@ public final class Multimaps {
    *
    * @since 7.0
    */
+  @Impure
   public static <K, V1, V2> ListMultimap<K, V2> transformValues(
       ListMultimap<K, V1> fromMultimap,
       final Function<? super V1, V2> function) {
@@ -1374,6 +1497,7 @@ public final class Multimaps {
    *
    * @since 7.0
    */
+  @Impure
   public static <K, V1, V2> ListMultimap<K, V2> transformEntries(
       ListMultimap<K, V1> fromMap,
       EntryTransformer<? super K, ? super V1, V2> transformer) {
@@ -1384,24 +1508,29 @@ public final class Multimaps {
       extends TransformedEntriesMultimap<K, V1, V2>
       implements ListMultimap<K, V2> {
 
+    @Impure
     TransformedEntriesListMultimap(ListMultimap<K, V1> fromMultimap,
         EntryTransformer<? super K, ? super V1, V2> transformer) {
       super(fromMultimap, transformer);
     }
 
+    @Impure
     @Override List<V2> transform(K key, Collection<V1> values) {
       return Lists.transform((List<V1>) values, Maps.asValueToValueFunction(transformer, key));
     }
 
+    @Impure
     @Override public List<V2> get(K key) {
       return transform(key, fromMultimap.get(key));
     }
 
+    @Impure
     @SuppressWarnings("unchecked")
     @Override public List<V2> removeAll(Object key) {
       return transform((K) key, fromMultimap.removeAll(key));
     }
 
+    @Pure
     @Override public List<V2> replaceValues(
         K key, Iterable<? extends V2> values) {
       throw new UnsupportedOperationException();
@@ -1450,6 +1579,7 @@ public final class Multimaps {
    *         values}
    *     </ul>
    */
+  @Impure
   public static <K, V> ImmutableListMultimap<K, V> index(
       Iterable<V> values, Function<? super V, K> keyFunction) {
     return index(values.iterator(), keyFunction);
@@ -1498,6 +1628,7 @@ public final class Multimaps {
    *     </ul>
    * @since 10.0
    */
+  @Impure
   public static <K, V> ImmutableListMultimap<K, V> index(
       Iterator<V> values, Function<? super V, K> keyFunction) {
     checkNotNull(keyFunction);
@@ -1514,22 +1645,27 @@ public final class Multimaps {
   static class Keys<K, V> extends AbstractMultiset<K> {
     final Multimap<K, V> multimap;
     
+    @Impure
     Keys(Multimap<K, V> multimap) {
       this.multimap = multimap;
     }
 
+    @Impure
     @Override Iterator<Multiset.Entry<K>> entryIterator() {
       return new TransformedIterator<Map.Entry<K, Collection<V>>, Multiset.Entry<K>>(
           multimap.asMap().entrySet().iterator()) {
+        @Impure
         @Override
         Multiset.Entry<K> transform(
             final Map.Entry<K, Collection<V>> backingEntry) {
           return new Multisets.AbstractEntry<K>() {
+            @Pure
             @Override
             public K getElement() {
               return backingEntry.getKey();
             }
 
+            @Pure
             @Override
             public int getCount() {
               return backingEntry.getValue().size();
@@ -1539,31 +1675,38 @@ public final class Multimaps {
       };
     }
 
+    @Impure
     @Override int distinctElements() {
       return multimap.asMap().size();
     }
 
+    @Impure
     @Override Set<Multiset.Entry<K>> createEntrySet() {
       return new KeysEntrySet();
     }
 
     class KeysEntrySet extends Multisets.EntrySet<K> {
+      @Pure
       @Override Multiset<K> multiset() {
         return Keys.this;
       }
 
+      @Impure
       @Override public Iterator<Multiset.Entry<K>> iterator() {
         return entryIterator();
       }
 
+      @Impure
       @Override public int size() {
         return distinctElements();
       }
 
+      @Impure
       @Override public boolean isEmpty() {
         return multimap.isEmpty();
       }
 
+      @Impure
       @Override public boolean contains(@Nullable Object o) {
         if (o instanceof Multiset.Entry) {
           Multiset.Entry<?> entry = (Multiset.Entry<?>) o;
@@ -1573,6 +1716,7 @@ public final class Multimaps {
         return false;
       }
 
+      @Impure
       @Override public boolean remove(@Nullable Object o) {
         if (o instanceof Multiset.Entry) {
           Multiset.Entry<?> entry = (Multiset.Entry<?>) o;
@@ -1586,19 +1730,23 @@ public final class Multimaps {
       }
     }
 
+    @Impure
     @Override public boolean contains(@Nullable Object element) {
       return multimap.containsKey(element);
     }
 
+    @Impure
     @Override public Iterator<K> iterator() {
       return Maps.keyIterator(multimap.entries().iterator());
     }
 
+    @Impure
     @Override public int count(@Nullable Object element) {
       Collection<V> values = Maps.safeGet(multimap.asMap(), element);
       return (values == null) ? 0 : values.size();
     }
 
+    @Impure
     @Override public int remove(@Nullable Object element, int occurrences) {
       checkNonnegative(occurrences, "occurrences");
       if (occurrences == 0) {
@@ -1624,10 +1772,12 @@ public final class Multimaps {
       return oldCount;
     }
 
+    @Impure
     @Override public void clear() {
       multimap.clear();
     }
 
+    @Impure
     @Override public Set<K> elementSet() {
       return multimap.keySet();
     }
@@ -1638,12 +1788,15 @@ public final class Multimaps {
    */
   abstract static class Entries<K, V> extends
       AbstractCollection<Map.Entry<K, V>> {
+    @Pure
     abstract Multimap<K, V> multimap();
 
+    @Impure
     @Override public int size() {
       return multimap().size();
     }
 
+    @Impure
     @Override public boolean contains(@Nullable Object o) {
       if (o instanceof Map.Entry) {
         Map.Entry<?, ?> entry = (Map.Entry<?, ?>) o;
@@ -1652,6 +1805,7 @@ public final class Multimaps {
       return false;
     }
 
+    @Impure
     @Override public boolean remove(@Nullable Object o) {
       if (o instanceof Map.Entry) {
         Map.Entry<?, ?> entry = (Map.Entry<?, ?>) o;
@@ -1660,6 +1814,7 @@ public final class Multimaps {
       return false;
     }
 
+    @Impure
     @Override public void clear() {
       multimap().clear();
     }
@@ -1672,29 +1827,36 @@ public final class Multimaps {
       Maps.ImprovedAbstractMap<K, Collection<V>> {
     private final Multimap<K, V> multimap;
     
+    @Impure
     AsMap(Multimap<K, V> multimap) {
       this.multimap = checkNotNull(multimap);
     }
 
+    @Impure
     @Override public int size() {
       return multimap.keySet().size();
     }
 
+    @Impure
     @Override protected Set<Entry<K, Collection<V>>> createEntrySet() {
       return new EntrySet();
     }
 
+    @Impure
     void removeValuesForKey(Object key) {
       multimap.keySet().remove(key);
     }
 
     class EntrySet extends Maps.EntrySet<K, Collection<V>> {
+      @Pure
       @Override Map<K, Collection<V>> map() {
         return AsMap.this;
       }
 
+      @Impure
       @Override public Iterator<Entry<K, Collection<V>>> iterator() {
         return Maps.asMapEntryIterator(multimap.keySet(), new Function<K, Collection<V>>() {
+          @Impure
           @Override
           public Collection<V> apply(K key) {
             return multimap.get(key);
@@ -1702,6 +1864,7 @@ public final class Multimaps {
         });
       }
 
+      @Impure
       @Override public boolean remove(Object o) {
         if (!contains(o)) {
           return false;
@@ -1712,27 +1875,33 @@ public final class Multimaps {
       }
     }
 
+    @Impure
     @SuppressWarnings("unchecked")
     @Override public Collection<V> get(Object key) {
       return containsKey(key) ? multimap.get((K) key) : null;
     }
 
+    @Impure
     @Override public Collection<V> remove(Object key) {
       return containsKey(key) ? multimap.removeAll(key) : null;
     }
 
+    @Impure
     @Override public Set<K> keySet() {
       return multimap.keySet();
     }
 
+    @Impure
     @Override public boolean isEmpty() {
       return multimap.isEmpty();
     }
 
+    @Impure
     @Override public boolean containsKey(Object key) {
       return multimap.containsKey(key);
     }
 
+    @Impure
     @Override public void clear() {
       multimap.clear();
     }
@@ -1768,6 +1937,7 @@ public final class Multimaps {
    *
    * @since 11.0
    */
+  @Impure
   public static <K, V> Multimap<K, V> filterKeys(
       Multimap<K, V> unfiltered, final Predicate<? super K> keyPredicate) {
     if (unfiltered instanceof SetMultimap) {
@@ -1816,6 +1986,7 @@ public final class Multimaps {
    *
    * @since 14.0
    */
+  @Impure
   public static <K, V> SetMultimap<K, V> filterKeys(
       SetMultimap<K, V> unfiltered, final Predicate<? super K> keyPredicate) {
     if (unfiltered instanceof FilteredKeySetMultimap) {
@@ -1860,6 +2031,7 @@ public final class Multimaps {
    *
    * @since 14.0
    */
+  @Impure
   public static <K, V> ListMultimap<K, V> filterKeys(
       ListMultimap<K, V> unfiltered, final Predicate<? super K> keyPredicate) {
     if (unfiltered instanceof FilteredKeyListMultimap) {
@@ -1901,6 +2073,7 @@ public final class Multimaps {
    *
    * @since 11.0
    */
+  @Impure
   public static <K, V> Multimap<K, V> filterValues(
       Multimap<K, V> unfiltered, final Predicate<? super V> valuePredicate) {
     return filterEntries(unfiltered, Maps.<V>valuePredicateOnEntries(valuePredicate));
@@ -1936,6 +2109,7 @@ public final class Multimaps {
    *
    * @since 14.0
    */
+  @Impure
   public static <K, V> SetMultimap<K, V> filterValues(
       SetMultimap<K, V> unfiltered, final Predicate<? super V> valuePredicate) {
     return filterEntries(unfiltered, Maps.<V>valuePredicateOnEntries(valuePredicate));
@@ -1969,6 +2143,7 @@ public final class Multimaps {
    *
    * @since 11.0
    */
+  @Impure
   public static <K, V> Multimap<K, V> filterEntries(
       Multimap<K, V> unfiltered, Predicate<? super Entry<K, V>> entryPredicate) {
     checkNotNull(entryPredicate);
@@ -2008,6 +2183,7 @@ public final class Multimaps {
    *
    * @since 14.0
    */
+  @Impure
   public static <K, V> SetMultimap<K, V> filterEntries(
       SetMultimap<K, V> unfiltered, Predicate<? super Entry<K, V>> entryPredicate) {
     checkNotNull(entryPredicate);
@@ -2023,6 +2199,7 @@ public final class Multimaps {
    * operations would fail. This method combines the predicates to avoid that
    * problem.
    */
+  @Impure
   private static <K, V> Multimap<K, V> filterFiltered(FilteredMultimap<K, V> multimap,
       Predicate<? super Entry<K, V>> entryPredicate) {
     Predicate<Entry<K, V>> predicate
@@ -2036,6 +2213,7 @@ public final class Multimaps {
    * lead to a multimap whose removal operations would fail. This method combines the predicates to
    * avoid that problem.
    */
+  @Impure
   private static <K, V> SetMultimap<K, V> filterFiltered(
       FilteredSetMultimap<K, V> multimap,
       Predicate<? super Entry<K, V>> entryPredicate) {
@@ -2044,6 +2222,7 @@ public final class Multimaps {
     return new FilteredEntrySetMultimap<K, V>(multimap.unfiltered(), predicate);
   }
   
+  @Impure
   static boolean equalsImpl(Multimap<?, ?> multimap, @Nullable Object object) {
     if (object == multimap) {
       return true;

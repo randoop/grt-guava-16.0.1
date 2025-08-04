@@ -16,6 +16,9 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -49,6 +52,7 @@ import java.util.RandomAccess;
 // javadoc?
 @GwtCompatible
 public final class Bytes {
+  @SideEffectFree
   private Bytes() {}
 
   /**
@@ -58,6 +62,7 @@ public final class Bytes {
    * @param value a primitive {@code byte} value
    * @return a hash code for the value
    */
+  @Pure
   public static int hashCode(byte value) {
     return value;
   }
@@ -71,6 +76,7 @@ public final class Bytes {
    * @return {@code true} if {@code array[i] == target} for some value of {@code
    *     i}
    */
+  @Pure
   public static boolean contains(byte[] array, byte target) {
     for (byte value : array) {
       if (value == target) {
@@ -89,11 +95,14 @@ public final class Bytes {
    * @return the least index {@code i} for which {@code array[i] == target}, or
    *     {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int indexOf(byte[] array, byte target) {
     return indexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int indexOf(
       byte[] array, byte target, int start, int end) {
     for (int i = start; i < end; i++) {
@@ -115,6 +124,8 @@ public final class Bytes {
    * @param array the array to search for the sequence {@code target}
    * @param target the array to search for as a sub-sequence of {@code array}
    */
+  @Impure
+  @SideEffectFree
   public static int indexOf(byte[] array, byte[] target) {
     checkNotNull(array, "array");
     checkNotNull(target, "target");
@@ -143,11 +154,14 @@ public final class Bytes {
    * @return the greatest index {@code i} for which {@code array[i] == target},
    *     or {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int lastIndexOf(byte[] array, byte target) {
     return lastIndexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int lastIndexOf(
       byte[] array, byte target, int start, int end) {
     for (int i = end - 1; i >= start; i--) {
@@ -167,6 +181,7 @@ public final class Bytes {
    * @return a single array containing all the values from the source arrays, in
    *     order
    */
+  @SideEffectFree
   public static byte[] concat(byte[]... arrays) {
     int length = 0;
     for (byte[] array : arrays) {
@@ -197,6 +212,7 @@ public final class Bytes {
    * @return an array containing the values of {@code array}, with guaranteed
    *     minimum length {@code minLength}
    */
+  @Impure
   public static byte[] ensureCapacity(
       byte[] array, int minLength, int padding) {
     checkArgument(minLength >= 0, "Invalid minLength: %s", minLength);
@@ -207,6 +223,7 @@ public final class Bytes {
   }
 
   // Arrays.copyOf() requires Java 6
+  @SideEffectFree
   private static byte[] copyOf(byte[] original, int length) {
     byte[] copy = new byte[length];
     System.arraycopy(original, 0, copy, 0, Math.min(original.length, length));
@@ -228,6 +245,7 @@ public final class Bytes {
    *     is null
    * @since 1.0 (parameter was {@code Collection<Byte>} before 12.0)
    */
+  @Impure
   public static byte[] toArray(Collection<? extends Number> collection) {
     if (collection instanceof ByteArrayAsList) {
       return ((ByteArrayAsList) collection).toByteArray();
@@ -257,6 +275,7 @@ public final class Bytes {
    * @param backingArray the array to back the list
    * @return a list view of the array
    */
+  @Impure
   public static List<Byte> asList(byte... backingArray) {
     if (backingArray.length == 0) {
       return Collections.emptyList();
@@ -271,35 +290,45 @@ public final class Bytes {
     final int start;
     final int end;
 
+    @SideEffectFree
+    @Impure
     ByteArrayAsList(byte[] array) {
       this(array, 0, array.length);
     }
 
+    @SideEffectFree
     ByteArrayAsList(byte[] array, int start, int end) {
       this.array = array;
       this.start = start;
       this.end = end;
     }
 
+    @Pure
     @Override public int size() {
       return end - start;
     }
 
+    @Pure
     @Override public boolean isEmpty() {
       return false;
     }
 
+    @Impure
     @Override public Byte get(int index) {
       checkElementIndex(index, size());
       return array[start + index];
     }
 
+    @Pure
+    @Impure
     @Override public boolean contains(Object target) {
       // Overridden to prevent a ton of boxing
       return (target instanceof Byte)
           && Bytes.indexOf(array, (Byte) target, start, end) != -1;
     }
 
+    @Pure
+    @Impure
     @Override public int indexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Byte) {
@@ -311,6 +340,8 @@ public final class Bytes {
       return -1;
     }
 
+    @Pure
+    @Impure
     @Override public int lastIndexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Byte) {
@@ -322,6 +353,7 @@ public final class Bytes {
       return -1;
     }
 
+    @Impure
     @Override public Byte set(int index, Byte element) {
       checkElementIndex(index, size());
       byte oldValue = array[start + index];
@@ -330,6 +362,7 @@ public final class Bytes {
       return oldValue;
     }
 
+    @Impure
     @Override public List<Byte> subList(int fromIndex, int toIndex) {
       int size = size();
       checkPositionIndexes(fromIndex, toIndex, size);
@@ -339,6 +372,7 @@ public final class Bytes {
       return new ByteArrayAsList(array, start + fromIndex, start + toIndex);
     }
 
+    @Pure
     @Override public boolean equals(Object object) {
       if (object == this) {
         return true;
@@ -359,6 +393,8 @@ public final class Bytes {
       return super.equals(object);
     }
 
+    @Pure
+    @Impure
     @Override public int hashCode() {
       int result = 1;
       for (int i = start; i < end; i++) {
@@ -367,6 +403,7 @@ public final class Bytes {
       return result;
     }
 
+    @Impure
     @Override public String toString() {
       StringBuilder builder = new StringBuilder(size() * 5);
       builder.append('[').append(array[start]);
@@ -376,6 +413,7 @@ public final class Bytes {
       return builder.append(']').toString();
     }
 
+    @SideEffectFree
     byte[] toByteArray() {
       // Arrays.copyOfRange() is not available under GWT
       int size = size();

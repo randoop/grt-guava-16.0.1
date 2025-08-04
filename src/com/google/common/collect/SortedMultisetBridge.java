@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.SortedSet;
 
 /**
@@ -26,6 +27,7 @@ import java.util.SortedSet;
  * @author Louis Wasserman
  */
 interface SortedMultisetBridge<E> extends Multiset<E> {
+  @Impure
   @Override
   SortedSet<E> elementSet();
 }

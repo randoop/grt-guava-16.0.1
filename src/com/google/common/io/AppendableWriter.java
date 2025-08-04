@@ -16,6 +16,7 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.Closeable;
@@ -43,6 +44,7 @@ class AppendableWriter extends Writer {
    *
    * @param target target to which to append output
    */
+  @Impure
   AppendableWriter(Appendable target) {
     this.target = checkNotNull(target);
   }
@@ -51,6 +53,7 @@ class AppendableWriter extends Writer {
    * Abstract methods from Writer
    */
 
+  @Impure
   @Override public void write(char cbuf[], int off, int len)
       throws IOException {
     checkNotClosed();
@@ -59,6 +62,7 @@ class AppendableWriter extends Writer {
     target.append(new String(cbuf, off, len));
   }
 
+  @Impure
   @Override public void flush() throws IOException {
     checkNotClosed();
     if (target instanceof Flushable) {
@@ -66,6 +70,7 @@ class AppendableWriter extends Writer {
     }
   }
 
+  @Impure
   @Override public void close() throws IOException {
     this.closed = true;
     if (target instanceof Closeable) {
@@ -78,34 +83,40 @@ class AppendableWriter extends Writer {
    * unnecessary strings.
    */
 
+  @Impure
   @Override public void write(int c) throws IOException {
     checkNotClosed();
     target.append((char) c);
   }
 
+  @Impure
   @Override public void write(@Nullable String str) throws IOException {
     checkNotClosed();
     target.append(str);
   }
 
+  @Impure
   @Override public void write(@Nullable String str, int off, int len) throws IOException {
     checkNotClosed();
     // tricky: append takes start, end pair...
     target.append(str, off, off + len);
   }
 
+  @Impure
   @Override public Writer append(char c) throws IOException {
     checkNotClosed();
     target.append(c);
     return this;
   }
 
+  @Impure
   @Override public Writer append(@Nullable CharSequence charSeq) throws IOException {
     checkNotClosed();
     target.append(charSeq);
     return this;
   }
 
+  @Impure
   @Override public Writer append(@Nullable CharSequence charSeq, int start, int end)
       throws IOException {
     checkNotClosed();
@@ -113,6 +124,7 @@ class AppendableWriter extends Writer {
     return this;
   }
 
+  @Impure
   private void checkNotClosed() throws IOException {
     if (closed) {
       throw new IOException("Cannot write to a closed writer.");

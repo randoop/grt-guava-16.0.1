@@ -16,6 +16,9 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -47,6 +50,7 @@ import java.util.RandomAccess;
  */
 @GwtCompatible
 public final class Longs {
+  @SideEffectFree
   private Longs() {}
 
   /**
@@ -74,6 +78,7 @@ public final class Longs {
    * @param value a primitive {@code long} value
    * @return a hash code for the value
    */
+  @Pure
   public static int hashCode(long value) {
     return (int) (value ^ (value >>> 32));
   }
@@ -91,6 +96,7 @@ public final class Longs {
    *     value if {@code a} is greater than {@code b}; or zero if they are equal
    */
   // TODO(kevinb): if JDK 6 ever becomes a non-concern, remove this
+  @Pure
   public static int compare(long a, long b) {
     return (a < b) ? -1 : ((a > b) ? 1 : 0);
   }
@@ -104,6 +110,7 @@ public final class Longs {
    * @return {@code true} if {@code array[i] == target} for some value of {@code
    *     i}
    */
+  @Pure
   public static boolean contains(long[] array, long target) {
     for (long value : array) {
       if (value == target) {
@@ -122,11 +129,14 @@ public final class Longs {
    * @return the least index {@code i} for which {@code array[i] == target}, or
    *     {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int indexOf(long[] array, long target) {
     return indexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int indexOf(
       long[] array, long target, int start, int end) {
     for (int i = start; i < end; i++) {
@@ -148,6 +158,8 @@ public final class Longs {
    * @param array the array to search for the sequence {@code target}
    * @param target the array to search for as a sub-sequence of {@code array}
    */
+  @Impure
+  @SideEffectFree
   public static int indexOf(long[] array, long[] target) {
     checkNotNull(array, "array");
     checkNotNull(target, "target");
@@ -176,11 +188,14 @@ public final class Longs {
    * @return the greatest index {@code i} for which {@code array[i] == target},
    *     or {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int lastIndexOf(long[] array, long target) {
     return lastIndexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int lastIndexOf(
       long[] array, long target, int start, int end) {
     for (int i = end - 1; i >= start; i--) {
@@ -199,6 +214,8 @@ public final class Longs {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
+  @SideEffectFree
   public static long min(long... array) {
     checkArgument(array.length > 0);
     long min = array[0];
@@ -218,6 +235,8 @@ public final class Longs {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
+  @SideEffectFree
   public static long max(long... array) {
     checkArgument(array.length > 0);
     long max = array[0];
@@ -238,6 +257,7 @@ public final class Longs {
    * @return a single array containing all the values from the source arrays, in
    *     order
    */
+  @SideEffectFree
   public static long[] concat(long[]... arrays) {
     int length = 0;
     for (long[] array : arrays) {
@@ -263,6 +283,7 @@ public final class Longs {
    * {@link com.google.common.io.ByteStreams#newDataOutput()} to get a growable
    * buffer.
    */
+  @Impure
   public static byte[] toByteArray(long value) {
     // Note that this code needs to stay compatible with GWT, which has known
     // bugs when narrowing byte casts of long values occur.
@@ -287,6 +308,7 @@ public final class Longs {
    * @throws IllegalArgumentException if {@code bytes} has fewer than 8
    *     elements
    */
+  @Impure
   public static long fromByteArray(byte[] bytes) {
     checkArgument(bytes.length >= BYTES,
         "array too small: %s < %s", bytes.length, BYTES);
@@ -301,6 +323,7 @@ public final class Longs {
    *
    * @since 7.0
    */
+  @Pure
   public static long fromBytes(byte b1, byte b2, byte b3, byte b4,
       byte b5, byte b6, byte b7, byte b8) {
     return (b1 & 0xFFL) << 56
@@ -331,6 +354,8 @@ public final class Longs {
    *     value
    * @since 14.0
    */
+  @Impure
+  @Pure
   @Beta
   public static Long tryParse(String string) {
     if (checkNotNull(string).isEmpty()) {
@@ -370,21 +395,25 @@ public final class Longs {
   private static final class LongConverter extends Converter<String, Long> implements Serializable {
     static final LongConverter INSTANCE = new LongConverter();
 
+    @SideEffectFree
     @Override
     protected Long doForward(String value) {
       return Long.decode(value);
     }
 
+    @SideEffectFree
     @Override
     protected String doBackward(Long value) {
       return value.toString();
     }
 
+    @Pure
     @Override
     public String toString() {
       return "Longs.stringConverter()";
     }
 
+    @Pure
     private Object readResolve() {
       return INSTANCE;
     }
@@ -397,6 +426,7 @@ public final class Longs {
    *
    * @since 16.0
    */
+  @Pure
   @Beta
   public static Converter<String, Long> stringConverter() {
     return LongConverter.INSTANCE;
@@ -418,6 +448,7 @@ public final class Longs {
    * @return an array containing the values of {@code array}, with guaranteed
    *     minimum length {@code minLength}
    */
+  @Impure
   public static long[] ensureCapacity(
       long[] array, int minLength, int padding) {
     checkArgument(minLength >= 0, "Invalid minLength: %s", minLength);
@@ -428,6 +459,7 @@ public final class Longs {
   }
 
   // Arrays.copyOf() requires Java 6
+  @SideEffectFree
   private static long[] copyOf(long[] original, int length) {
     long[] copy = new long[length];
     System.arraycopy(original, 0, copy, 0, Math.min(original.length, length));
@@ -443,6 +475,7 @@ public final class Longs {
    *     the resulting string (but not at the start or end)
    * @param array an array of {@code long} values, possibly empty
    */
+  @Impure
   public static String join(String separator, long... array) {
     checkNotNull(separator);
     if (array.length == 0) {
@@ -474,6 +507,7 @@ public final class Longs {
    *     Lexicographical order article at Wikipedia</a>
    * @since 2.0
    */
+  @Pure
   public static Comparator<long[]> lexicographicalComparator() {
     return LexicographicalComparator.INSTANCE;
   }
@@ -481,6 +515,8 @@ public final class Longs {
   private enum LexicographicalComparator implements Comparator<long[]> {
     INSTANCE;
 
+    @Pure
+    @Impure
     @Override
     public int compare(long[] left, long[] right) {
       int minLength = Math.min(left.length, right.length);
@@ -509,6 +545,7 @@ public final class Longs {
    *     is null
    * @since 1.0 (parameter was {@code Collection<Long>} before 12.0)
    */
+  @Impure
   public static long[] toArray(Collection<? extends Number> collection) {
     if (collection instanceof LongArrayAsList) {
       return ((LongArrayAsList) collection).toLongArray();
@@ -538,6 +575,7 @@ public final class Longs {
    * @param backingArray the array to back the list
    * @return a list view of the array
    */
+  @Impure
   public static List<Long> asList(long... backingArray) {
     if (backingArray.length == 0) {
       return Collections.emptyList();
@@ -552,35 +590,45 @@ public final class Longs {
     final int start;
     final int end;
 
+    @SideEffectFree
+    @Impure
     LongArrayAsList(long[] array) {
       this(array, 0, array.length);
     }
 
+    @SideEffectFree
     LongArrayAsList(long[] array, int start, int end) {
       this.array = array;
       this.start = start;
       this.end = end;
     }
 
+    @Pure
     @Override public int size() {
       return end - start;
     }
 
+    @Pure
     @Override public boolean isEmpty() {
       return false;
     }
 
+    @Impure
     @Override public Long get(int index) {
       checkElementIndex(index, size());
       return array[start + index];
     }
 
+    @Pure
+    @Impure
     @Override public boolean contains(Object target) {
       // Overridden to prevent a ton of boxing
       return (target instanceof Long)
           && Longs.indexOf(array, (Long) target, start, end) != -1;
     }
 
+    @Pure
+    @Impure
     @Override public int indexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Long) {
@@ -592,6 +640,8 @@ public final class Longs {
       return -1;
     }
 
+    @Pure
+    @Impure
     @Override public int lastIndexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Long) {
@@ -603,6 +653,7 @@ public final class Longs {
       return -1;
     }
 
+    @Impure
     @Override public Long set(int index, Long element) {
       checkElementIndex(index, size());
       long oldValue = array[start + index];
@@ -611,6 +662,7 @@ public final class Longs {
       return oldValue;
     }
 
+    @Impure
     @Override public List<Long> subList(int fromIndex, int toIndex) {
       int size = size();
       checkPositionIndexes(fromIndex, toIndex, size);
@@ -620,6 +672,7 @@ public final class Longs {
       return new LongArrayAsList(array, start + fromIndex, start + toIndex);
     }
 
+    @Pure
     @Override public boolean equals(Object object) {
       if (object == this) {
         return true;
@@ -640,6 +693,8 @@ public final class Longs {
       return super.equals(object);
     }
 
+    @Pure
+    @Impure
     @Override public int hashCode() {
       int result = 1;
       for (int i = start; i < end; i++) {
@@ -648,6 +703,7 @@ public final class Longs {
       return result;
     }
 
+    @Impure
     @Override public String toString() {
       StringBuilder builder = new StringBuilder(size() * 10);
       builder.append('[').append(array[start]);
@@ -657,6 +713,7 @@ public final class Longs {
       return builder.append(']').toString();
     }
 
+    @SideEffectFree
     long[] toLongArray() {
       // Arrays.copyOfRange() is not available under GWT
       int size = size();

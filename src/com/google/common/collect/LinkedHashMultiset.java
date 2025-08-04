@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 
@@ -48,6 +49,7 @@ public final class LinkedHashMultiset<E> extends AbstractMapBasedMultiset<E> {
    * Creates a new, empty {@code LinkedHashMultiset} using the default initial
    * capacity.
    */
+  @Impure
   public static <E> LinkedHashMultiset<E> create() {
     return new LinkedHashMultiset<E>();
   }
@@ -59,6 +61,7 @@ public final class LinkedHashMultiset<E> extends AbstractMapBasedMultiset<E> {
    * @param distinctElements the expected number of distinct elements
    * @throws IllegalArgumentException if {@code distinctElements} is negative
    */
+  @Impure
   public static <E> LinkedHashMultiset<E> create(int distinctElements) {
     return new LinkedHashMultiset<E>(distinctElements);
   }
@@ -71,6 +74,7 @@ public final class LinkedHashMultiset<E> extends AbstractMapBasedMultiset<E> {
    *
    * @param elements the elements that the multiset should contain
    */
+  @Impure
   public static <E> LinkedHashMultiset<E> create(
       Iterable<? extends E> elements) {
     LinkedHashMultiset<E> multiset =
@@ -79,10 +83,12 @@ public final class LinkedHashMultiset<E> extends AbstractMapBasedMultiset<E> {
     return multiset;
   }
 
+  @Impure
   private LinkedHashMultiset() {
     super(new LinkedHashMap<E, Count>());
   }
 
+  @Impure
   private LinkedHashMultiset(int distinctElements) {
     // Could use newLinkedHashMapWithExpectedSize() if it existed
     super(new LinkedHashMap<E, Count>(Maps.capacity(distinctElements)));
@@ -92,12 +98,14 @@ public final class LinkedHashMultiset<E> extends AbstractMapBasedMultiset<E> {
    * @serialData the number of distinct elements, the first element, its count,
    *     the second element, its count, and so on
    */
+  @Impure
   @GwtIncompatible("java.io.ObjectOutputStream")
   private void writeObject(ObjectOutputStream stream) throws IOException {
     stream.defaultWriteObject();
     Serialization.writeMultiset(this, stream);
   }
 
+  @Impure
   @GwtIncompatible("java.io.ObjectInputStream")
   private void readObject(ObjectInputStream stream)
       throws IOException, ClassNotFoundException {

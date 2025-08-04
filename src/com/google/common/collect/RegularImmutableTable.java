@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -32,34 +34,43 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible
 abstract class RegularImmutableTable<R, C, V> extends ImmutableTable<R, C, V> {
+  @Impure
   RegularImmutableTable() {}
   
+  @Pure
   abstract Cell<R, C, V> getCell(int iterationIndex);
   
+  @Impure
   @Override
   final ImmutableSet<Cell<R, C, V>> createCellSet() {
     return isEmpty() ? ImmutableSet.<Cell<R, C, V>>of() : new CellSet();
   }
 
   private final class CellSet extends ImmutableSet<Cell<R, C, V>> {
+    @Impure
     @Override
     public int size() {
       return RegularImmutableTable.this.size();
     }
 
+    @Impure
     @Override
     public UnmodifiableIterator<Cell<R, C, V>> iterator() {
       return asList().iterator();
     }
 
+    @Impure
     @Override
     ImmutableList<Cell<R, C, V>> createAsList() {
       return new ImmutableAsList<Cell<R, C, V>>() {
+        @Pure
+        @Impure
         @Override
         public Cell<R, C, V> get(int index) {
           return getCell(index);
         }
 
+        @Pure
         @Override
         ImmutableCollection<Cell<R, C, V>> delegateCollection() {
           return CellSet.this;
@@ -67,6 +78,7 @@ abstract class RegularImmutableTable<R, C, V> extends ImmutableTable<R, C, V> {
       };
     }
 
+    @Impure
     @Override
     public boolean contains(@Nullable Object object) {
       if (object instanceof Cell) {
@@ -77,36 +89,44 @@ abstract class RegularImmutableTable<R, C, V> extends ImmutableTable<R, C, V> {
       return false;
     }
 
+    @Pure
     @Override
     boolean isPartialView() {
       return false;
     }
   }
   
+  @Pure
   abstract V getValue(int iterationIndex);
 
+  @Impure
   @Override
   final ImmutableCollection<V> createValues() {
     return isEmpty() ? ImmutableList.<V>of() : new Values();
   }
   
   private final class Values extends ImmutableList<V> {
+    @Impure
     @Override
     public int size() {
       return RegularImmutableTable.this.size();
     }
 
+    @Pure
+    @Impure
     @Override
     public V get(int index) {
       return getValue(index);
     }
 
+    @Pure
     @Override
     boolean isPartialView() {
       return true;
     }
   }
 
+  @Impure
   static <R, C, V> RegularImmutableTable<R, C, V> forCells(
       List<Cell<R, C, V>> cells,
       @Nullable final Comparator<? super R> rowComparator,
@@ -136,6 +156,7 @@ abstract class RegularImmutableTable<R, C, V> extends ImmutableTable<R, C, V> {
     return forCellsInternal(cells, rowComparator, columnComparator);
   }
 
+  @Impure
   static <R, C, V> RegularImmutableTable<R, C, V> forCells(
       Iterable<Cell<R, C, V>> cells) {
     return forCellsInternal(cells, null, null);
@@ -145,6 +166,7 @@ abstract class RegularImmutableTable<R, C, V> extends ImmutableTable<R, C, V> {
    * A factory that chooses the most space-efficient representation of the
    * table.
    */
+  @Impure
   private static final <R, C, V> RegularImmutableTable<R, C, V>
       forCellsInternal(Iterable<Cell<R, C, V>> cells,
           @Nullable Comparator<? super R> rowComparator,

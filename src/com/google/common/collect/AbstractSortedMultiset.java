@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -38,42 +40,50 @@ abstract class AbstractSortedMultiset<E> extends AbstractMultiset<E> implements 
   @GwtTransient final Comparator<? super E> comparator;
 
   // needed for serialization
+  @Impure
   @SuppressWarnings("unchecked")
   AbstractSortedMultiset() {
     this((Comparator) Ordering.natural());
   }
 
+  @Impure
   AbstractSortedMultiset(Comparator<? super E> comparator) {
     this.comparator = checkNotNull(comparator);
   }
 
+  @Impure
   @Override
   public NavigableSet<E> elementSet() {
     return (NavigableSet<E>) super.elementSet();
   }
 
+  @Impure
   @Override
   NavigableSet<E> createElementSet() {
     return new SortedMultisets.NavigableElementSet<E>(this);
   }
 
+  @Pure
   @Override
   public Comparator<? super E> comparator() {
     return comparator;
   }
 
+  @Impure
   @Override
   public Entry<E> firstEntry() {
     Iterator<Entry<E>> entryIterator = entryIterator();
     return entryIterator.hasNext() ? entryIterator.next() : null;
   }
 
+  @Impure
   @Override
   public Entry<E> lastEntry() {
     Iterator<Entry<E>> entryIterator = descendingEntryIterator();
     return entryIterator.hasNext() ? entryIterator.next() : null;
   }
 
+  @Impure
   @Override
   public Entry<E> pollFirstEntry() {
     Iterator<Entry<E>> entryIterator = entryIterator();
@@ -86,6 +96,7 @@ abstract class AbstractSortedMultiset<E> extends AbstractMultiset<E> implements 
     return null;
   }
 
+  @Impure
   @Override
   public Entry<E> pollLastEntry() {
     Iterator<Entry<E>> entryIterator = descendingEntryIterator();
@@ -98,6 +109,7 @@ abstract class AbstractSortedMultiset<E> extends AbstractMultiset<E> implements 
     return null;
   }
 
+  @Impure
   @Override
   public SortedMultiset<E> subMultiset(@Nullable E fromElement, BoundType fromBoundType,
       @Nullable E toElement, BoundType toBoundType) {
@@ -107,32 +119,40 @@ abstract class AbstractSortedMultiset<E> extends AbstractMultiset<E> implements 
     return tailMultiset(fromElement, fromBoundType).headMultiset(toElement, toBoundType);
   }
 
+  @Pure
   abstract Iterator<Entry<E>> descendingEntryIterator();
 
+  @Impure
   Iterator<E> descendingIterator() {
     return Multisets.iteratorImpl(descendingMultiset());
   }
 
   private transient SortedMultiset<E> descendingMultiset;
 
+  @Impure
   @Override
   public SortedMultiset<E> descendingMultiset() {
     SortedMultiset<E> result = descendingMultiset;
     return (result == null) ? descendingMultiset = createDescendingMultiset() : result;
   }
 
+  @Impure
   SortedMultiset<E> createDescendingMultiset() {
     return new DescendingMultiset<E>() {
+      @Pure
       @Override
       SortedMultiset<E> forwardMultiset() {
         return AbstractSortedMultiset.this;
       }
 
+      @Pure
+      @Impure
       @Override
       Iterator<Entry<E>> entryIterator() {
         return descendingEntryIterator();
       }
 
+      @Impure
       @Override
       public Iterator<E> iterator() {
         return descendingIterator();

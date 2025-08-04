@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -82,9 +85,11 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
   private static class Factory<C, V>
       implements Supplier<TreeMap<C, V>>, Serializable {
     final Comparator<? super C> comparator;
+    @SideEffectFree
     Factory(Comparator<? super C> comparator) {
       this.comparator = comparator;
     }
+    @Impure
     @Override
     public TreeMap<C, V> get() {
       return new TreeMap<C, V>(comparator);
@@ -101,6 +106,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
    * and the same for {@code C}. That's necessary to support classes defined
    * without generics.
    */
+  @Impure
   public static <R extends Comparable, C extends Comparable, V>
       TreeBasedTable<R, C, V> create() {
     return new TreeBasedTable<R, C, V>(Ordering.natural(),
@@ -114,6 +120,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
    * @param rowComparator the comparator that orders the row keys
    * @param columnComparator the comparator that orders the column keys
    */
+  @Impure
   public static <R, C, V> TreeBasedTable<R, C, V> create(
       Comparator<? super R> rowComparator,
       Comparator<? super C> columnComparator) {
@@ -126,6 +133,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
    * Creates a {@code TreeBasedTable} with the same mappings and sort order
    * as the specified {@code TreeBasedTable}.
    */
+  @Impure
   public static <R, C, V> TreeBasedTable<R, C, V> create(
       TreeBasedTable<R, C, ? extends V> table) {
     TreeBasedTable<R, C, V> result
@@ -135,6 +143,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
     return result;
   }
 
+  @Impure
   TreeBasedTable(Comparator<? super R> rowComparator,
       Comparator<? super C> columnComparator) {
     super(new TreeMap<R, Map<C, V>>(rowComparator),
@@ -148,6 +157,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
    * Returns the comparator that orders the rows. With natural ordering,
    * {@link Ordering#natural()} is returned.
    */
+  @Impure
   public Comparator<? super R> rowComparator() {
     return rowKeySet().comparator();
   }
@@ -156,6 +166,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
    * Returns the comparator that orders the columns. With natural ordering,
    * {@link Ordering#natural()} is returned.
    */
+  @Pure
   public Comparator<? super C> columnComparator() {
     return columnComparator;
   }
@@ -172,6 +183,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
    *     (<a href="http://code.google.com/p/guava-libraries/wiki/Compatibility"
    *     >mostly source-compatible</a> since 7.0)
    */
+  @Impure
   @Override
   public SortedMap<C, V> row(R rowKey) {
     return new TreeRow(rowKey);
@@ -181,10 +193,12 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
     @Nullable final C lowerBound;
     @Nullable final C upperBound;
 
+    @Impure
     TreeRow(R rowKey) {
       this(rowKey, null, null);
     }
 
+    @Impure
     TreeRow(R rowKey, @Nullable C lowerBound, @Nullable C upperBound) {
       super(rowKey);
       this.lowerBound = lowerBound;
@@ -193,14 +207,18 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
           || compare(lowerBound, upperBound) <= 0);
     }
 
+    @Impure
     @Override public SortedSet<C> keySet() {
       return new Maps.SortedKeySet<C, V>(this);
     }
 
+    @Pure
+    @Impure
     @Override public Comparator<? super C> comparator() {
       return columnComparator();
     }
 
+    @Impure
     int compare(Object a, Object b) {
       // pretend we can compare anything
       @SuppressWarnings({"rawtypes", "unchecked"})
@@ -208,27 +226,32 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
       return cmp.compare(a, b);
     }
 
+    @Impure
     boolean rangeContains(@Nullable Object o) {
       return o != null && (lowerBound == null || compare(lowerBound, o) <= 0)
           && (upperBound == null || compare(upperBound, o) > 0);
     }
 
+    @Impure
     @Override public SortedMap<C, V> subMap(C fromKey, C toKey) {
       checkArgument(rangeContains(checkNotNull(fromKey))
           && rangeContains(checkNotNull(toKey)));
       return new TreeRow(rowKey, fromKey, toKey);
     }
 
+    @Impure
     @Override public SortedMap<C, V> headMap(C toKey) {
       checkArgument(rangeContains(checkNotNull(toKey)));
       return new TreeRow(rowKey, lowerBound, toKey);
     }
 
+    @Impure
     @Override public SortedMap<C, V> tailMap(C fromKey) {
       checkArgument(rangeContains(checkNotNull(fromKey)));
       return new TreeRow(rowKey, fromKey, upperBound);
     }
 
+    @Impure
     @Override public C firstKey() {
       SortedMap<C, V> backing = backingRowMap();
       if (backing == null) {
@@ -237,6 +260,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
       return backingRowMap().firstKey();
     }
 
+    @Impure
     @Override public C lastKey() {
       SortedMap<C, V> backing = backingRowMap();
       if (backing == null) {
@@ -251,6 +275,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
      * If the row was previously empty, we check if there's a new row here every
      * time we're queried.
      */
+    @Impure
     SortedMap<C, V> wholeRow() {
       if (wholeRow == null
           || (wholeRow.isEmpty() && backingMap.containsKey(rowKey))) {
@@ -259,11 +284,13 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
       return wholeRow;
     }
 
+    @Impure
     @Override
     SortedMap<C, V> backingRowMap() {
       return (SortedMap<C, V>) super.backingRowMap();
     }
 
+    @Impure
     @Override
     SortedMap<C, V> computeBackingRowMap() {
       SortedMap<C, V> map = wholeRow();
@@ -279,6 +306,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
       return null;
     }
 
+    @Impure
     @Override
     void maintainEmptyInvariant() {
       if (wholeRow() != null && wholeRow.isEmpty()) {
@@ -288,10 +316,12 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
       }
     }
 
+    @Impure
     @Override public boolean containsKey(Object key) {
       return rangeContains(key) && super.containsKey(key);
     }
 
+    @Impure
     @Override public V put(C key, V value) {
       checkArgument(rangeContains(checkNotNull(key)));
       return super.put(key, value);
@@ -300,10 +330,12 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
 
   // rowKeySet() and rowMap() are defined here so they appear in the Javadoc.
 
+  @Impure
   @Override public SortedSet<R> rowKeySet() {
     return super.rowKeySet();
   }
 
+  @Impure
   @Override public SortedMap<R, Map<C, V>> rowMap() {
     return super.rowMap();
   }
@@ -312,6 +344,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
    * Overridden column iterator to return columns values in globally sorted
    * order.
    */
+  @Impure
   @Override
   Iterator<C> createColumnKeyIterator() {
     final Comparator<? super C> comparator = columnComparator();
@@ -319,6 +352,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
     final Iterator<C> merged =
         Iterators.mergeSorted(Iterables.transform(backingMap.values(),
             new Function<Map<C, V>, Iterator<C>>() {
+              @SideEffectFree
               @Override
               public Iterator<C> apply(Map<C, V> input) {
                 return input.keySet().iterator();
@@ -328,6 +362,7 @@ public class TreeBasedTable<R, C, V> extends StandardRowSortedTable<R, C, V> {
     return new AbstractIterator<C>() {
       C lastValue;
 
+      @Impure
       @Override
       protected C computeNext() {
         while (merged.hasNext()) {

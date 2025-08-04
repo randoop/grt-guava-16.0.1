@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 
 import java.util.concurrent.ExecutionException;
@@ -70,6 +72,7 @@ public interface Service {
    *         {@link State#FAILED}. If it has already finished starting, {@link ListenableFuture#get}
    *         returns immediately. Cancelling this future has no effect on the service.
    */
+  @Impure
   @Deprecated
   ListenableFuture<State> start();
 
@@ -83,6 +86,7 @@ public interface Service {
    * @throws UncheckedExecutionException if startup failed
    * @return the state of the service when startup finished.
    */
+  @Impure
   @Deprecated
   State startAndWait();
 
@@ -95,16 +99,19 @@ public interface Service {
    *
    * @since 15.0
    */
+  @Impure
   Service startAsync();
 
   /**
    * Returns {@code true} if this service is {@linkplain State#RUNNING running}.
    */
+  @Impure
   boolean isRunning();
 
   /**
    * Returns the lifecycle state of the service.
    */
+  @Impure
   State state();
 
   /**
@@ -124,6 +131,7 @@ public interface Service {
    *         {@link ListenableFuture#get} returns immediately. Cancelling this future has no effect
    *         on the service.
    */
+  @Impure
   @Deprecated
   ListenableFuture<State> stop();
 
@@ -138,6 +146,7 @@ public interface Service {
    * @throws UncheckedExecutionException if the service has failed or fails during shutdown
    * @return the state of the service when shutdown finished.
    */
+  @Impure
   @Deprecated
   State stopAndWait();
 
@@ -151,6 +160,7 @@ public interface Service {
    * @return this
    * @since 15.0
    */
+  @Impure
   Service stopAsync();
 
   /**
@@ -163,6 +173,7 @@ public interface Service {
    *
    * @since 15.0
    */
+  @Impure
   void awaitRunning();
 
   /**
@@ -179,6 +190,7 @@ public interface Service {
    *
    * @since 15.0
    */
+  @Impure
   void awaitRunning(long timeout, TimeUnit unit) throws TimeoutException;
 
   /**
@@ -188,6 +200,7 @@ public interface Service {
    *
    * @since 15.0
    */
+  @Impure
   void awaitTerminated();
 
   /**
@@ -201,6 +214,7 @@ public interface Service {
    * @throws IllegalStateException if the service {@linkplain State#FAILED fails}.
    * @since 15.0
    */
+  @Impure
   void awaitTerminated(long timeout, TimeUnit unit) throws TimeoutException;
 
   /**
@@ -210,6 +224,7 @@ public interface Service {
    *
    * @since 14.0
    */
+  @Impure
   Throwable failureCause();
 
   /**
@@ -232,6 +247,7 @@ public interface Service {
    *     {@link MoreExecutors#sameThreadExecutor}.
    * @since 13.0
    */
+  @Impure
   void addListener(Listener listener, Executor executor);
 
   /**
@@ -251,6 +267,7 @@ public interface Service {
      * minimal resources.
      */
     NEW {
+      @Pure
       @Override boolean isTerminal() {
         return false;
       }
@@ -260,6 +277,7 @@ public interface Service {
      * A service in this state is transitioning to {@link #RUNNING}.
      */
     STARTING {
+      @Pure
       @Override boolean isTerminal() {
         return false;
       }
@@ -269,6 +287,7 @@ public interface Service {
      * A service in this state is operational.
      */
     RUNNING {
+      @Pure
       @Override boolean isTerminal() {
         return false;
       }
@@ -278,6 +297,7 @@ public interface Service {
      * A service in this state is transitioning to {@link #TERMINATED}.
      */
     STOPPING {
+      @Pure
       @Override boolean isTerminal() {
         return false;
       }
@@ -288,6 +308,7 @@ public interface Service {
      * minimal resources.
      */
     TERMINATED {
+      @Pure
       @Override boolean isTerminal() {
         return true;
       }
@@ -298,12 +319,14 @@ public interface Service {
      * started nor stopped.
      */
     FAILED {
+      @Pure
       @Override boolean isTerminal() {
         return true;
       }
     };
 
     /** Returns true if this state is terminal. */
+    @Pure
     abstract boolean isTerminal();
   }
 
@@ -322,12 +345,14 @@ public interface Service {
      * {@linkplain State#STARTING STARTING}. This occurs when {@link Service#start} or
      * {@link Service#startAndWait} is called the first time.
      */
+    @Impure
     public void starting() {}
 
     /**
      * Called when the service transitions from {@linkplain State#STARTING STARTING} to
      * {@linkplain State#RUNNING RUNNING}. This occurs when a service has successfully started.
      */
+    @Impure
     public void running() {}
 
     /**
@@ -337,6 +362,7 @@ public interface Service {
      *
      * @param from The previous state that is being transitioned from.
      */
+    @Impure
     public void stopping(State from) {}
 
     /**
@@ -349,6 +375,7 @@ public interface Service {
      *     this are {@linkplain State#NEW NEW}, {@linkplain State#RUNNING RUNNING} or
      *     {@linkplain State#STOPPING STOPPING}.
      */
+    @Impure
     public void terminated(State from) {}
 
     /**
@@ -361,6 +388,7 @@ public interface Service {
      *     {@linkplain State#TERMINATED TERMINATED}.
      * @param failure The exception that caused the failure.
      */
+    @Impure
     public void failed(State from, Throwable failure) {}
   }
 }

@@ -16,6 +16,7 @@
 
 package com.google.common.annotations;
 
+import org.checkerframework.dataflow.qual.Pure;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -48,5 +49,6 @@ public @interface GwtIncompatible {
    * it is sufficient to simply reference the unsupported type/method. E.g.
    * "Class.isInstance".
    */
+  @Pure
   String value();
 }

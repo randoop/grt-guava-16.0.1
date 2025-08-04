@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -30,14 +33,17 @@ import javax.annotation.Nullable;
 final class ComparatorOrdering<T> extends Ordering<T> implements Serializable {
   final Comparator<T> comparator;
 
+  @Impure
   ComparatorOrdering(Comparator<T> comparator) {
     this.comparator = checkNotNull(comparator);
   }
 
+  @Impure
   @Override public int compare(T a, T b) {
     return comparator.compare(a, b);
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object object) {
     if (object == this) {
       return true;
@@ -49,10 +55,12 @@ final class ComparatorOrdering<T> extends Ordering<T> implements Serializable {
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     return comparator.hashCode();
   }
 
+  @SideEffectFree
   @Override public String toString() {
     return comparator.toString();
   }

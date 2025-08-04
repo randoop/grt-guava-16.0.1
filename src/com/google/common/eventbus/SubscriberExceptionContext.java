@@ -15,6 +15,8 @@
  */
 package com.google.common.eventbus;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.lang.reflect.Method;
@@ -37,6 +39,7 @@ public class SubscriberExceptionContext {
    * @param subscriber The source subscriber context.
    * @param subscriberMethod the subscribed method.
    */
+  @Impure
   SubscriberExceptionContext(EventBus eventBus, Object event, Object subscriber,
       Method subscriberMethod) {
     this.eventBus = checkNotNull(eventBus);
@@ -49,6 +52,7 @@ public class SubscriberExceptionContext {
    * @return The {@link EventBus} that handled the event and the subscriber.
    *     Useful for broadcasting a a new event based on the error.
    */
+  @Pure
   public EventBus getEventBus() {
     return eventBus;
   }
@@ -56,6 +60,7 @@ public class SubscriberExceptionContext {
   /**
    * @return The event object that caused the subscriber to throw.
    */
+  @Pure
   public Object getEvent() {
     return event;
   }
@@ -63,6 +68,7 @@ public class SubscriberExceptionContext {
   /**
    * @return The object context that the subscriber was called on.
    */
+  @Pure
   public Object getSubscriber() {
     return subscriber;
   }
@@ -70,6 +76,7 @@ public class SubscriberExceptionContext {
   /**
    * @return The subscribed method that threw the exception.
    */
+  @Pure
   public Method getSubscriberMethod() {
     return subscriberMethod;
   }

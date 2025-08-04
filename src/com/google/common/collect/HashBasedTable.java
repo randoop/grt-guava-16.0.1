@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.collect.CollectPreconditions.checkNonnegative;
 
 import com.google.common.annotations.GwtCompatible;
@@ -57,9 +60,11 @@ public class HashBasedTable<R, C, V> extends StandardTable<R, C, V> {
   private static class Factory<C, V>
       implements Supplier<Map<C, V>>, Serializable {
     final int expectedSize;
+    @SideEffectFree
     Factory(int expectedSize) {
       this.expectedSize = expectedSize;
     }
+    @Impure
     @Override
     public Map<C, V> get() {
       return Maps.newHashMapWithExpectedSize(expectedSize);
@@ -70,6 +75,7 @@ public class HashBasedTable<R, C, V> extends StandardTable<R, C, V> {
   /**
    * Creates an empty {@code HashBasedTable}.
    */
+  @Impure
   public static <R, C, V> HashBasedTable<R, C, V> create() {
     return new HashBasedTable<R, C, V>(
         new HashMap<R, Map<C, V>>(), new Factory<C, V>(0));
@@ -84,6 +90,7 @@ public class HashBasedTable<R, C, V> extends StandardTable<R, C, V> {
    * @throws IllegalArgumentException if {@code expectedRows} or {@code
    *     expectedCellsPerRow} is negative
    */
+  @Impure
   public static <R, C, V> HashBasedTable<R, C, V> create(
       int expectedRows, int expectedCellsPerRow) {
     checkNonnegative(expectedCellsPerRow, "expectedCellsPerRow");
@@ -101,6 +108,7 @@ public class HashBasedTable<R, C, V> extends StandardTable<R, C, V> {
    * @throws NullPointerException if any of the row keys, column keys, or values
    *     in {@code table} is null
    */
+  @Impure
   public static <R, C, V> HashBasedTable<R, C, V> create(
       Table<? extends R, ? extends C, ? extends V> table) {
     HashBasedTable<R, C, V> result = create();
@@ -108,37 +116,45 @@ public class HashBasedTable<R, C, V> extends StandardTable<R, C, V> {
     return result;
   }
 
+  @Impure
   HashBasedTable(Map<R, Map<C, V>> backingMap, Factory<C, V> factory) {
     super(backingMap, factory);
   }
 
   // Overriding so NullPointerTester test passes.
 
+  @Impure
   @Override public boolean contains(
       @Nullable Object rowKey, @Nullable Object columnKey) {
     return super.contains(rowKey, columnKey);
   }
 
+  @Impure
   @Override public boolean containsColumn(@Nullable Object columnKey) {
     return super.containsColumn(columnKey);
   }
 
+  @Impure
   @Override public boolean containsRow(@Nullable Object rowKey) {
     return super.containsRow(rowKey);
   }
 
+  @Impure
   @Override public boolean containsValue(@Nullable Object value) {
     return super.containsValue(value);
   }
 
+  @Impure
   @Override public V get(@Nullable Object rowKey, @Nullable Object columnKey) {
     return super.get(rowKey, columnKey);
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object obj) {
     return super.equals(obj);
   }
 
+  @Impure
   @Override public V remove(
       @Nullable Object rowKey, @Nullable Object columnKey) {
     return super.remove(rowKey, columnKey);

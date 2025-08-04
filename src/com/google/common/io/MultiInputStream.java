@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.IOException;
@@ -41,12 +43,14 @@ final class MultiInputStream extends InputStream {
    *
    * @param it an iterator of I/O suppliers that will provide each substream
    */
+  @Impure
   public MultiInputStream(
       Iterator<? extends ByteSource> it) throws IOException {
     this.it = checkNotNull(it);
     advance();
   }
 
+  @Impure
   @Override public void close() throws IOException {
     if (in != null) {
       try {
@@ -60,6 +64,7 @@ final class MultiInputStream extends InputStream {
   /**
    * Closes the current input stream and opens the next one, if any.
    */
+  @Impure
   private void advance() throws IOException {
     close();
     if (it.hasNext()) {
@@ -67,6 +72,7 @@ final class MultiInputStream extends InputStream {
     }
   }
 
+  @Impure
   @Override public int available() throws IOException {
     if (in == null) {
       return 0;
@@ -74,10 +80,12 @@ final class MultiInputStream extends InputStream {
     return in.available();
   }
 
+  @Pure
   @Override public boolean markSupported() {
     return false;
   }
 
+  @Impure
   @Override public int read() throws IOException {
     if (in == null) {
       return -1;
@@ -90,6 +98,7 @@ final class MultiInputStream extends InputStream {
     return result;
   }
 
+  @Impure
   @Override public int read(@Nullable byte[] b, int off, int len) throws IOException {
     if (in == null) {
       return -1;
@@ -102,6 +111,7 @@ final class MultiInputStream extends InputStream {
     return result;
   }
 
+  @Impure
   @Override public long skip(long n) throws IOException {
     if (in == null || n <= 0) {
       return 0;

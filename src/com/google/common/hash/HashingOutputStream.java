@@ -14,6 +14,8 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -42,16 +44,19 @@ public final class HashingOutputStream extends FilterOutputStream {
   // HashCode on an existing OutputStream, compared to creating a separate OutputStream that could
   // be (optionally) be combined with another if needed (with something like
   // MultiplexingOutputStream).
+  @Impure
   public HashingOutputStream(HashFunction hashFunction, OutputStream out) {
     super(checkNotNull(out));
     this.hasher = checkNotNull(hashFunction.newHasher());
   }
 
+  @Impure
   @Override public void write(int b) throws IOException {
     hasher.putByte((byte) b);
     out.write(b);
   }
 
+  @Impure
   @Override public void write(byte[] bytes, int off, int len) throws IOException {
     hasher.putBytes(bytes, off, len);
     out.write(bytes, off, len);
@@ -61,6 +66,7 @@ public final class HashingOutputStream extends FilterOutputStream {
    * Returns the {@link HashCode} based on the data written to this stream. The result is
    * unspecified if this method is called more than once on the same instance.
    */
+  @Pure
   public HashCode hash() {
     return hasher.hash();
   }

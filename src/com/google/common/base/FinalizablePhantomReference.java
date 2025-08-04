@@ -16,6 +16,7 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
 
@@ -37,6 +38,7 @@ public abstract class FinalizablePhantomReference<T> extends PhantomReference<T>
    * @param referent to phantom reference
    * @param queue that should finalize the referent
    */
+  @Impure
   protected FinalizablePhantomReference(T referent, FinalizableReferenceQueue queue) {
     super(referent, queue.queue);
     queue.cleanUp();

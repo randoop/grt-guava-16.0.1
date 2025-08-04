@@ -16,6 +16,9 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.util.concurrent.Uninterruptibles.getUninterruptibly;
 
@@ -55,6 +58,7 @@ public final class JdkFutureAdapters {
    * Future} instances to be upgraded to {@code ListenableFuture} after the
    * fact.
    */
+  @Impure
   public static <V> ListenableFuture<V> listenInPoolThread(
       Future<V> future) {
     if (future instanceof ListenableFuture) {
@@ -87,6 +91,7 @@ public final class JdkFutureAdapters {
    *
    * @since 12.0
    */
+  @Impure
   public static <V> ListenableFuture<V> listenInPoolThread(
       Future<V> future, Executor executor) {
     checkNotNull(executor);
@@ -129,20 +134,24 @@ public final class JdkFutureAdapters {
     // The delegate future.
     private final Future<V> delegate;
 
+    @Impure
     ListenableFutureAdapter(Future<V> delegate) {
       this(delegate, defaultAdapterExecutor);
     }
 
+    @Impure
     ListenableFutureAdapter(Future<V> delegate, Executor adapterExecutor) {
       this.delegate = checkNotNull(delegate);
       this.adapterExecutor = checkNotNull(adapterExecutor);
     }
 
+    @Pure
     @Override
     protected Future<V> delegate() {
       return delegate;
     }
 
+    @Impure
     @Override
     public void addListener(Runnable listener, Executor exec) {
       executionList.add(listener, exec);
@@ -158,6 +167,7 @@ public final class JdkFutureAdapters {
         }
 
         adapterExecutor.execute(new Runnable() {
+          @Impure
           @Override
           public void run() {
             try {
@@ -181,5 +191,6 @@ public final class JdkFutureAdapters {
     }
   }
 
+  @SideEffectFree
   private JdkFutureAdapters() {}
 }

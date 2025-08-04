@@ -16,6 +16,8 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.VisibleForTesting;
 
 import java.io.Closeable;
@@ -153,6 +155,7 @@ public class FinalizableReferenceQueue implements Closeable {
   /**
    * Constructs a new queue.
    */
+  @Impure
   public FinalizableReferenceQueue() {
     // We could start the finalizer lazily, but I'd rather it blow up early.
     queue = new ReferenceQueue<Object>();
@@ -171,6 +174,7 @@ public class FinalizableReferenceQueue implements Closeable {
     this.threadStarted = threadStarted;
   }
 
+  @Impure
   @Override
   public void close() {
     frqRef.enqueue();
@@ -182,6 +186,7 @@ public class FinalizableReferenceQueue implements Closeable {
    * FinalizableReference#finalizeReferent()} on them until the queue is empty. This method is a
    * no-op if the background thread was created successfully.
    */
+  @Impure
   void cleanUp() {
     if (threadStarted) {
       return;
@@ -207,6 +212,7 @@ public class FinalizableReferenceQueue implements Closeable {
    *
    * @return Finalizer.class
    */
+  @Impure
   private static Class<?> loadFinalizer(FinalizerLoader... loaders) {
     for (FinalizerLoader loader : loaders) {
       Class<?> finalizer = loader.loadFinalizer();
@@ -228,6 +234,7 @@ public class FinalizableReferenceQueue implements Closeable {
      *
      * @throws SecurityException if we don't have the appropriate privileges
      */
+    @Impure
     Class<?> loadFinalizer();
   }
 
@@ -241,6 +248,7 @@ public class FinalizableReferenceQueue implements Closeable {
     @VisibleForTesting
     static boolean disabled;
 
+    @Impure
     @Override
     public Class<?> loadFinalizer() {
       if (disabled) {
@@ -277,6 +285,7 @@ public class FinalizableReferenceQueue implements Closeable {
         + "to garbage collect this class loader. To support reclaiming this class loader, either"
         + "resolve the underlying issue, or move Google Collections to your system class path.";
 
+    @Impure
     @Override
     public Class<?> loadFinalizer() {
       try {
@@ -300,6 +309,7 @@ public class FinalizableReferenceQueue implements Closeable {
     /**
      * Gets URL for base of path containing Finalizer.class.
      */
+    @Impure
     URL getBaseUrl() throws IOException {
       // Find URL pointing to Finalizer.class file.
       String finalizerPath = FINALIZER_CLASS_NAME.replace('.', '/') + ".class";
@@ -318,6 +328,7 @@ public class FinalizableReferenceQueue implements Closeable {
     }
 
     /** Creates a class loader with the given base URL as its classpath. */
+    @Impure
     URLClassLoader newLoader(URL base) {
       // We use the bootstrap class loader as the parent because Finalizer by design uses
       // only standard Java classes. That also means that FinalizableReferenceQueueTest
@@ -331,6 +342,7 @@ public class FinalizableReferenceQueue implements Closeable {
    * this class loader, but at least the world doesn't end.
    */
   static class DirectLoader implements FinalizerLoader {
+    @Impure
     @Override
     public Class<?> loadFinalizer() {
       try {
@@ -344,6 +356,7 @@ public class FinalizableReferenceQueue implements Closeable {
   /**
    * Looks up Finalizer.startFinalizer().
    */
+  @SideEffectFree
   static Method getStartFinalizer(Class<?> finalizer) {
     try {
       return finalizer.getMethod(

@@ -15,6 +15,7 @@
  */
 
 package com.google.common.base;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 
 /**
  * Implemented by references that have code to run after garbage collection of their referents.
@@ -29,5 +30,6 @@ public interface FinalizableReference {
    * restrictions prevented starting a background thread, in which case this method is invoked when
    * new references are created.
    */
+  @SideEffectFree
   void finalizeReferent();
 }

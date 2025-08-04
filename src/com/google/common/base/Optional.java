@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -74,6 +77,7 @@ public abstract class Optional<T> implements Serializable {
   /**
    * Returns an {@code Optional} instance with no contained reference.
    */
+  @Impure
   public static <T> Optional<T> absent() {
     return Absent.withType();
   }
@@ -81,6 +85,7 @@ public abstract class Optional<T> implements Serializable {
   /**
    * Returns an {@code Optional} instance containing the given non-null reference.
    */
+  @Impure
   public static <T> Optional<T> of(T reference) {
     return new Present<T>(checkNotNull(reference));
   }
@@ -89,17 +94,20 @@ public abstract class Optional<T> implements Serializable {
    * If {@code nullableReference} is non-null, returns an {@code Optional} instance containing that
    * reference; otherwise returns {@link Optional#absent}.
    */
+  @Impure
   public static <T> Optional<T> fromNullable(@Nullable T nullableReference) {
     return (nullableReference == null)
         ? Optional.<T>absent()
         : new Present<T>(nullableReference);
   }
 
+  @SideEffectFree
   Optional() {}
 
   /**
    * Returns {@code true} if this holder contains a (non-null) instance.
    */
+  @Pure
   public abstract boolean isPresent();
 
   /**
@@ -109,6 +117,7 @@ public abstract class Optional<T> implements Serializable {
    * @throws IllegalStateException if the instance is absent ({@link #isPresent} returns
    *     {@code false})
    */
+  @Pure
   public abstract T get();
 
   /**
@@ -140,12 +149,15 @@ public abstract class Optional<T> implements Serializable {
    *   Optional<Number> first = (Optional) numbers.first();
    *   Number value = first.or(0.5); // fine}</pre>
    */
+  @SideEffectFree
+  @Pure
   public abstract T or(T defaultValue);
 
   /**
    * Returns this {@code Optional} if it has a value present; {@code secondChoice}
    * otherwise.
    */
+  @Pure
   public abstract Optional<T> or(Optional<? extends T> secondChoice);
 
   /**
@@ -154,6 +166,8 @@ public abstract class Optional<T> implements Serializable {
    *
    * @throws NullPointerException if the supplier returns {@code null}
    */
+  @Impure
+  @Pure
   @Beta
   public abstract T or(Supplier<? extends T> supplier);
 
@@ -161,6 +175,7 @@ public abstract class Optional<T> implements Serializable {
    * Returns the contained instance if it is present; {@code null} otherwise. If the
    * instance is known to be present, use {@link #get()} instead.
    */
+  @Pure
   @Nullable
   public abstract T orNull();
 
@@ -170,6 +185,8 @@ public abstract class Optional<T> implements Serializable {
    *
    * @since 11.0
    */
+  @Impure
+  @Pure
   public abstract Set<T> asSet();
 
   /**
@@ -181,6 +198,8 @@ public abstract class Optional<T> implements Serializable {
    *
    * @since 12.0
    */
+  @Impure
+  @Pure
   public abstract <V> Optional<V> transform(Function<? super T, V> function);
 
   /**
@@ -189,12 +208,14 @@ public abstract class Optional<T> implements Serializable {
    * are absent. Note that {@code Optional} instances of differing parameterized types can
    * be equal.
    */
+  @Pure
   @Override
   public abstract boolean equals(@Nullable Object object);
 
   /**
    * Returns a hash code for this instance.
    */
+  @Pure
   @Override
   public abstract int hashCode();
 
@@ -202,6 +223,7 @@ public abstract class Optional<T> implements Serializable {
    * Returns a string representation for this instance. The form of this string
    * representation is unspecified.
    */
+  @Pure
   @Override
   public abstract String toString();
 
@@ -212,17 +234,20 @@ public abstract class Optional<T> implements Serializable {
    *
    * @since 11.0 (generics widened in 13.0)
    */
+  @Impure
   @Beta
   public static <T> Iterable<T> presentInstances(
       final Iterable<? extends Optional<? extends T>> optionals) {
     checkNotNull(optionals);
     return new Iterable<T>() {
+      @Impure
       @Override
       public Iterator<T> iterator() {
         return new AbstractIterator<T>() {
           private final Iterator<? extends Optional<? extends T>> iterator =
               checkNotNull(optionals.iterator());
 
+          @Impure
           @Override
           protected T computeNext() {
             while (iterator.hasNext()) {

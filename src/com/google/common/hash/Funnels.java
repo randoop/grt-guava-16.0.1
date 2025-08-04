@@ -14,6 +14,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 
@@ -31,11 +34,13 @@ import javax.annotation.Nullable;
  */
 @Beta
 public final class Funnels {
+  @SideEffectFree
   private Funnels() {}
 
   /**
    * Returns a funnel that extracts the bytes from a {@code byte} array.
    */
+  @Pure
   public static Funnel<byte[]> byteArrayFunnel() {
     return ByteArrayFunnel.INSTANCE;
   }
@@ -43,10 +48,12 @@ public final class Funnels {
   private enum ByteArrayFunnel implements Funnel<byte[]> {
     INSTANCE;
 
+    @SideEffectFree
     public void funnel(byte[] from, PrimitiveSink into) {
       into.putBytes(from);
     }
 
+    @Pure
     @Override public String toString() {
       return "Funnels.byteArrayFunnel()";
     }
@@ -59,6 +66,7 @@ public final class Funnels {
    *
    * @since 15.0 (since 11.0 as {@code Funnels.stringFunnel()}.
    */
+  @Pure
   public static Funnel<CharSequence> unencodedCharsFunnel() {
     return UnencodedCharsFunnel.INSTANCE;
   }
@@ -66,10 +74,12 @@ public final class Funnels {
   private enum UnencodedCharsFunnel implements Funnel<CharSequence> {
     INSTANCE;
 
+    @SideEffectFree
     public void funnel(CharSequence from, PrimitiveSink into) {
       into.putUnencodedChars(from);
     }
 
+    @Pure
     @Override public String toString() {
       return "Funnels.unencodedCharsFunnel()";
     }
@@ -81,6 +91,7 @@ public final class Funnels {
    *
    * @since 15.0
    */
+  @Impure
   public static Funnel<CharSequence> stringFunnel(Charset charset) {
     return new StringCharsetFunnel(charset);
   }
@@ -88,18 +99,22 @@ public final class Funnels {
   private static class StringCharsetFunnel implements Funnel<CharSequence>, Serializable {
     private final Charset charset;
 
+    @Impure
     StringCharsetFunnel(Charset charset) {
       this.charset = Preconditions.checkNotNull(charset);
     }
 
+    @SideEffectFree
     public void funnel(CharSequence from, PrimitiveSink into) {
       into.putString(from, charset);
     }
 
+    @Impure
     @Override public String toString() {
       return "Funnels.stringFunnel(" + charset.name() + ")";
     }
 
+    @Pure
     @Override public boolean equals(@Nullable Object o) {
       if (o instanceof StringCharsetFunnel) {
         StringCharsetFunnel funnel = (StringCharsetFunnel) o;
@@ -108,10 +123,12 @@ public final class Funnels {
       return false;
     }
 
+    @Pure
     @Override public int hashCode() {
       return StringCharsetFunnel.class.hashCode() ^ charset.hashCode();
     }
 
+    @Impure
     Object writeReplace() {
       return new SerializedForm(charset);
     }
@@ -119,10 +136,12 @@ public final class Funnels {
     private static class SerializedForm implements Serializable {
       private final String charsetCanonicalName;
 
+      @Impure
       SerializedForm(Charset charset) {
         this.charsetCanonicalName = charset.name();
       }
 
+      @Impure
       private Object readResolve() {
         return stringFunnel(Charset.forName(charsetCanonicalName));
       }
@@ -136,6 +155,7 @@ public final class Funnels {
    *
    * @since 13.0
    */
+  @Pure
   public static Funnel<Integer> integerFunnel() {
     return IntegerFunnel.INSTANCE;
   }
@@ -143,10 +163,12 @@ public final class Funnels {
   private enum IntegerFunnel implements Funnel<Integer> {
     INSTANCE;
 
+    @SideEffectFree
     public void funnel(Integer from, PrimitiveSink into) {
       into.putInt(from);
     }
 
+    @Pure
     @Override public String toString() {
       return "Funnels.integerFunnel()";
     }
@@ -158,6 +180,7 @@ public final class Funnels {
    *
    * @since 15.0
    */
+  @Impure
   public static <E> Funnel<Iterable<? extends E>> sequentialFunnel(Funnel<E> elementFunnel) {
     return new SequentialFunnel<E>(elementFunnel);
   }
@@ -165,20 +188,24 @@ public final class Funnels {
   private static class SequentialFunnel<E> implements Funnel<Iterable<? extends E>>, Serializable {
     private final Funnel<E> elementFunnel;
 
+    @Impure
     SequentialFunnel(Funnel<E> elementFunnel) {
       this.elementFunnel = Preconditions.checkNotNull(elementFunnel);
     }
 
+    @SideEffectFree
     public void funnel(Iterable<? extends E> from, PrimitiveSink into) {
       for (E e : from) {
         elementFunnel.funnel(e, into);
       }
     }
 
+    @Pure
     @Override public String toString() {
       return "Funnels.sequentialFunnel(" + elementFunnel + ")";
     }
 
+    @Pure
     @Override public boolean equals(@Nullable Object o) {
       if (o instanceof SequentialFunnel) {
         SequentialFunnel<?> funnel = (SequentialFunnel<?>) o;
@@ -187,6 +214,7 @@ public final class Funnels {
       return false;
     }
 
+    @Pure
     @Override public int hashCode() {
       return SequentialFunnel.class.hashCode() ^ elementFunnel.hashCode();
     }
@@ -197,6 +225,7 @@ public final class Funnels {
    * 
    * @since 13.0
    */
+  @Pure
   public static Funnel<Long> longFunnel() {
     return LongFunnel.INSTANCE;
   }
@@ -204,10 +233,12 @@ public final class Funnels {
   private enum LongFunnel implements Funnel<Long> {
     INSTANCE;
     
+    @SideEffectFree
     public void funnel(Long from, PrimitiveSink into) {
       into.putLong(from);
     }
     
+    @Pure
     @Override public String toString() {
       return "Funnels.longFunnel()";
     }
@@ -223,28 +254,34 @@ public final class Funnels {
    * 
    * @since 13.0
    */
+  @Impure
   public static OutputStream asOutputStream(PrimitiveSink sink) {
     return new SinkAsStream(sink);
   }
   
   private static class SinkAsStream extends OutputStream {
     final PrimitiveSink sink;
+    @Impure
     SinkAsStream(PrimitiveSink sink) {
       this.sink = Preconditions.checkNotNull(sink);
     }
     
+    @SideEffectFree
     @Override public void write(int b) {
       sink.putByte((byte) b);
     }
 
+    @SideEffectFree
     @Override public void write(byte[] bytes) {
       sink.putBytes(bytes);
     }
 
+    @SideEffectFree
     @Override public void write(byte[] bytes, int off, int len) {
       sink.putBytes(bytes, off, len);
     }
     
+    @Pure
     @Override public String toString() {
       return "Funnels.asOutputStream(" + sink + ")";
     }

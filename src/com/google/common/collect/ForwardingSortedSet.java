@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 
@@ -58,41 +61,53 @@ public abstract class ForwardingSortedSet<E> extends ForwardingSet<E>
     implements SortedSet<E> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingSortedSet() {}
 
+  @Pure
   @Override protected abstract SortedSet<E> delegate();
 
+  @Pure
+  @Impure
   @Override
   public Comparator<? super E> comparator() {
     return delegate().comparator();
   }
 
+  @SideEffectFree
+  @Impure
   @Override
   public E first() {
     return delegate().first();
   }
 
+  @Impure
   @Override
   public SortedSet<E> headSet(E toElement) {
     return delegate().headSet(toElement);
   }
 
+  @SideEffectFree
+  @Impure
   @Override
   public E last() {
     return delegate().last();
   }
 
+  @Impure
   @Override
   public SortedSet<E> subSet(E fromElement, E toElement) {
     return delegate().subSet(fromElement, toElement);
   }
 
+  @Impure
   @Override
   public SortedSet<E> tailSet(E fromElement) {
     return delegate().tailSet(fromElement);
   }
 
   // unsafe, but worst case is a CCE is thrown, which callers will be expecting
+  @Impure
   @SuppressWarnings("unchecked")
   private int unsafeCompare(Object o1, Object o2) {
     Comparator<? super E> comparator = comparator();
@@ -108,6 +123,7 @@ public abstract class ForwardingSortedSet<E> extends ForwardingSet<E>
    *
    * @since 7.0
    */
+  @Impure
   @Override @Beta protected boolean standardContains(@Nullable Object object) {
     try {
       // any ClassCastExceptions are caught
@@ -131,6 +147,7 @@ public abstract class ForwardingSortedSet<E> extends ForwardingSet<E>
    *
    * @since 7.0
    */
+  @Impure
   @Override @Beta protected boolean standardRemove(@Nullable Object object) {
     try {
       // any ClassCastExceptions are caught
@@ -160,6 +177,7 @@ public abstract class ForwardingSortedSet<E> extends ForwardingSet<E>
    *
    * @since 7.0
    */
+  @SideEffectFree
   @Beta protected SortedSet<E> standardSubSet(E fromElement, E toElement) {
     return tailSet(fromElement).headSet(toElement);
   }

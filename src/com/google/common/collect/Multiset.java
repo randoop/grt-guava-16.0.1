@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Collection;
@@ -103,6 +106,7 @@ public interface Multiset<E> extends Collection<E> {
    * @return the number of occurrences of the element in this multiset; possibly
    *     zero but never negative
    */
+  @Impure
   int count(@Nullable Object element);
 
   // Bulk Operations
@@ -126,6 +130,7 @@ public interface Multiset<E> extends Collection<E> {
    *     implementation does not permit null elements. Note that if {@code
    *     occurrences} is zero, the implementation may opt to return normally.
    */
+  @Impure
   int add(@Nullable E element, int occurrences);
 
   /**
@@ -141,6 +146,7 @@ public interface Multiset<E> extends Collection<E> {
    * @return the count of the element before the operation; possibly zero
    * @throws IllegalArgumentException if {@code occurrences} is negative
    */
+  @Impure
   int remove(@Nullable Object element, int occurrences);
 
   /**
@@ -156,6 +162,8 @@ public interface Multiset<E> extends Collection<E> {
    *     implementation does not permit null elements. Note that if {@code
    *     count} is zero, the implementor may optionally return zero instead.
    */
+  @Pure
+  @Impure
   int setCount(E element, int count);
 
   /**
@@ -178,6 +186,8 @@ public interface Multiset<E> extends Collection<E> {
    *     oldCount} and {@code newCount} are both zero, the implementor may
    *     optionally return {@code true} instead.
    */
+  @Pure
+  @Impure
   boolean setCount(E element, int oldCount, int newCount);
 
   // Views
@@ -198,6 +208,7 @@ public interface Multiset<E> extends Collection<E> {
    *
    * @return a view of the set of distinct elements in this multiset
    */
+  @Impure
   Set<E> elementSet();
 
   /**
@@ -219,6 +230,7 @@ public interface Multiset<E> extends Collection<E> {
    *
    * @return a set of entries representing the data of this multiset
    */
+  @Impure
   Set<Entry<E>> entrySet();
 
   /**
@@ -239,6 +251,7 @@ public interface Multiset<E> extends Collection<E> {
      *
      * @return the element corresponding to this entry
      */
+    @Pure
     E getElement();
 
     /**
@@ -252,6 +265,7 @@ public interface Multiset<E> extends Collection<E> {
      *
      * @return the count of the element; never negative
      */
+    @Pure
     int getCount();
 
     /**
@@ -264,6 +278,8 @@ public interface Multiset<E> extends Collection<E> {
      *   Objects.equal(a.getElement(), b.getElement())
      *       && a.getCount() == b.getCount()}</pre>
      */
+    @Impure
+    @Pure
     @Override
     // TODO(kevinb): check this wrt TreeMultiset?
     boolean equals(Object o);
@@ -276,6 +292,7 @@ public interface Multiset<E> extends Collection<E> {
      *
      *   ((element == null) ? 0 : element.hashCode()) ^ count}</pre>
      */
+    @Pure
     @Override
     int hashCode();
 
@@ -286,6 +303,8 @@ public interface Multiset<E> extends Collection<E> {
      * representation of the element, followed by the three characters {@code
      * " x "} (space, letter x, space), followed by the count.
      */
+    @SideEffectFree
+    @Pure
     @Override
     String toString();
   }
@@ -297,6 +316,7 @@ public interface Multiset<E> extends Collection<E> {
    * {@code true} if the given object is also a multiset and contains equal
    * elements with equal counts, regardless of order.
    */
+  @Impure
   @Override
   // TODO(kevinb): caveats about equivalence-relation?
   boolean equals(@Nullable Object object);
@@ -310,6 +330,7 @@ public interface Multiset<E> extends Collection<E> {
    * <p>over all distinct elements in the multiset. It follows that a multiset and
    * its entry set always have the same hash code.
    */
+  @Impure
   @Override
   int hashCode();
 
@@ -320,6 +341,7 @@ public interface Multiset<E> extends Collection<E> {
    * result of invoking {@link #toString} on the {@link #entrySet}, yielding a
    * result such as {@code [a x 3, c, d x 2, e]}.
    */
+  @Impure
   @Override
   String toString();
 
@@ -331,6 +353,7 @@ public interface Multiset<E> extends Collection<E> {
    * <p>Elements that occur multiple times in the multiset will appear
    * multiple times in this iterator, though not necessarily sequentially.
    */
+  @Impure
   @Override
   Iterator<E> iterator();
 
@@ -345,6 +368,7 @@ public interface Multiset<E> extends Collection<E> {
    * @return {@code true} if this multiset contains at least one occurrence of
    *     the element
    */
+  @Impure
   @Override
   boolean contains(@Nullable Object element);
 
@@ -369,6 +393,7 @@ public interface Multiset<E> extends Collection<E> {
    *     each element contained in {@code elements}
    * @throws NullPointerException if {@code elements} is null
    */
+  @Impure
   @Override
   boolean containsAll(Collection<?> elements);
 
@@ -389,6 +414,7 @@ public interface Multiset<E> extends Collection<E> {
    * @throws IllegalArgumentException if {@link Integer#MAX_VALUE} occurrences
    *     of {@code element} are already contained in this multiset
    */
+  @Pure
   @Override
   boolean add(E element);
 
@@ -403,6 +429,7 @@ public interface Multiset<E> extends Collection<E> {
    * @param element the element to remove one occurrence of
    * @return {@code true} if an occurrence was found and removed
    */
+  @Pure
   @Override
   boolean remove(@Nullable Object element);
 
@@ -418,6 +445,7 @@ public interface Multiset<E> extends Collection<E> {
    * it <b>may not</b> throw an exception in response to any of {@code elements}
    * being null or of the wrong type. 
    */
+  @Pure
   @Override
   boolean removeAll(Collection<?> c);
 
@@ -435,6 +463,7 @@ public interface Multiset<E> extends Collection<E> {
    * 
    * @see Multisets#retainOccurrences(Multiset, Multiset)
    */
+  @Pure
   @Override
   boolean retainAll(Collection<?> c);
 }

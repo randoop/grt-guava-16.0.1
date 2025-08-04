@@ -14,6 +14,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 
 import java.util.NoSuchElementException;
@@ -52,18 +55,21 @@ public interface RangeSet<C extends Comparable> {
   /**
    * Determines whether any of this range set's member ranges contains {@code value}.
    */
+  @Pure
   boolean contains(C value);
 
   /**
    * Returns the unique range from this range set that {@linkplain Range#contains contains}
    * {@code value}, or {@code null} if this range set does not contain {@code value}.
    */
+  @Impure
   Range<C> rangeContaining(C value);
 
   /**
    * Returns {@code true} if there exists a member range in this range set which
    * {@linkplain Range#encloses encloses} the specified range.
    */
+  @Impure
   boolean encloses(Range<C> otherRange);
 
   /**
@@ -75,11 +81,13 @@ public interface RangeSet<C extends Comparable> {
    * <p>This is equivalent to checking if this range set {@link #encloses} each of the ranges in
    * {@code other}.
    */
+  @Pure
   boolean enclosesAll(RangeSet<C> other);
 
   /**
    * Returns {@code true} if this range set contains no ranges.
    */
+  @Pure
   boolean isEmpty();
 
   /**
@@ -88,6 +96,7 @@ public interface RangeSet<C extends Comparable> {
    *
    * @throws NoSuchElementException if this range set is {@linkplain #isEmpty() empty}
    */
+  @Impure
   Range<C> span();
 
   // Views
@@ -98,6 +107,7 @@ public interface RangeSet<C extends Comparable> {
    * {@link Iterable#iterator} method return the ranges in increasing order of lower bound
    * (equivalently, of upper bound).
    */
+  @Impure
   Set<Range<C>> asRanges();
 
   /**
@@ -106,6 +116,7 @@ public interface RangeSet<C extends Comparable> {
    * <p>The returned view supports the {@link #add} operation if this {@code RangeSet} supports
    * {@link #remove}, and vice versa.
    */
+  @Impure
   RangeSet<C> complement();
   
   /**
@@ -116,6 +127,7 @@ public interface RangeSet<C extends Comparable> {
    * {@linkplain #add(Range) add} any range not {@linkplain Range#encloses(Range) enclosed} by
    * {@code view}.
    */
+  @Impure
   RangeSet<C> subRangeSet(Range<C> view);
   
   // Modification
@@ -132,6 +144,7 @@ public interface RangeSet<C extends Comparable> {
    * @throws UnsupportedOperationException if this range set does not support the {@code add}
    *         operation
    */
+  @SideEffectFree
   void add(Range<C> range);
 
   /**
@@ -143,6 +156,7 @@ public interface RangeSet<C extends Comparable> {
    * @throws UnsupportedOperationException if this range set does not support the {@code remove}
    *         operation
    */
+  @SideEffectFree
   void remove(Range<C> range);
   
   /**
@@ -154,6 +168,7 @@ public interface RangeSet<C extends Comparable> {
    * @throws UnsupportedOperationException if this range set does not support the {@code clear}
    *         operation
    */
+  @SideEffectFree
   void clear();
 
   /**
@@ -166,6 +181,7 @@ public interface RangeSet<C extends Comparable> {
    * @throws UnsupportedOperationException if this range set does not support the {@code addAll}
    *         operation
    */
+  @SideEffectFree
   void addAll(RangeSet<C> other);
 
   /**
@@ -179,6 +195,7 @@ public interface RangeSet<C extends Comparable> {
    * @throws UnsupportedOperationException if this range set does not support the {@code removeAll}
    *         operation
    */
+  @SideEffectFree
   void removeAll(RangeSet<C> other);
   
   // Object methods
@@ -187,12 +204,14 @@ public interface RangeSet<C extends Comparable> {
    * Returns {@code true} if {@code obj} is another {@code RangeSet} that contains the same ranges
    * according to {@link Range#equals(Object)}.
    */
+  @Pure
   @Override
   boolean equals(@Nullable Object obj);
   
   /**
    * Returns {@code asRanges().hashCode()}.
    */
+  @Pure
   @Override
   int hashCode();
 
@@ -201,6 +220,7 @@ public interface RangeSet<C extends Comparable> {
    * {@code RangeSet} consisted of {@code Range.closed(1, 3)} and {@code Range.greaterThan(4)},
    * this might return {@code " [1‥3](4‥+∞)}"}.
    */
+  @Pure
   @Override
   String toString();
 }

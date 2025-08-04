@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.google.common.annotations.Beta;
@@ -47,6 +49,7 @@ public final class Uninterruptibles {
    * Invokes {@code latch.}{@link CountDownLatch#await() await()}
    * uninterruptibly.
    */
+  @Impure
   public static void awaitUninterruptibly(CountDownLatch latch) {
     boolean interrupted = false;
     try {
@@ -70,6 +73,7 @@ public final class Uninterruptibles {
    * {@code latch.}{@link CountDownLatch#await(long, TimeUnit)
    * await(timeout, unit)} uninterruptibly.
    */
+  @Impure
   public static boolean awaitUninterruptibly(CountDownLatch latch,
       long timeout, TimeUnit unit) {
     boolean interrupted = false;
@@ -96,6 +100,7 @@ public final class Uninterruptibles {
   /**
    * Invokes {@code toJoin.}{@link Thread#join() join()} uninterruptibly.
    */
+  @Impure
   public static void joinUninterruptibly(Thread toJoin) {
     boolean interrupted = false;
     try {
@@ -126,6 +131,7 @@ public final class Uninterruptibles {
    * @throws ExecutionException if the computation threw an exception
    * @throws CancellationException if the computation was cancelled
    */
+  @Impure
   public static <V> V getUninterruptibly(Future<V> future)
       throws ExecutionException {
     boolean interrupted = false;
@@ -157,6 +163,7 @@ public final class Uninterruptibles {
    * @throws CancellationException if the computation was cancelled
    * @throws TimeoutException if the wait timed out
    */
+  @Impure
   public static <V> V getUninterruptibly(
       Future<V> future, long timeout,  TimeUnit unit)
           throws ExecutionException, TimeoutException {
@@ -186,6 +193,7 @@ public final class Uninterruptibles {
    * {@code unit.}{@link TimeUnit#timedJoin(Thread, long)
    * timedJoin(toJoin, timeout)} uninterruptibly.
    */
+  @Impure
   public static void joinUninterruptibly(Thread toJoin,
       long timeout, TimeUnit unit) {
     Preconditions.checkNotNull(toJoin);
@@ -213,6 +221,7 @@ public final class Uninterruptibles {
   /**
    * Invokes {@code queue.}{@link BlockingQueue#take() take()} uninterruptibly.
    */
+  @Impure
   public static <E> E takeUninterruptibly(BlockingQueue<E> queue) {
     boolean interrupted = false;
     try {
@@ -239,6 +248,7 @@ public final class Uninterruptibles {
    * @throws IllegalArgumentException if some property of the specified element
    *     prevents it from being added to the given queue
    */
+  @Impure
   public static <E> void putUninterruptibly(BlockingQueue<E> queue, E element) {
     boolean interrupted = false;
     try {
@@ -262,6 +272,7 @@ public final class Uninterruptibles {
    * Invokes {@code unit.}{@link TimeUnit#sleep(long) sleep(sleepFor)}
    * uninterruptibly.
    */
+  @Impure
   public static void sleepUninterruptibly(long sleepFor, TimeUnit unit) {
     boolean interrupted = false;
     try {
@@ -286,5 +297,6 @@ public final class Uninterruptibles {
 
   // TODO(user): Add support for waitUninterruptibly.
 
+  @SideEffectFree
   private Uninterruptibles() {}
 }

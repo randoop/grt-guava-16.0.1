@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.and;
@@ -54,6 +57,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible
 public final class Collections2 {
+  @SideEffectFree
   private Collections2() {}
 
   /**
@@ -86,6 +90,7 @@ public final class Collections2 {
    */
   // TODO(kevinb): how can we omit that Iterables link when building gwt
   // javadoc?
+  @Impure
   public static <E> Collection<E> filter(
       Collection<E> unfiltered, Predicate<? super E> predicate) {
     if (unfiltered instanceof FilteredCollection) {
@@ -103,6 +108,7 @@ public final class Collections2 {
    * {@code contains} method throws a {@code ClassCastException} or
    * {@code NullPointerException}.
    */
+  @Impure
   static boolean safeContains(
       Collection<?> collection, @Nullable Object object) {
     checkNotNull(collection);
@@ -120,6 +126,7 @@ public final class Collections2 {
    * {@code remove} method throws a {@code ClassCastException} or
    * {@code NullPointerException}.
    */
+  @Impure
   static boolean safeRemove(Collection<?> collection, @Nullable Object object) {
     checkNotNull(collection);
     try {
@@ -135,24 +142,28 @@ public final class Collections2 {
     final Collection<E> unfiltered;
     final Predicate<? super E> predicate;
 
+    @SideEffectFree
     FilteredCollection(Collection<E> unfiltered,
         Predicate<? super E> predicate) {
       this.unfiltered = unfiltered;
       this.predicate = predicate;
     }
 
+    @Impure
     FilteredCollection<E> createCombined(Predicate<? super E> newPredicate) {
       return new FilteredCollection<E>(unfiltered,
           Predicates.<E>and(predicate, newPredicate));
       // .<E> above needed to compile in JDK 5
     }
 
+    @Impure
     @Override
     public boolean add(E element) {
       checkArgument(predicate.apply(element));
       return unfiltered.add(element);
     }
 
+    @Impure
     @Override
     public boolean addAll(Collection<? extends E> collection) {
       for (E element : collection) {
@@ -161,11 +172,13 @@ public final class Collections2 {
       return unfiltered.addAll(collection);
     }
 
+    @Impure
     @Override
     public void clear() {
       Iterables.removeIf(unfiltered, predicate);
     }
 
+    @Impure
     @Override
     public boolean contains(@Nullable Object element) {
       if (safeContains(unfiltered, element)) {
@@ -176,47 +189,56 @@ public final class Collections2 {
       return false;
     }
 
+    @Impure
     @Override
     public boolean containsAll(Collection<?> collection) {
       return containsAllImpl(this, collection);
     }
 
+    @Impure
     @Override
     public boolean isEmpty() {
       return !Iterables.any(unfiltered, predicate);
     }
 
+    @Impure
     @Override
     public Iterator<E> iterator() {
       return Iterators.filter(unfiltered.iterator(), predicate);
     }
 
+    @Impure
     @Override
     public boolean remove(Object element) {
       return contains(element) && unfiltered.remove(element);
     }
 
+    @Impure
     @Override
     public boolean removeAll(final Collection<?> collection) {
       return Iterables.removeIf(unfiltered, and(predicate, in(collection)));
     }
 
+    @Impure
     @Override
     public boolean retainAll(final Collection<?> collection) {
       return Iterables.removeIf(unfiltered, and(predicate, not(in(collection))));
     }
 
+    @Impure
     @Override
     public int size() {
       return Iterators.size(iterator());
     }
 
+    @Impure
     @Override
     public Object[] toArray() {
       // creating an ArrayList so filtering happens once
       return Lists.newArrayList(iterator()).toArray();
     }
 
+    @Impure
     @Override
     public <T> T[] toArray(T[] array) {
       return Lists.newArrayList(iterator()).toArray(array);
@@ -242,6 +264,7 @@ public final class Collections2 {
    * {@link Lists#transform}. If only an {@code Iterable} is available, use
    * {@link Iterables#transform}.
    */
+  @Impure
   public static <F, T> Collection<T> transform(Collection<F> fromCollection,
       Function<? super F, T> function) {
     return new TransformedCollection<F, T>(fromCollection, function);
@@ -251,24 +274,29 @@ public final class Collections2 {
     final Collection<F> fromCollection;
     final Function<? super F, ? extends T> function;
 
+    @Impure
     TransformedCollection(Collection<F> fromCollection,
         Function<? super F, ? extends T> function) {
       this.fromCollection = checkNotNull(fromCollection);
       this.function = checkNotNull(function);
     }
 
+    @Impure
     @Override public void clear() {
       fromCollection.clear();
     }
 
+    @Pure
     @Override public boolean isEmpty() {
       return fromCollection.isEmpty();
     }
 
+    @Impure
     @Override public Iterator<T> iterator() {
       return Iterators.transform(fromCollection.iterator(), function);
     }
 
+    @Pure
     @Override public int size() {
       return fromCollection.size();
     }
@@ -286,6 +314,7 @@ public final class Collections2 {
    * @param self a collection which might contain all elements in {@code c}
    * @param c a collection whose elements might be contained by {@code self}
    */
+  @Impure
   static boolean containsAllImpl(Collection<?> self, Collection<?> c) {
     return Iterables.all(c, Predicates.in(self));
   }
@@ -293,11 +322,13 @@ public final class Collections2 {
   /**
    * An implementation of {@link Collection#toString()}.
    */
+  @Impure
   static String toStringImpl(final Collection<?> collection) {
     StringBuilder sb
         = newStringBuilderForCollection(collection.size()).append('[');
     STANDARD_JOINER.appendTo(
         sb, Iterables.transform(collection, new Function<Object, Object>() {
+          @Pure
           @Override public Object apply(Object input) {
             return input == collection ? "(this Collection)" : input;
           }
@@ -308,6 +339,7 @@ public final class Collections2 {
   /**
    * Returns best-effort-sized StringBuilder based on the given collection size.
    */
+  @Impure
   static StringBuilder newStringBuilderForCollection(int size) {
     checkNonnegative(size, "size");
     return new StringBuilder((int) Math.min(size * 8L, Ints.MAX_POWER_OF_TWO));
@@ -316,6 +348,7 @@ public final class Collections2 {
   /**
    * Used to avoid http://bugs.sun.com/view_bug.do?bug_id=6558557
    */
+  @Pure
   static <T> Collection<T> cast(Iterable<T> iterable) {
     return (Collection<T>) iterable;
   }
@@ -349,6 +382,7 @@ public final class Collections2 {
    *     null elements.
    * @since 12.0
    */
+  @Impure
   @Beta public static <E extends Comparable<? super E>>
       Collection<List<E>> orderedPermutations(Iterable<E> elements) {
     return orderedPermutations(elements, Ordering.natural());
@@ -401,6 +435,7 @@ public final class Collections2 {
    *     null elements, or if the specified comparator is null.
    * @since 12.0
    */
+  @Impure
   @Beta public static <E> Collection<List<E>> orderedPermutations(
       Iterable<E> elements, Comparator<? super E> comparator) {
     return new OrderedPermutationCollection<E>(elements, comparator);
@@ -412,6 +447,7 @@ public final class Collections2 {
     final Comparator<? super E> comparator;
     final int size;
 
+    @Impure
     OrderedPermutationCollection(Iterable<E> input,
         Comparator<? super E> comparator) {
       this.inputList = Ordering.from(comparator).immutableSortedCopy(input);
@@ -428,6 +464,7 @@ public final class Collections2 {
      * permutations is increased by a factor of (n choose r).</li>
      * </ul>
      */
+    @Impure
     private static <E> int calculateSize(
         List<E> sortedInputList, Comparator<? super E> comparator) {
       long permutations = 1;
@@ -454,18 +491,22 @@ public final class Collections2 {
       return (int) permutations;
     }
 
+    @Pure
     @Override public int size() {
       return size;
     }
 
+    @Pure
     @Override public boolean isEmpty() {
       return false;
     }
 
+    @Impure
     @Override public Iterator<List<E>> iterator() {
       return new OrderedPermutationIterator<E>(inputList, comparator);
     }
 
+    @Impure
     @Override public boolean contains(@Nullable Object obj) {
       if (obj instanceof List) {
         List<?> list = (List<?>) obj;
@@ -474,6 +515,7 @@ public final class Collections2 {
       return false;
     }
 
+    @Pure
     @Override public String toString() {
       return "orderedPermutationCollection(" + inputList + ")";
     }
@@ -485,12 +527,14 @@ public final class Collections2 {
     List<E> nextPermutation;
     final Comparator<? super E> comparator;
 
+    @Impure
     OrderedPermutationIterator(List<E> list,
         Comparator<? super E> comparator) {
       this.nextPermutation = Lists.newArrayList(list);
       this.comparator = comparator;
     }
 
+    @Impure
     @Override protected List<E> computeNext() {
       if (nextPermutation == null) {
         return endOfData();
@@ -500,6 +544,7 @@ public final class Collections2 {
       return next;
     }
 
+    @Impure
     void calculateNextPermutation() {
       int j = findNextJ();
       if (j == -1) {
@@ -513,6 +558,7 @@ public final class Collections2 {
       Collections.reverse(nextPermutation.subList(j + 1, n));
     }
 
+    @Impure
     int findNextJ() {
       for (int k = nextPermutation.size() - 2; k >= 0; k--) {
         if (comparator.compare(nextPermutation.get(k),
@@ -523,6 +569,7 @@ public final class Collections2 {
       return -1;
     }
 
+    @Impure
     int findNextL(int j) {
       E ak = nextPermutation.get(j);
       for (int l = nextPermutation.size() - 1; l > j; l--) {
@@ -554,6 +601,7 @@ public final class Collections2 {
    *     null elements.
    * @since 12.0
    */
+  @Impure
   @Beta public static <E> Collection<List<E>> permutations(
       Collection<E> elements) {
     return new PermutationCollection<E>(ImmutableList.copyOf(elements));
@@ -563,22 +611,27 @@ public final class Collections2 {
       extends AbstractCollection<List<E>> {
     final ImmutableList<E> inputList;
 
+    @SideEffectFree
     PermutationCollection(ImmutableList<E> input) {
       this.inputList = input;
     }
 
+    @Impure
     @Override public int size() {
       return IntMath.factorial(inputList.size());
     }
 
+    @Pure
     @Override public boolean isEmpty() {
       return false;
     }
 
+    @Impure
     @Override public Iterator<List<E>> iterator() {
       return new PermutationIterator<E>(inputList);
     }
 
+    @Impure
     @Override public boolean contains(@Nullable Object obj) {
       if (obj instanceof List) {
         List<?> list = (List<?>) obj;
@@ -587,6 +640,7 @@ public final class Collections2 {
       return false;
     }
 
+    @Pure
     @Override public String toString() {
       return "permutations(" + inputList + ")";
     }
@@ -599,6 +653,7 @@ public final class Collections2 {
     final int[] o;
     int j;
 
+    @Impure
     PermutationIterator(List<E> list) {
       this.list = new ArrayList<E>(list);
       int n = list.size();
@@ -609,6 +664,7 @@ public final class Collections2 {
       j = Integer.MAX_VALUE;
     }
 
+    @Impure
     @Override protected List<E> computeNext() {
       if (j <= 0) {
         return endOfData();
@@ -618,6 +674,7 @@ public final class Collections2 {
       return next;
     }
 
+    @Impure
     void calculateNextPermutation() {
       j = list.size() - 1;
       int s = 0;
@@ -649,6 +706,7 @@ public final class Collections2 {
       }
     }
 
+    @Impure
     void switchDirection() {
       o[j] = -o[j];
       j--;
@@ -658,6 +716,7 @@ public final class Collections2 {
   /**
    * Returns {@code true} if the second list is a permutation of the first.
    */
+  @Impure
   private static boolean isPermutation(List<?> first,
       List<?> second) {
     if (first.size() != second.size()) {
@@ -668,6 +727,7 @@ public final class Collections2 {
     return firstMultiset.equals(secondMultiset);
   }
 
+  @Pure
   private static boolean isPositiveInt(long n) {
     return n >= 0 && n <= Integer.MAX_VALUE;
   }

@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Map;
@@ -47,6 +50,7 @@ public interface BiMap<K, V> extends Map<K, V> {
    *     different key in this bimap. The bimap will remain unmodified in this
    *     event. To avoid this exception, call {@link #forcePut} instead.
    */
+  @Pure
   @Override
   V put(@Nullable K key, @Nullable V value);
 
@@ -67,6 +71,7 @@ public interface BiMap<K, V> extends Map<K, V> {
    * @return the value which was previously associated with the key, which may
    *     be {@code null}, or {@code null} if there was no previous entry
    */
+  @Impure
   V forcePut(@Nullable K key, @Nullable V value);
 
   // Bulk Operations
@@ -81,6 +86,7 @@ public interface BiMap<K, V> extends Map<K, V> {
    *     entry fails. Note that some map entries may have been added to the
    *     bimap before the exception was thrown.
    */
+  @SideEffectFree
   @Override
   void putAll(Map<? extends K, ? extends V> map);
 
@@ -93,6 +99,7 @@ public interface BiMap<K, V> extends Map<K, V> {
    * instead of the {@link java.util.Collection} specified in the {@link Map}
    * interface.
    */
+  @Impure
   @Override
   Set<V> values();
 
@@ -106,5 +113,6 @@ public interface BiMap<K, V> extends Map<K, V> {
    *
    * @return the inverse view of this bimap
    */
+  @Impure
   BiMap<V, K> inverse();
 }

@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Preconditions;
 
@@ -43,43 +45,52 @@ final class SingletonImmutableSet<E> extends ImmutableSet<E> {
   // it will always be recalculated, unfortunately.
   private transient int cachedHashCode;
 
+  @Impure
   SingletonImmutableSet(E element) {
     this.element = Preconditions.checkNotNull(element);
   }
 
+  @Impure
   SingletonImmutableSet(E element, int hashCode) {
     // Guaranteed to be non-null by the presence of the pre-computed hash code.
     this.element = element;
     cachedHashCode = hashCode;
   }
 
+  @Pure
   @Override
   public int size() {
     return 1;
   }
 
+  @Pure
   @Override public boolean isEmpty() {
     return false;
   }
 
+  @Pure
   @Override public boolean contains(Object target) {
     return element.equals(target);
   }
 
+  @Impure
   @Override public UnmodifiableIterator<E> iterator() {
     return Iterators.singletonIterator(element);
   }
 
+  @Pure
   @Override boolean isPartialView() {
     return false;
   }
 
+  @Impure
   @Override
   int copyIntoArray(Object[] dst, int offset) {
     dst[offset] = element;
     return offset + 1;
   }
 
+  @Impure
   @Override public boolean equals(@Nullable Object object) {
     if (object == this) {
       return true;
@@ -91,6 +102,7 @@ final class SingletonImmutableSet<E> extends ImmutableSet<E> {
     return false;
   }
 
+  @Impure
   @Override public final int hashCode() {
     // Racy single-check.
     int code = cachedHashCode;
@@ -100,10 +112,12 @@ final class SingletonImmutableSet<E> extends ImmutableSet<E> {
     return code;
   }
 
+  @Pure
   @Override boolean isHashCodeFast() {
     return cachedHashCode != 0;
   }
 
+  @Impure
   @Override public String toString() {
     String elementToString = element.toString();
     return new StringBuilder(elementToString.length() + 2)

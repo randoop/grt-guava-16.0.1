@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.CollectPreconditions.checkNonnegative;
 import static com.google.common.collect.ObjectArrays.checkElementsNotNull;
@@ -47,14 +50,17 @@ import javax.annotation.Nullable;
 public abstract class ImmutableCollection<E> extends AbstractCollection<E>
     implements Serializable {
 
+  @SideEffectFree
   ImmutableCollection() {}
 
   /**
    * Returns an unmodifiable iterator across the elements in this collection.
    */
+  @Impure
   @Override
   public abstract UnmodifiableIterator<E> iterator();
 
+  @Impure
   @Override
   public final Object[] toArray() {
     int size = size();
@@ -66,6 +72,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
     return result;
   }
 
+  @Impure
   @Override
   public final <T> T[] toArray(T[] other) {
     checkNotNull(other);
@@ -79,6 +86,8 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
     return other;
   }
 
+  @Pure
+  @Impure
   @Override
   public boolean contains(@Nullable Object object) {
     return object != null && super.contains(object);
@@ -90,6 +99,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
    * @throws UnsupportedOperationException always
    * @deprecated Unsupported operation.
    */
+  @Pure
   @Deprecated
   @Override
   public final boolean add(E e) {
@@ -102,6 +112,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
    * @throws UnsupportedOperationException always
    * @deprecated Unsupported operation.
    */
+  @Pure
   @Deprecated
   @Override
   public final boolean remove(Object object) {
@@ -114,6 +125,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
    * @throws UnsupportedOperationException always
    * @deprecated Unsupported operation.
    */
+  @Pure
   @Deprecated
   @Override
   public final boolean addAll(Collection<? extends E> newElements) {
@@ -126,6 +138,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
    * @throws UnsupportedOperationException always
    * @deprecated Unsupported operation.
    */
+  @Pure
   @Deprecated
   @Override
   public final boolean removeAll(Collection<?> oldElements) {
@@ -138,6 +151,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
    * @throws UnsupportedOperationException always
    * @deprecated Unsupported operation.
    */
+  @Pure
   @Deprecated
   @Override
   public final boolean retainAll(Collection<?> elementsToKeep) {
@@ -150,6 +164,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
    * @throws UnsupportedOperationException always
    * @deprecated Unsupported operation.
    */
+  @SideEffectFree
   @Deprecated
   @Override
   public final void clear() {
@@ -167,11 +182,13 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
    *
    * @since 2.0
    */
+  @Impure
   public ImmutableList<E> asList() {
     ImmutableList<E> list = asList;
     return (list == null) ? (asList = createAsList()) : list;
   }
 
+  @Impure
   ImmutableList<E> createAsList() {
     switch (size()) {
       case 0:
@@ -189,12 +206,14 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
    * used to determine whether {@code copyOf} implementations should make an explicit copy to avoid
    * memory leaks.
    */
+  @Impure
   abstract boolean isPartialView();
   
   /**
    * Copies the contents of this immutable collection into the specified array at the specified
    * offset.  Returns {@code offset + size()}.
    */
+  @Impure
   int copyIntoArray(Object[] dst, int offset) {
     for (E e : this) {
       dst[offset++] = e;
@@ -202,6 +221,8 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
     return offset;
   }
 
+  @SideEffectFree
+  @Impure
   Object writeReplace() {
     // We serialize by default to ImmutableList, the simplest thing that works.
     return new ImmutableList.SerializedForm(toArray());
@@ -215,6 +236,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
   public abstract static class Builder<E> {
     static final int DEFAULT_INITIAL_CAPACITY = 4;
 
+    @Pure
     static int expandedCapacity(int oldCapacity, int minCapacity) {
       if (minCapacity < 0) {
         throw new AssertionError("cannot store more than MAX_VALUE elements");
@@ -231,6 +253,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
       return newCapacity;
     }
 
+    @SideEffectFree
     Builder() {
     }
 
@@ -244,6 +267,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
      * @return this {@code Builder} instance
      * @throws NullPointerException if {@code element} is null
      */
+    @Impure
     public abstract Builder<E> add(E element);
 
     /**
@@ -258,6 +282,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
      * @throws NullPointerException if {@code elements} is null or contains a
      *     null element
      */
+    @Impure
     public Builder<E> add(E... elements) {
       for (E element : elements) {
         add(element);
@@ -277,6 +302,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
      * @throws NullPointerException if {@code elements} is null or contains a
      *     null element
      */
+    @Impure
     public Builder<E> addAll(Iterable<? extends E> elements) {
       for (E element : elements) {
         add(element);
@@ -296,6 +322,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
      * @throws NullPointerException if {@code elements} is null or contains a
      *     null element
      */
+    @Impure
     public Builder<E> addAll(Iterator<? extends E> elements) {
       while (elements.hasNext()) {
         add(elements.next());
@@ -310,6 +337,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
      * <p>Note that each builder class covariantly returns the appropriate type
      * of {@code ImmutableCollection} from this method.
      */
+    @Impure
     public abstract ImmutableCollection<E> build();
   }
   
@@ -317,6 +345,8 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
     Object[] contents;
     int size;
     
+    @SideEffectFree
+    @Impure
     ArrayBasedBuilder(int initialCapacity) {
       checkNonnegative(initialCapacity, "initialCapacity");
       this.contents = new Object[initialCapacity];
@@ -327,6 +357,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
      * Expand the absolute capacity of the builder so it can accept at least
      * the specified number of elements without being resized.
      */
+    @Impure
     private void ensureCapacity(int minCapacity) {
       if (contents.length < minCapacity) {
         this.contents = ObjectArrays.arraysCopyOf(
@@ -334,6 +365,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
       }
     }
 
+    @Impure
     @Override
     public ArrayBasedBuilder<E> add(E element) {
       checkNotNull(element);
@@ -342,6 +374,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
       return this;
     }
 
+    @Impure
     @Override
     public Builder<E> add(E... elements) {
       checkElementsNotNull(elements);
@@ -351,6 +384,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E>
       return this;
     }
 
+    @Impure
     @Override
     public Builder<E> addAll(Iterable<? extends E> elements) {
       if (elements instanceof Collection) {

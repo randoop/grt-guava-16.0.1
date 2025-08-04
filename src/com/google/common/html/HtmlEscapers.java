@@ -16,6 +16,8 @@
 
 package com.google.common.html;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.escape.Escaper;
@@ -55,6 +57,7 @@ public final class HtmlEscapers {
    * points with character references. This escaper escapes only the following
    * five ASCII characters: {@code '"&<>}.
    */
+  @Pure
   public static Escaper htmlEscaper() {
     return HTML_ESCAPER;
   }
@@ -72,5 +75,6 @@ public final class HtmlEscapers {
           .addEscape('>', "&gt;")
           .build();
 
+  @SideEffectFree
   private HtmlEscapers() {}
 }

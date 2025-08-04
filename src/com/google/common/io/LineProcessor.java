@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 
 import java.io.IOException;
@@ -38,8 +40,10 @@ public interface LineProcessor<T> {
    * @param line the line read from the input, without delimiter
    * @return true to continue processing, false to stop
    */
+  @Impure
   boolean processLine(String line) throws IOException;
 
   /** Return the result of processing all the lines. */
+  @Pure
   T getResult();
 }

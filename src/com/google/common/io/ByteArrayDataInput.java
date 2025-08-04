@@ -16,6 +16,7 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.io.DataInput;
 import java.io.IOException;
 
@@ -33,33 +34,48 @@ import java.io.IOException;
  * @since 1.0
  */
 public interface ByteArrayDataInput extends DataInput {
+  @Impure
   @Override void readFully(byte b[]);
 
+  @Impure
   @Override void readFully(byte b[], int off, int len);
 
+  @Impure
   @Override int skipBytes(int n);
 
+  @Impure
   @Override boolean readBoolean();
 
+  @Impure
   @Override byte readByte();
 
+  @Impure
   @Override int readUnsignedByte();
 
+  @Impure
   @Override short readShort();
 
+  @Impure
   @Override int readUnsignedShort();
 
+  @Impure
   @Override char readChar();
 
+  @Impure
   @Override int readInt();
 
+  @Impure
   @Override long readLong();
 
+  @Impure
   @Override float readFloat();
 
+  @Impure
   @Override double readDouble();
 
+  @Impure
   @Override String readLine();
 
+  @Impure
   @Override String readUTF();
 }

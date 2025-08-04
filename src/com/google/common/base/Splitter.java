@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -106,10 +109,13 @@ public final class Splitter {
   private final Strategy strategy;
   private final int limit;
 
+  @SideEffectFree
+  @Impure
   private Splitter(Strategy strategy) {
     this(strategy, false, CharMatcher.NONE, Integer.MAX_VALUE);
   }
 
+  @SideEffectFree
   private Splitter(Strategy strategy, boolean omitEmptyStrings,
       CharMatcher trimmer, int limit) {
     this.strategy = strategy;
@@ -126,6 +132,7 @@ public final class Splitter {
    * @param separator the character to recognize as a separator
    * @return a splitter, with default settings, that recognizes that separator
    */
+  @Impure
   public static Splitter on(char separator) {
     return on(CharMatcher.is(separator));
   }
@@ -140,6 +147,7 @@ public final class Splitter {
    *     character is a separator
    * @return a splitter, with default settings, that uses this matcher
    */
+  @Impure
   public static Splitter on(final CharMatcher separatorMatcher) {
     checkNotNull(separatorMatcher);
 
@@ -167,6 +175,7 @@ public final class Splitter {
    * @param separator the literal, nonempty string to recognize as a separator
    * @return a splitter, with default settings, that recognizes that separator
    */
+  @Impure
   public static Splitter on(final String separator) {
     checkArgument(separator.length() != 0,
         "The separator may not be the empty string.");
@@ -211,6 +220,7 @@ public final class Splitter {
    * @throws IllegalArgumentException if {@code separatorPattern} matches the
    *     empty string
    */
+  @Impure
   @GwtIncompatible("java.util.regex")
   public static Splitter on(final Pattern separatorPattern) {
     checkNotNull(separatorPattern);
@@ -249,6 +259,7 @@ public final class Splitter {
    * @throws IllegalArgumentException if {@code separatorPattern} matches the
    *     empty string
    */
+  @Impure
   @GwtIncompatible("java.util.regex")
   public static Splitter onPattern(String separatorPattern) {
     return on(Pattern.compile(separatorPattern));
@@ -273,6 +284,7 @@ public final class Splitter {
    *     pieces
    * @throws IllegalArgumentException if {@code length} is zero or negative
    */
+  @Impure
   public static Splitter fixedLength(final int length) {
     checkArgument(length > 0, "The length may not be less than 1");
 
@@ -311,6 +323,8 @@ public final class Splitter {
    *
    * @return a splitter with the desired configuration
    */
+  @SideEffectFree
+  @Impure
   @CheckReturnValue
   public Splitter omitEmptyStrings() {
     return new Splitter(strategy, true, trimmer, limit);
@@ -335,6 +349,7 @@ public final class Splitter {
    * @return a splitter with the desired configuration
    * @since 9.0
    */
+  @Impure
   @CheckReturnValue
   public Splitter limit(int limit) {
     checkArgument(limit > 0, "must be greater than zero: %s", limit);
@@ -351,6 +366,8 @@ public final class Splitter {
    *
    * @return a splitter with the desired configuration
    */
+  @SideEffectFree
+  @Impure
   @CheckReturnValue
   public Splitter trimResults() {
     return trimResults(CharMatcher.WHITESPACE);
@@ -368,6 +385,8 @@ public final class Splitter {
    * @return a splitter with the desired configuration
    */
   // TODO(kevinb): throw if a trimmer was already specified!
+  @SideEffectFree
+  @Impure
   @CheckReturnValue
   public Splitter trimResults(CharMatcher trimmer) {
     checkNotNull(trimmer);
@@ -382,6 +401,7 @@ public final class Splitter {
    * @param sequence the sequence of characters to split
    * @return an iteration over the segments split from the parameter.
    */
+  @Impure
   public Iterable<String> split(final CharSequence sequence) {
     checkNotNull(sequence);
 
@@ -398,6 +418,7 @@ public final class Splitter {
     };
   }
 
+  @Impure
   private Iterator<String> splittingIterator(CharSequence sequence) {
     return strategy.iterator(this, sequence);
   }
@@ -411,6 +432,7 @@ public final class Splitter {
    * @return an immutable list of the segments split from the parameter
    * @since 15.0
    */
+  @Impure
   @Beta
   public List<String> splitToList(CharSequence sequence) {
     checkNotNull(sequence);
@@ -431,6 +453,7 @@ public final class Splitter {
    *
    * @since 10.0
    */
+  @Impure
   @CheckReturnValue
   @Beta
   public MapSplitter withKeyValueSeparator(String separator) {
@@ -443,6 +466,7 @@ public final class Splitter {
    *
    * @since 14.0
    */
+  @Impure
   @CheckReturnValue
   @Beta
   public MapSplitter withKeyValueSeparator(char separator) {
@@ -456,6 +480,8 @@ public final class Splitter {
    *
    * @since 10.0
    */
+  @SideEffectFree
+  @Impure
   @CheckReturnValue
   @Beta
   public MapSplitter withKeyValueSeparator(Splitter keyValueSplitter) {
@@ -476,6 +502,8 @@ public final class Splitter {
     private final Splitter outerSplitter;
     private final Splitter entrySplitter;
 
+    @SideEffectFree
+    @Impure
     private MapSplitter(Splitter outerSplitter, Splitter entrySplitter) {
       this.outerSplitter = outerSplitter; // only "this" is passed
       this.entrySplitter = checkNotNull(entrySplitter);
@@ -496,6 +524,7 @@ public final class Splitter {
      * @throws IllegalArgumentException if the specified sequence does not split
      *         into valid map entries, or if there are duplicate keys
      */
+    @Impure
     public Map<String, String> split(CharSequence sequence) {
       Map<String, String> map = new LinkedHashMap<String, String>();
       for (String entry : outerSplitter.split(sequence)) {
@@ -516,6 +545,7 @@ public final class Splitter {
   }
 
   private interface Strategy {
+    @Impure
     Iterator<String> iterator(Splitter splitter, CharSequence toSplit);
   }
 
@@ -528,6 +558,7 @@ public final class Splitter {
      * Returns the first index in {@code toSplit} at or after {@code start}
      * that contains the separator.
      */
+    @Impure
     abstract int separatorStart(int start);
 
     /**
@@ -535,11 +566,14 @@ public final class Splitter {
      * separatorPosition} that does not contain a separator. This method is only
      * invoked after a call to {@code separatorStart}.
      */
+    @Pure
     abstract int separatorEnd(int separatorPosition);
 
     int offset = 0;
     int limit;
 
+    @SideEffectFree
+    @Impure
     protected SplittingIterator(Splitter splitter, CharSequence toSplit) {
       this.trimmer = splitter.trimmer;
       this.omitEmptyStrings = splitter.omitEmptyStrings;
@@ -547,6 +581,7 @@ public final class Splitter {
       this.toSplit = toSplit;
     }
 
+    @Impure
     @Override protected String computeNext() {
       /*
        * The returned string will be from the end of the last match to the

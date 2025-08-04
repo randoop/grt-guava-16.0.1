@@ -16,6 +16,9 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -47,6 +50,7 @@ import java.util.RandomAccess;
  */
 @GwtCompatible
 public final class Booleans {
+  @SideEffectFree
   private Booleans() {}
 
   /**
@@ -56,6 +60,7 @@ public final class Booleans {
    * @param value a primitive {@code boolean} value
    * @return a hash code for the value
    */
+  @Pure
   public static int hashCode(boolean value) {
     return value ? 1231 : 1237;
   }
@@ -74,6 +79,7 @@ public final class Booleans {
    *     number if only {@code b} is true, or zero if {@code a == b}
    */
   // TODO(kevinb): if JDK 6 ever becomes a non-concern, remove this
+  @Pure
   public static int compare(boolean a, boolean b) {
     return (a == b) ? 0 : (a ? 1 : -1);
   }
@@ -92,6 +98,7 @@ public final class Booleans {
    * @return {@code true} if {@code array[i] == target} for some value of {@code
    *     i}
    */
+  @Pure
   public static boolean contains(boolean[] array, boolean target) {
     for (boolean value : array) {
       if (value == target) {
@@ -114,11 +121,14 @@ public final class Booleans {
    * @return the least index {@code i} for which {@code array[i] == target}, or
    *     {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int indexOf(boolean[] array, boolean target) {
     return indexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int indexOf(
       boolean[] array, boolean target, int start, int end) {
     for (int i = start; i < end; i++) {
@@ -140,6 +150,8 @@ public final class Booleans {
    * @param array the array to search for the sequence {@code target}
    * @param target the array to search for as a sub-sequence of {@code array}
    */
+  @Impure
+  @SideEffectFree
   public static int indexOf(boolean[] array, boolean[] target) {
     checkNotNull(array, "array");
     checkNotNull(target, "target");
@@ -168,11 +180,14 @@ public final class Booleans {
    * @return the greatest index {@code i} for which {@code array[i] == target},
    *     or {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int lastIndexOf(boolean[] array, boolean target) {
     return lastIndexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int lastIndexOf(
       boolean[] array, boolean target, int start, int end) {
     for (int i = end - 1; i >= start; i--) {
@@ -192,6 +207,7 @@ public final class Booleans {
    * @return a single array containing all the values from the source arrays, in
    *     order
    */
+  @SideEffectFree
   public static boolean[] concat(boolean[]... arrays) {
     int length = 0;
     for (boolean[] array : arrays) {
@@ -222,6 +238,7 @@ public final class Booleans {
    * @return an array containing the values of {@code array}, with guaranteed
    *     minimum length {@code minLength}
    */
+  @Impure
   public static boolean[] ensureCapacity(
       boolean[] array, int minLength, int padding) {
     checkArgument(minLength >= 0, "Invalid minLength: %s", minLength);
@@ -232,6 +249,7 @@ public final class Booleans {
   }
 
   // Arrays.copyOf() requires Java 6
+  @SideEffectFree
   private static boolean[] copyOf(boolean[] original, int length) {
     boolean[] copy = new boolean[length];
     System.arraycopy(original, 0, copy, 0, Math.min(original.length, length));
@@ -247,6 +265,7 @@ public final class Booleans {
    *     the resulting string (but not at the start or end)
    * @param array an array of {@code boolean} values, possibly empty
    */
+  @Impure
   public static String join(String separator, boolean... array) {
     checkNotNull(separator);
     if (array.length == 0) {
@@ -278,6 +297,7 @@ public final class Booleans {
    *     Lexicographical order article at Wikipedia</a>
    * @since 2.0
    */
+  @Pure
   public static Comparator<boolean[]> lexicographicalComparator() {
     return LexicographicalComparator.INSTANCE;
   }
@@ -285,6 +305,8 @@ public final class Booleans {
   private enum LexicographicalComparator implements Comparator<boolean[]> {
     INSTANCE;
 
+    @Pure
+    @Impure
     @Override
     public int compare(boolean[] left, boolean[] right) {
       int minLength = Math.min(left.length, right.length);
@@ -315,6 +337,7 @@ public final class Booleans {
    * @throws NullPointerException if {@code collection} or any of its elements
    *     is null
    */
+  @Impure
   public static boolean[] toArray(Collection<Boolean> collection) {
     if (collection instanceof BooleanArrayAsList) {
       return ((BooleanArrayAsList) collection).toBooleanArray();
@@ -344,6 +367,7 @@ public final class Booleans {
    * @param backingArray the array to back the list
    * @return a list view of the array
    */
+  @Impure
   public static List<Boolean> asList(boolean... backingArray) {
     if (backingArray.length == 0) {
       return Collections.emptyList();
@@ -358,35 +382,45 @@ public final class Booleans {
     final int start;
     final int end;
 
+    @SideEffectFree
+    @Impure
     BooleanArrayAsList(boolean[] array) {
       this(array, 0, array.length);
     }
 
+    @SideEffectFree
     BooleanArrayAsList(boolean[] array, int start, int end) {
       this.array = array;
       this.start = start;
       this.end = end;
     }
 
+    @Pure
     @Override public int size() {
       return end - start;
     }
 
+    @Pure
     @Override public boolean isEmpty() {
       return false;
     }
 
+    @Impure
     @Override public Boolean get(int index) {
       checkElementIndex(index, size());
       return array[start + index];
     }
 
+    @Pure
+    @Impure
     @Override public boolean contains(Object target) {
       // Overridden to prevent a ton of boxing
       return (target instanceof Boolean)
           && Booleans.indexOf(array, (Boolean) target, start, end) != -1;
     }
 
+    @Pure
+    @Impure
     @Override public int indexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Boolean) {
@@ -398,6 +432,8 @@ public final class Booleans {
       return -1;
     }
 
+    @Pure
+    @Impure
     @Override public int lastIndexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Boolean) {
@@ -409,6 +445,7 @@ public final class Booleans {
       return -1;
     }
 
+    @Impure
     @Override public Boolean set(int index, Boolean element) {
       checkElementIndex(index, size());
       boolean oldValue = array[start + index];
@@ -417,6 +454,7 @@ public final class Booleans {
       return oldValue;
     }
 
+    @Impure
     @Override public List<Boolean> subList(int fromIndex, int toIndex) {
       int size = size();
       checkPositionIndexes(fromIndex, toIndex, size);
@@ -426,6 +464,7 @@ public final class Booleans {
       return new BooleanArrayAsList(array, start + fromIndex, start + toIndex);
     }
 
+    @Pure
     @Override public boolean equals(Object object) {
       if (object == this) {
         return true;
@@ -446,6 +485,8 @@ public final class Booleans {
       return super.equals(object);
     }
 
+    @Pure
+    @Impure
     @Override public int hashCode() {
       int result = 1;
       for (int i = start; i < end; i++) {
@@ -454,6 +495,7 @@ public final class Booleans {
       return result;
     }
 
+    @Impure
     @Override public String toString() {
       StringBuilder builder = new StringBuilder(size() * 7);
       builder.append(array[start] ? "[true" : "[false");
@@ -463,6 +505,7 @@ public final class Booleans {
       return builder.append(']').toString();
     }
 
+    @SideEffectFree
     boolean[] toBooleanArray() {
       // Arrays.copyOfRange() is not available under GWT
       int size = size();
@@ -479,6 +522,7 @@ public final class Booleans {
    *
    * @since 16.0
    */
+  @Pure
   @Beta
   public static int countTrue(boolean... values) {
     int count = 0;

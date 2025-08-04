@@ -14,6 +14,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -39,6 +42,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible
 @Beta final class SortedLists {
+  @SideEffectFree
   private SortedLists() {}
 
   /**
@@ -51,6 +55,7 @@ import javax.annotation.Nullable;
      * made as to which index is returned, if more than one element compares as equal to the key.
      */
     ANY_PRESENT {
+      @Pure
       @Override
       <E> int resultIndex(
           Comparator<? super E> comparator, E key, List<? extends E> list, int foundIndex) {
@@ -61,6 +66,7 @@ import javax.annotation.Nullable;
      * Return the index of the last list element that compares as equal to the key.
      */
     LAST_PRESENT {
+      @Impure
       @Override
       <E> int resultIndex(
           Comparator<? super E> comparator, E key, List<? extends E> list, int foundIndex) {
@@ -85,6 +91,7 @@ import javax.annotation.Nullable;
      * Return the index of the first list element that compares as equal to the key.
      */
     FIRST_PRESENT {
+      @Impure
       @Override
       <E> int resultIndex(
           Comparator<? super E> comparator, E key, List<? extends E> list, int foundIndex) {
@@ -111,6 +118,7 @@ import javax.annotation.Nullable;
      * list.size()} if there is no such element.
      */
     FIRST_AFTER {
+      @Impure
       @Override
       public <E> int resultIndex(
           Comparator<? super E> comparator, E key, List<? extends E> list, int foundIndex) {
@@ -122,12 +130,14 @@ import javax.annotation.Nullable;
      * if there is no such element.
      */
     LAST_BEFORE {
+      @Impure
       @Override
       public <E> int resultIndex(
           Comparator<? super E> comparator, E key, List<? extends E> list, int foundIndex) {
         return FIRST_PRESENT.resultIndex(comparator, key, list, foundIndex) - 1;
       }
     };
+    @Impure
     abstract <E> int resultIndex(
         Comparator<? super E> comparator, E key, List<? extends E> list, int foundIndex);
   }
@@ -142,6 +152,7 @@ import javax.annotation.Nullable;
      * element.
      */
     NEXT_LOWER {
+      @Pure
       @Override
       int resultIndex(int higherIndex) {
         return higherIndex - 1;
@@ -152,6 +163,7 @@ import javax.annotation.Nullable;
      * no such element.
      */
     NEXT_HIGHER {
+      @Pure
       @Override
       public int resultIndex(int higherIndex) {
         return higherIndex;
@@ -170,12 +182,14 @@ import javax.annotation.Nullable;
      * {@code ~insertionIndex} is equal to {@code -1 - insertionIndex}.
      */
     INVERTED_INSERTION_INDEX {
+      @Pure
       @Override
       public int resultIndex(int higherIndex) {
         return ~higherIndex;
       }
     };
 
+    @Pure
     abstract int resultIndex(int higherIndex);
   }
 
@@ -186,6 +200,7 @@ import javax.annotation.Nullable;
    * <p>Equivalent to {@link #binarySearch(List, Function, Object, Comparator, KeyPresentBehavior,
    * KeyAbsentBehavior)} using {@link Ordering#natural}.
    */
+  @Impure
   public static <E extends Comparable> int binarySearch(List<? extends E> list, E e,
       KeyPresentBehavior presentBehavior, KeyAbsentBehavior absentBehavior) {
     checkNotNull(e);
@@ -199,6 +214,7 @@ import javax.annotation.Nullable;
    * <p>Equivalent to {@link #binarySearch(List, Function, Object, Comparator, KeyPresentBehavior,
    * KeyAbsentBehavior)} using {@link Ordering#natural}.
    */
+  @Impure
   public static <E, K extends Comparable> int binarySearch(List<E> list,
       Function<? super E, K> keyFunction, @Nullable K key, KeyPresentBehavior presentBehavior,
       KeyAbsentBehavior absentBehavior) {
@@ -218,6 +234,7 @@ import javax.annotation.Nullable;
    * {@link #binarySearch(List, Object, Comparator, KeyPresentBehavior, KeyAbsentBehavior)} using
    * {@link Lists#transform(List, Function) Lists.transform(list, keyFunction)}.
    */
+  @Impure
   public static <E, K> int binarySearch(
       List<E> list,
       Function<? super E, K> keyFunction,
@@ -252,6 +269,7 @@ import javax.annotation.Nullable;
    * @return the index determined by the {@code KeyPresentBehavior}, if the key is in the list;
    *         otherwise the index determined by the {@code KeyAbsentBehavior}.
    */
+  @Impure
   public static <E> int binarySearch(List<? extends E> list, @Nullable E key,
       Comparator<? super E> comparator, KeyPresentBehavior presentBehavior,
       KeyAbsentBehavior absentBehavior) {

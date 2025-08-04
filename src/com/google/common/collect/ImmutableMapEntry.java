@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.collect.CollectPreconditions.checkEntryNotNull;
 
 import com.google.common.annotations.GwtIncompatible;
@@ -32,37 +34,45 @@ import javax.annotation.Nullable;
  */
 @GwtIncompatible("unnecessary")
 abstract class ImmutableMapEntry<K, V> extends ImmutableEntry<K, V> {
+  @Impure
   ImmutableMapEntry(K key, V value) {
     super(key, value);
     checkEntryNotNull(key, value);
   }
 
+  @Impure
   ImmutableMapEntry(ImmutableMapEntry<K, V> contents) {
     super(contents.getKey(), contents.getValue());
     // null check would be redundant
   }
 
+  @Pure
   @Nullable
   abstract ImmutableMapEntry<K, V> getNextInKeyBucket();
 
+  @Pure
   @Nullable
   abstract ImmutableMapEntry<K, V> getNextInValueBucket();
 
   static final class TerminalEntry<K, V> extends ImmutableMapEntry<K, V> {
+    @Impure
     TerminalEntry(ImmutableMapEntry<K, V> contents) {
       super(contents);
     }
 
+    @Impure
     TerminalEntry(K key, V value) {
       super(key, value);
     }
 
+    @Pure
     @Override
     @Nullable
     ImmutableMapEntry<K, V> getNextInKeyBucket() {
       return null;
     }
 
+    @Pure
     @Override
     @Nullable
     ImmutableMapEntry<K, V> getNextInValueBucket() {

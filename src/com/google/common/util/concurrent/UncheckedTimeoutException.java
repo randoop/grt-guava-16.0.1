@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import javax.annotation.Nullable;
 
 /**
@@ -25,16 +26,20 @@ import javax.annotation.Nullable;
  * @since 1.0
  */
 public class UncheckedTimeoutException extends RuntimeException {
+  @SideEffectFree
   public UncheckedTimeoutException() {}
 
+  @SideEffectFree
   public UncheckedTimeoutException(@Nullable String message) {
     super(message);
   }
 
+  @SideEffectFree
   public UncheckedTimeoutException(@Nullable Throwable cause) {
     super(cause);
   }
 
+  @SideEffectFree
   public UncheckedTimeoutException(@Nullable String message, @Nullable Throwable cause) {
     super(message, cause);
   }

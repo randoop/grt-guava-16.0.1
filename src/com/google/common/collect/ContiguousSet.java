@@ -14,6 +14,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Deterministic;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -49,6 +52,7 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
    *
    * @since 13.0
    */
+  @Impure
   public static <C extends Comparable> ContiguousSet<C> create(
       Range<C> range, DiscreteDomain<C> domain) {
     checkNotNull(range);
@@ -78,11 +82,13 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
 
   final DiscreteDomain<C> domain;
 
+  @Impure
   ContiguousSet(DiscreteDomain<C> domain) {
     super(Ordering.natural());
     this.domain = domain;
   }
 
+  @Impure
   @Override public ContiguousSet<C> headSet(C toElement) {
     return headSetImpl(checkNotNull(toElement), false);
   }
@@ -90,11 +96,13 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
   /**
    * @since 12.0
    */
+  @Impure
   @GwtIncompatible("NavigableSet")
   @Override public ContiguousSet<C> headSet(C toElement, boolean inclusive) {
     return headSetImpl(checkNotNull(toElement), inclusive);
   }
 
+  @Impure
   @Override public ContiguousSet<C> subSet(C fromElement, C toElement) {
     checkNotNull(fromElement);
     checkNotNull(toElement);
@@ -105,6 +113,7 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
   /**
    * @since 12.0
    */
+  @Impure
   @GwtIncompatible("NavigableSet")
   @Override public ContiguousSet<C> subSet(C fromElement, boolean fromInclusive, C toElement,
       boolean toInclusive) {
@@ -114,6 +123,7 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
     return subSetImpl(fromElement, fromInclusive, toElement, toInclusive);
   }
 
+  @Impure
   @Override public ContiguousSet<C> tailSet(C fromElement) {
     return tailSetImpl(checkNotNull(fromElement), true);
   }
@@ -121,6 +131,7 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
   /**
    * @since 12.0
    */
+  @Impure
   @GwtIncompatible("NavigableSet")
   @Override public ContiguousSet<C> tailSet(C fromElement, boolean inclusive) {
     return tailSetImpl(checkNotNull(fromElement), inclusive);
@@ -129,12 +140,12 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
   /*
    * These methods perform most headSet, subSet, and tailSet logic, besides parameter validation.
    */
-  /*@Override*/ abstract ContiguousSet<C> headSetImpl(C toElement, boolean inclusive);
+  /*@Override*/ @Pure abstract ContiguousSet<C> headSetImpl(C toElement, boolean inclusive);
 
-  /*@Override*/ abstract ContiguousSet<C> subSetImpl(C fromElement, boolean fromInclusive,
+  /*@Override*/ @Pure abstract ContiguousSet<C> subSetImpl(C fromElement, boolean fromInclusive,
       C toElement, boolean toInclusive);
 
-  /*@Override*/ abstract ContiguousSet<C> tailSetImpl(C fromElement, boolean inclusive);
+  /*@Override*/ @Pure abstract ContiguousSet<C> tailSetImpl(C fromElement, boolean inclusive);
 
   /**
    * Returns the set of values that are contained in both this set and the other.
@@ -142,6 +153,7 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
    * <p>This method should always be used instead of
    * {@link Sets#intersection} for {@link ContiguousSet} instances.
    */
+  @Pure
   public abstract ContiguousSet<C> intersection(ContiguousSet<C> other);
 
   /**
@@ -150,6 +162,7 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
    *
    * @throws NoSuchElementException if this set is empty
    */
+  @Deterministic
   public abstract Range<C> range();
 
   /**
@@ -163,9 +176,11 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
    *
    * @throws NoSuchElementException if this set is empty
    */
+  @Deterministic
   public abstract Range<C> range(BoundType lowerBoundType, BoundType upperBoundType);
 
   /** Returns a short-hand representation of the contents such as {@code "[1..100]"}. */
+  @Impure
   @Override public String toString() {
     return range().toString();
   }
@@ -178,6 +193,7 @@ public abstract class ContiguousSet<C extends Comparable> extends ImmutableSorte
    * @throws UnsupportedOperationException always
    * @deprecated Use {@link #create}.
    */
+  @Pure
   @Deprecated public static <E> ImmutableSortedSet.Builder<E> builder() {
     throw new UnsupportedOperationException();
   }

@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Map;
@@ -53,6 +54,7 @@ public interface ClassToInstanceMap<B> extends Map<Class<? extends B>, B> {
    * bound to this specific class, not a value that may have been bound to a
    * subtype.
    */
+  @Pure
   <T extends B> T getInstance(Class<T> type);
 
   /**
@@ -62,5 +64,6 @@ public interface ClassToInstanceMap<B> extends Map<Class<? extends B>, B> {
    * @return the value previously associated with this class (possibly {@code
    *     null}), or {@code null} if there was no previous entry.
    */
+  @Pure
   <T extends B> T putInstance(Class<T> type, @Nullable T value);
 }

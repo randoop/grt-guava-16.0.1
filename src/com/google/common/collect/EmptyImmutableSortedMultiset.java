@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collection;
@@ -30,45 +32,54 @@ import javax.annotation.Nullable;
 final class EmptyImmutableSortedMultiset<E> extends ImmutableSortedMultiset<E> {
   private final ImmutableSortedSet<E> elementSet;
 
+  @Impure
   EmptyImmutableSortedMultiset(Comparator<? super E> comparator) {
     this.elementSet = ImmutableSortedSet.emptySet(comparator);
   }
 
+  @Pure
   @Override
   public Entry<E> firstEntry() {
     return null;
   }
 
+  @Pure
   @Override
   public Entry<E> lastEntry() {
     return null;
   }
 
+  @Pure
   @Override
   public int count(@Nullable Object element) {
     return 0;
   }
 
+  @Pure
   @Override
   public boolean containsAll(Collection<?> targets) {
     return targets.isEmpty();
   }
 
+  @Pure
   @Override
   public int size() {
     return 0;
   }
 
+  @Pure
   @Override
   public ImmutableSortedSet<E> elementSet() {
     return elementSet;
   }
 
+  @Pure
   @Override
   Entry<E> getEntry(int index) {
     throw new AssertionError("should never be called");
   }
 
+  @Impure
   @Override
   public ImmutableSortedMultiset<E> headMultiset(E upperBound, BoundType boundType) {
     checkNotNull(upperBound);
@@ -76,6 +87,7 @@ final class EmptyImmutableSortedMultiset<E> extends ImmutableSortedMultiset<E> {
     return this;
   }
 
+  @Impure
   @Override
   public ImmutableSortedMultiset<E> tailMultiset(E lowerBound, BoundType boundType) {
     checkNotNull(lowerBound);
@@ -83,11 +95,13 @@ final class EmptyImmutableSortedMultiset<E> extends ImmutableSortedMultiset<E> {
     return this;
   }
 
+  @Impure
   @Override
   public UnmodifiableIterator<E> iterator() {
     return Iterators.emptyIterator();
   }
 
+  @Pure
   @Override
   public boolean equals(@Nullable Object object) {
     if (object instanceof Multiset) {
@@ -97,16 +111,19 @@ final class EmptyImmutableSortedMultiset<E> extends ImmutableSortedMultiset<E> {
     return false;
   }
 
+  @Pure
   @Override
   boolean isPartialView() {
     return false;
   }
 
+  @Pure
   @Override
   int copyIntoArray(Object[] dst, int offset) {
     return offset;
   }
 
+  @Impure
   @Override
   public ImmutableList<E> asList() {
     return ImmutableList.of();

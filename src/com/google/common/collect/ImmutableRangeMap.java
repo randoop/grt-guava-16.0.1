@@ -14,6 +14,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,6 +51,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
   /**
    * Returns an empty immutable range map.
    */
+  @Pure
   @SuppressWarnings("unchecked")
   public static <K extends Comparable<?>, V> ImmutableRangeMap<K, V> of() {
     return (ImmutableRangeMap<K, V>) EMPTY;
@@ -56,11 +60,13 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
   /**
    * Returns an immutable range map mapping a single range to a single value.
    */
+  @Impure
   public static <K extends Comparable<?>, V> ImmutableRangeMap<K, V> of(
       Range<K> range, V value) {
     return new ImmutableRangeMap<K, V>(ImmutableList.of(range), ImmutableList.of(value));
   }
 
+  @Impure
   @SuppressWarnings("unchecked")
   public static <K extends Comparable<?>, V> ImmutableRangeMap<K, V> copyOf(
       RangeMap<K, ? extends V> rangeMap) {
@@ -80,6 +86,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
   /**
    * Returns a new builder for an immutable range map.
    */
+  @Impure
   public static <K extends Comparable<?>, V> Builder<K, V> builder() {
     return new Builder<K, V>();
   }
@@ -91,6 +98,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
     private final RangeSet<K> keyRanges;
     private final RangeMap<K, V> rangeMap;
 
+    @Impure
     public Builder() {
       this.keyRanges = TreeRangeSet.create();
       this.rangeMap = TreeRangeMap.create();
@@ -102,6 +110,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
      * @throws IllegalArgumentException if {@code range} overlaps with any other ranges inserted
      *         into this builder, or if {@code range} is empty
      */
+    @Impure
     public Builder<K, V> put(Range<K> range, V value) {
       checkNotNull(range);
       checkNotNull(value);
@@ -127,6 +136,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
      * @throws IllegalArgumentException if any of the ranges in {@code rangeMap} overlap with ranges
      *         already in this builder
      */
+    @Impure
     public Builder<K, V> putAll(RangeMap<K, ? extends V> rangeMap) {
       for (Entry<Range<K>, ? extends V> entry : rangeMap.asMapOfRanges().entrySet()) {
         put(entry.getKey(), entry.getValue());
@@ -138,6 +148,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
      * Returns an {@code ImmutableRangeMap} containing the associations previously added to this
      * builder.
      */
+    @Impure
     public ImmutableRangeMap<K, V> build() {
       Map<Range<K>, V> map = rangeMap.asMapOfRanges();
       ImmutableList.Builder<Range<K>> rangesBuilder =
@@ -154,11 +165,13 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
   private final ImmutableList<Range<K>> ranges;
   private final ImmutableList<V> values;
 
+  @SideEffectFree
   ImmutableRangeMap(ImmutableList<Range<K>> ranges, ImmutableList<V> values) {
     this.ranges = ranges;
     this.values = values;
   }
 
+  @Impure
   @Override
   @Nullable
   public V get(K key) {
@@ -172,6 +185,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
     }
   }
 
+  @Impure
   @Override
   @Nullable
   public Map.Entry<Range<K>, V> getEntry(K key) {
@@ -185,6 +199,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
     }
   }
 
+  @Impure
   @Override
   public Range<K> span() {
     if (ranges.isEmpty()) {
@@ -195,26 +210,31 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
     return Range.create(firstRange.lowerBound, lastRange.upperBound);
   }
 
+  @SideEffectFree
   @Override
   public void put(Range<K> range, V value) {
     throw new UnsupportedOperationException();
   }
 
+  @SideEffectFree
   @Override
   public void putAll(RangeMap<K, V> rangeMap) {
     throw new UnsupportedOperationException();
   }
 
+  @SideEffectFree
   @Override
   public void clear() {
     throw new UnsupportedOperationException();
   }
 
+  @SideEffectFree
   @Override
   public void remove(Range<K> range) {
     throw new UnsupportedOperationException();
   }
 
+  @Impure
   @Override
   public ImmutableMap<Range<K>, V> asMapOfRanges() {
     if (ranges.isEmpty()) {
@@ -225,6 +245,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
     return new RegularImmutableSortedMap<Range<K>, V>(rangeSet, values);
   }
   
+  @Impure
   @Override
   public ImmutableRangeMap<K, V> subRangeMap(final Range<K> range) {
     if (checkNotNull(range).isEmpty()) {
@@ -244,11 +265,13 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
     final int off = lowerIndex;
     final int len = upperIndex - lowerIndex;
     ImmutableList<Range<K>> subRanges = new ImmutableList<Range<K>>() {
+      @Pure
       @Override
       public int size() {
         return len;
       }
 
+      @Impure
       @Override
       public Range<K> get(int index) {
         checkElementIndex(index, len);
@@ -259,6 +282,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
         }
       }
 
+      @Pure
       @Override
       boolean isPartialView() {
         return true;
@@ -278,11 +302,13 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
     };
   }
 
+  @Impure
   @Override
   public int hashCode() {
     return asMapOfRanges().hashCode();
   }
 
+  @Impure
   @Override
   public boolean equals(@Nullable Object o) {
     if (o instanceof RangeMap) {
@@ -292,6 +318,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
     return false;
   }
 
+  @Impure
   @Override
   public String toString() {
     return asMapOfRanges().toString();

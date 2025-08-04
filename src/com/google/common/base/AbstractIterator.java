@@ -16,6 +16,8 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.GwtCompatible;
@@ -31,6 +33,7 @@ import java.util.NoSuchElementException;
 abstract class AbstractIterator<T> implements Iterator<T> {
   private State state = State.NOT_READY;
 
+  @SideEffectFree
   protected AbstractIterator() {}
 
   private enum State {
@@ -39,13 +42,16 @@ abstract class AbstractIterator<T> implements Iterator<T> {
 
   private T next;
 
+  @Impure
   protected abstract T computeNext();
 
+  @Impure
   protected final T endOfData() {
     state = State.DONE;
     return null;
   }
 
+  @Impure
   @Override
   public final boolean hasNext() {
     checkState(state != State.FAILED);
@@ -59,6 +65,7 @@ abstract class AbstractIterator<T> implements Iterator<T> {
     return tryToComputeNext();
   }
 
+  @Impure
   private boolean tryToComputeNext() {
     state = State.FAILED; // temporary pessimism
     next = computeNext();
@@ -69,6 +76,7 @@ abstract class AbstractIterator<T> implements Iterator<T> {
     return false;
   }
 
+  @Impure
   @Override
   public final T next() {
     if (!hasNext()) {
@@ -80,6 +88,7 @@ abstract class AbstractIterator<T> implements Iterator<T> {
     return result;
   }
 
+  @SideEffectFree
   @Override public final void remove() {
     throw new UnsupportedOperationException();
   }

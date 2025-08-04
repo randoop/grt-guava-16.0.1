@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Collection;
@@ -42,12 +44,15 @@ abstract class AbstractListMultimap<K, V>
    * @param map place to store the mapping from each key to its corresponding
    *     values
    */
+  @Impure
   protected AbstractListMultimap(Map<K, Collection<V>> map) {
     super(map);
   }
 
+  @Pure
   @Override abstract List<V> createCollection();
 
+  @Impure
   @Override
   List<V> createUnmodifiableEmptyCollection() {
     return ImmutableList.of();
@@ -62,6 +67,7 @@ abstract class AbstractListMultimap<K, V>
    * insertion ordering, this method returns a {@link List}, instead of the
    * {@link Collection} specified in the {@link Multimap} interface.
    */
+  @Impure
   @Override public List<V> get(@Nullable K key) {
     return (List<V>) super.get(key);
   }
@@ -73,6 +79,7 @@ abstract class AbstractListMultimap<K, V>
    * insertion ordering, this method returns a {@link List}, instead of the
    * {@link Collection} specified in the {@link Multimap} interface.
    */
+  @Impure
   @Override public List<V> removeAll(@Nullable Object key) {
     return (List<V>) super.removeAll(key);
   }
@@ -84,6 +91,7 @@ abstract class AbstractListMultimap<K, V>
    * insertion ordering, this method returns a {@link List}, instead of the
    * {@link Collection} specified in the {@link Multimap} interface.
    */
+  @Impure
   @Override public List<V> replaceValues(
       @Nullable K key, Iterable<? extends V> values) {
     return (List<V>) super.replaceValues(key, values);
@@ -96,6 +104,7 @@ abstract class AbstractListMultimap<K, V>
    * @param value value to store in the multimap
    * @return {@code true} always
    */
+  @Impure
   @Override public boolean put(@Nullable K key, @Nullable V value) {
     return super.put(key, value);
   }
@@ -106,6 +115,7 @@ abstract class AbstractListMultimap<K, V>
    * <p>Though the method signature doesn't say so explicitly, the returned map
    * has {@link List} values.
    */
+  @Impure
   @Override public Map<K, Collection<V>> asMap() {
     return super.asMap();
   }
@@ -117,6 +127,7 @@ abstract class AbstractListMultimap<K, V>
    * contain the same values in the same order. If the value orderings disagree,
    * the multimaps will not be considered equal.
    */
+  @Pure
   @Override public boolean equals(@Nullable Object object) {
     return super.equals(object);
   }

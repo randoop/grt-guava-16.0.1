@@ -16,6 +16,8 @@
 
 package com.google.common.net;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -92,6 +94,7 @@ public final class PercentEscaper extends UnicodeEscaper {
    *        rather than {@code %20}
    * @throws IllegalArgumentException if any of the parameters were invalid
    */
+  @Impure
   public PercentEscaper(String safeChars, boolean plusForSpace) {
     // TODO(user): Switch to static factory methods for creation now that class is final.
     // TODO(user): Support escapers where alphanumeric chars are not safe.
@@ -120,6 +123,7 @@ public final class PercentEscaper extends UnicodeEscaper {
    * specified in safeChars set to true. The array is as small as is required to
    * hold the given character information.
    */
+  @Impure
   private static boolean[] createSafeOctets(String safeChars) {
     int maxChar = -1;
     char[] safeCharArray = safeChars.toCharArray();
@@ -138,6 +142,8 @@ public final class PercentEscaper extends UnicodeEscaper {
    * performance of the uri escaper from ~760ns to ~400ns as measured by
    * {@link CharEscapersBenchmark}.
    */
+  @Impure
+  @Pure
   @Override
   protected int nextEscapeIndex(CharSequence csq, int index, int end) {
     checkNotNull(csq);
@@ -155,6 +161,7 @@ public final class PercentEscaper extends UnicodeEscaper {
    * performance of the uri escaper from ~400ns to ~170ns as measured by
    * {@link CharEscapersBenchmark}.
    */
+  @Impure
   @Override
   public String escape(String s) {
     checkNotNull(s);
@@ -171,6 +178,7 @@ public final class PercentEscaper extends UnicodeEscaper {
   /**
    * Escapes the given Unicode code point in UTF-8.
    */
+  @Impure
   @Override
   protected char[] escape(int cp) {
     // We should never get negative values here but if we do it will throw an

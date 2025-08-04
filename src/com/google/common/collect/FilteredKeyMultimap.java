@@ -14,6 +14,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkPositionIndex;
 
@@ -40,21 +43,25 @@ class FilteredKeyMultimap<K, V> extends AbstractMultimap<K, V> implements Filter
   final Multimap<K, V> unfiltered;
   final Predicate<? super K> keyPredicate;
 
+  @Impure
   FilteredKeyMultimap(Multimap<K, V> unfiltered, Predicate<? super K> keyPredicate) {
     this.unfiltered = checkNotNull(unfiltered);
     this.keyPredicate = checkNotNull(keyPredicate);
   }
 
+  @Impure
   @Override
   public Multimap<K, V> unfiltered() {
     return unfiltered;
   }
 
+  @Impure
   @Override
   public Predicate<? super Entry<K, V>> entryPredicate() {
     return Maps.keyPredicateOnEntries(keyPredicate);
   }
 
+  @Impure
   @Override
   public int size() {
     int size = 0;
@@ -64,6 +71,7 @@ class FilteredKeyMultimap<K, V> extends AbstractMultimap<K, V> implements Filter
     return size;
   }
 
+  @Impure
   @Override
   public boolean containsKey(@Nullable Object key) {
     if (unfiltered.containsKey(key)) {
@@ -74,11 +82,13 @@ class FilteredKeyMultimap<K, V> extends AbstractMultimap<K, V> implements Filter
     return false;
   }
 
+  @Impure
   @Override
   public Collection<V> removeAll(Object key) {
     return containsKey(key) ? unfiltered.removeAll(key) : unmodifiableEmptyCollection();
   }
 
+  @Impure
   Collection<V> unmodifiableEmptyCollection() {
     if (unfiltered instanceof SetMultimap) {
       return ImmutableSet.of();
@@ -87,16 +97,19 @@ class FilteredKeyMultimap<K, V> extends AbstractMultimap<K, V> implements Filter
     }
   }
 
+  @Impure
   @Override
   public void clear() {
     keySet().clear();
   }
 
+  @Impure
   @Override
   Set<K> createKeySet() {
     return Sets.filter(unfiltered.keySet(), keyPredicate);
   }
 
+  @Impure
   @Override
   public Collection<V> get(K key) {
     if (keyPredicate.apply(key)) {
@@ -111,21 +124,25 @@ class FilteredKeyMultimap<K, V> extends AbstractMultimap<K, V> implements Filter
   static class AddRejectingSet<K, V> extends ForwardingSet<V> {
     final K key;
 
+    @Impure
     AddRejectingSet(K key) {
       this.key = key;
     }
 
+    @Pure
     @Override
     public boolean add(V element) {
       throw new IllegalArgumentException("Key does not satisfy predicate: " + key);
     }
 
+    @Impure
     @Override
     public boolean addAll(Collection<? extends V> collection) {
       checkNotNull(collection);
       throw new IllegalArgumentException("Key does not satisfy predicate: " + key);
     }
 
+    @SideEffectFree
     @Override
     protected Set<V> delegate() {
       return Collections.emptySet();
@@ -135,28 +152,33 @@ class FilteredKeyMultimap<K, V> extends AbstractMultimap<K, V> implements Filter
   static class AddRejectingList<K, V> extends ForwardingList<V> {
     final K key;
 
+    @Impure
     AddRejectingList(K key) {
       this.key = key;
     }
 
+    @Impure
     @Override
     public boolean add(V v) {
       add(0, v);
       return true;
     }
 
+    @Impure
     @Override
     public boolean addAll(Collection<? extends V> collection) {
       addAll(0, collection);
       return true;
     }
 
+    @Impure
     @Override
     public void add(int index, V element) {
       checkPositionIndex(index, 0);
       throw new IllegalArgumentException("Key does not satisfy predicate: " + key);
     }
 
+    @Impure
     @Override
     public boolean addAll(int index, Collection<? extends V> elements) {
       checkNotNull(elements);
@@ -164,28 +186,33 @@ class FilteredKeyMultimap<K, V> extends AbstractMultimap<K, V> implements Filter
       throw new IllegalArgumentException("Key does not satisfy predicate: " + key);
     }
 
+    @SideEffectFree
     @Override
     protected List<V> delegate() {
       return Collections.emptyList();
     }
   }
 
+  @Pure
   @Override
   Iterator<Entry<K, V>> entryIterator() {
     throw new AssertionError("should never be called");
   }
 
+  @Impure
   @Override
   Collection<Entry<K, V>> createEntries() {
     return new Entries();
   }
 
   class Entries extends ForwardingCollection<Entry<K, V>> {
+    @Impure
     @Override
     protected Collection<Entry<K, V>> delegate() {
       return Collections2.filter(unfiltered.entries(), entryPredicate());
     }
 
+    @Impure
     @Override
     @SuppressWarnings("unchecked")
     public boolean remove(@Nullable Object o) {
@@ -201,16 +228,19 @@ class FilteredKeyMultimap<K, V> extends AbstractMultimap<K, V> implements Filter
     }
   }
   
+  @Impure
   @Override
   Collection<V> createValues() {
     return new FilteredMultimapValues<K, V>(this);
   }
 
+  @Impure
   @Override
   Map<K, Collection<V>> createAsMap() {
     return Maps.filterKeys(unfiltered.asMap(), keyPredicate);
   }
 
+  @Impure
   @Override
   Multiset<K> createKeys() {
     return Multisets.filter(unfiltered.keys(), keyPredicate);

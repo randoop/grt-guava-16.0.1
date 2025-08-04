@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 
@@ -41,16 +43,19 @@ import java.util.concurrent.TimeoutException;
 public abstract class ForwardingCheckedFuture<V, X extends Exception> 
     extends ForwardingListenableFuture<V> implements CheckedFuture<V, X> {
 
+  @Impure
   @Override
   public V checkedGet() throws X {
     return delegate().checkedGet();
   }
 
+  @Impure
   @Override
   public V checkedGet(long timeout, TimeUnit unit) throws TimeoutException, X {
     return delegate().checkedGet(timeout, unit);
   }
 
+  @Pure
   @Override
   protected abstract CheckedFuture<V, X> delegate();
 
@@ -66,10 +71,12 @@ public abstract class ForwardingCheckedFuture<V, X extends Exception>
       V, X extends Exception> extends ForwardingCheckedFuture<V, X> {
     private final CheckedFuture<V, X> delegate;
 
+    @Impure
     protected SimpleForwardingCheckedFuture(CheckedFuture<V, X> delegate) {
       this.delegate = Preconditions.checkNotNull(delegate);
     }
 
+    @Pure
     @Override
     protected final CheckedFuture<V, X> delegate() {
       return delegate;

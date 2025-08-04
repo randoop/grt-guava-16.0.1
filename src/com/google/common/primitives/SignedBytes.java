@@ -16,6 +16,9 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -40,6 +43,7 @@ import java.util.Comparator;
 // javadoc?
 @GwtCompatible
 public final class SignedBytes {
+  @SideEffectFree
   private SignedBytes() {}
 
   /**
@@ -57,6 +61,7 @@ public final class SignedBytes {
    * @throws IllegalArgumentException if {@code value} is greater than {@link
    *     Byte#MAX_VALUE} or less than {@link Byte#MIN_VALUE}
    */
+  @Pure
   public static byte checkedCast(long value) {
     byte result = (byte) value;
     if (result != value) {
@@ -74,6 +79,7 @@ public final class SignedBytes {
    *     {@code byte} type, {@link Byte#MAX_VALUE} if it is too large,
    *     or {@link Byte#MIN_VALUE} if it is too small
    */
+  @Pure
   public static byte saturatedCast(long value) {
     if (value > Byte.MAX_VALUE) {
       return Byte.MAX_VALUE;
@@ -98,6 +104,7 @@ public final class SignedBytes {
    */
   // TODO(kevinb): if Ints.compare etc. are ever removed, *maybe* remove this
   // one too, which would leave compare methods only on the Unsigned* classes.
+  @Pure
   public static int compare(byte a, byte b) {
     return a - b; // safe due to restricted range
   }
@@ -110,6 +117,8 @@ public final class SignedBytes {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
+  @SideEffectFree
   public static byte min(byte... array) {
     checkArgument(array.length > 0);
     byte min = array[0];
@@ -129,6 +138,8 @@ public final class SignedBytes {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
+  @SideEffectFree
   public static byte max(byte... array) {
     checkArgument(array.length > 0);
     byte max = array[0];
@@ -149,6 +160,7 @@ public final class SignedBytes {
    *     the resulting string (but not at the start or end)
    * @param array an array of {@code byte} values, possibly empty
    */
+  @Impure
   public static String join(String separator, byte... array) {
     checkNotNull(separator);
     if (array.length == 0) {
@@ -180,6 +192,7 @@ public final class SignedBytes {
    *     Lexicographical order article at Wikipedia</a>
    * @since 2.0
    */
+  @Pure
   public static Comparator<byte[]> lexicographicalComparator() {
     return LexicographicalComparator.INSTANCE;
   }
@@ -187,6 +200,8 @@ public final class SignedBytes {
   private enum LexicographicalComparator implements Comparator<byte[]> {
     INSTANCE;
 
+    @Pure
+    @Impure
     @Override
     public int compare(byte[] left, byte[] right) {
       int minLength = Math.min(left.length, right.length);

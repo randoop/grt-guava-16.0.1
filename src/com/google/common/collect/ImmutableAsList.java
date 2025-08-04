@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 
@@ -33,24 +36,32 @@ import java.io.Serializable;
 @GwtCompatible(serializable = true, emulated = true)
 @SuppressWarnings("serial")
 abstract class ImmutableAsList<E> extends ImmutableList<E> {
+  @Pure
   abstract ImmutableCollection<E> delegateCollection();
 
+  @Pure
+  @Impure
   @Override public boolean contains(Object target) {
     // The collection's contains() is at least as fast as ImmutableList's
     // and is often faster.
     return delegateCollection().contains(target);
   }
 
+  @Pure
+  @Impure
   @Override
   public int size() {
     return delegateCollection().size();
   }
 
+  @Pure
+  @Impure
   @Override
   public boolean isEmpty() {
     return delegateCollection().isEmpty();
   }
 
+  @Impure
   @Override
   boolean isPartialView() {
     return delegateCollection().isPartialView();
@@ -62,21 +73,26 @@ abstract class ImmutableAsList<E> extends ImmutableList<E> {
   @GwtIncompatible("serialization")
   static class SerializedForm implements Serializable {
     final ImmutableCollection<?> collection;
+    @SideEffectFree
     SerializedForm(ImmutableCollection<?> collection) {
       this.collection = collection;
     }
+    @Impure
     Object readResolve() {
       return collection.asList();
     }
     private static final long serialVersionUID = 0;
   }
 
+  @Impure
   @GwtIncompatible("serialization")
   private void readObject(ObjectInputStream stream)
       throws InvalidObjectException {
     throw new InvalidObjectException("Use SerializedForm");
   }
 
+  @SideEffectFree
+  @Impure
   @GwtIncompatible("serialization")
   @Override Object writeReplace() {
     return new SerializedForm(delegateCollection());

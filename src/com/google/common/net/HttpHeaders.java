@@ -16,6 +16,7 @@
 
 package com.google.common.net;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 
@@ -34,6 +35,7 @@ import com.google.common.annotations.GwtCompatible;
  */
 @GwtCompatible
 public final class HttpHeaders {
+  @SideEffectFree
   private HttpHeaders() {}
 
   // HTTP Request and Response header fields

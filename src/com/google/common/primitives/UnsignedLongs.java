@@ -14,6 +14,9 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -50,6 +53,7 @@ import java.util.Comparator;
 @Beta
 @GwtCompatible
 public final class UnsignedLongs {
+  @SideEffectFree
   private UnsignedLongs() {}
 
   public static final long MAX_VALUE = -1L; // Equivalent to 2^64 - 1
@@ -59,6 +63,7 @@ public final class UnsignedLongs {
    * longs, that is, {@code a <= b} as unsigned longs if and only if {@code flip(a) <= flip(b)}
    * as signed longs.
    */
+  @Pure
   private static long flip(long a) {
     return a ^ Long.MIN_VALUE;
   }
@@ -72,6 +77,8 @@ public final class UnsignedLongs {
    * @return a negative value if {@code a} is less than {@code b}; a positive value if {@code a} is
    *         greater than {@code b}; or zero if they are equal
    */
+  @Pure
+  @Impure
   public static int compare(long a, long b) {
     return Longs.compare(flip(a), flip(b));
   }
@@ -84,6 +91,7 @@ public final class UnsignedLongs {
    *         the array according to {@link #compare}
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
   public static long min(long... array) {
     checkArgument(array.length > 0);
     long min = flip(array[0]);
@@ -104,6 +112,7 @@ public final class UnsignedLongs {
    *         in the array according to {@link #compare}
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
   public static long max(long... array) {
     checkArgument(array.length > 0);
     long max = flip(array[0]);
@@ -124,6 +133,7 @@ public final class UnsignedLongs {
    *        string (but not at the start or end)
    * @param array an array of unsigned {@code long} values, possibly empty
    */
+  @Impure
   public static String join(String separator, long... array) {
     checkNotNull(separator);
     if (array.length == 0) {
@@ -152,6 +162,7 @@ public final class UnsignedLongs {
    * @see <a href="http://en.wikipedia.org/wiki/Lexicographical_order">Lexicographical order
    *      article at Wikipedia</a>
    */
+  @Pure
   public static Comparator<long[]> lexicographicalComparator() {
     return LexicographicalComparator.INSTANCE;
   }
@@ -159,6 +170,7 @@ public final class UnsignedLongs {
   enum LexicographicalComparator implements Comparator<long[]> {
     INSTANCE;
 
+    @Impure
     @Override
     public int compare(long[] left, long[] right) {
       int minLength = Math.min(left.length, right.length);
@@ -179,6 +191,7 @@ public final class UnsignedLongs {
    * @param divisor the divisor (denominator)
    * @throws ArithmeticException if divisor is 0
    */
+  @Impure
   public static long divide(long dividend, long divisor) {
     if (divisor < 0) { // i.e., divisor >= 2^63:
       if (compare(dividend, divisor) < 0) {
@@ -213,6 +226,7 @@ public final class UnsignedLongs {
    * @throws ArithmeticException if divisor is 0
    * @since 11.0
    */
+  @Impure
   public static long remainder(long dividend, long divisor) {
     if (divisor < 0) { // i.e., divisor >= 2^63:
       if (compare(dividend, divisor) < 0) {
@@ -246,6 +260,7 @@ public final class UnsignedLongs {
    * @throws NullPointerException if {@code s} is null 
    *         (in contrast to {@link Long#parseLong(String)})
    */
+  @Impure
   public static long parseUnsignedLong(String s) {
     return parseUnsignedLong(s, 10);
   }
@@ -266,6 +281,7 @@ public final class UnsignedLongs {
    *         value
    * @since 13.0
    */
+  @Impure
   public static long decode(String stringValue) {
     ParseRequest request = ParseRequest.fromString(stringValue);
 
@@ -290,6 +306,7 @@ public final class UnsignedLongs {
    * @throws NullPointerException if {@code s} is null 
    *         (in contrast to {@link Long#parseLong(String)})
    */
+  @Impure
   public static long parseUnsignedLong(String s, int radix) {
     checkNotNull(s);
     if (s.length() == 0) {
@@ -321,6 +338,7 @@ public final class UnsignedLongs {
    * a number. Does not verify whether supplied radix is valid, passing an invalid radix will give
    * undefined results or an ArrayIndexOutOfBoundsException.
    */
+  @Pure
   private static boolean overflowInParse(long current, int digit, int radix) {
     if (current >= 0) {
       if (current < maxValueDivs[radix]) {
@@ -340,6 +358,7 @@ public final class UnsignedLongs {
   /**
    * Returns a string representation of x, where x is treated as unsigned.
    */
+  @Impure
   public static String toString(long x) {
     return toString(x, 10);
   }
@@ -353,6 +372,7 @@ public final class UnsignedLongs {
    * @throws IllegalArgumentException if {@code radix} is not between {@link Character#MIN_RADIX}
    *         and {@link Character#MAX_RADIX}.
    */
+  @Impure
   public static String toString(long x, int radix) {
     checkArgument(radix >= Character.MIN_RADIX && radix <= Character.MAX_RADIX,
         "radix (%s) must be between Character.MIN_RADIX and Character.MAX_RADIX", radix);

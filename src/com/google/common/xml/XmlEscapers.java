@@ -16,6 +16,8 @@
 
 package com.google.common.xml;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.escape.Escaper;
@@ -47,6 +49,7 @@ import com.google.common.escape.Escapers;
 @Beta
 @GwtCompatible
 public class XmlEscapers {
+  @SideEffectFree
   private XmlEscapers() {}
 
   private static final char MIN_ASCII_CONTROL_CHAR = 0x00;
@@ -83,6 +86,7 @@ public class XmlEscapers {
    * <p>This escaper does not treat surrogate pairs specially and does not
    * perform Unicode validation on its input.
    */
+  @Pure
   public static Escaper xmlContentEscaper() {
     return XML_CONTENT_ESCAPER;
   }
@@ -104,6 +108,7 @@ public class XmlEscapers {
    * <p>This escaper does not treat surrogate pairs specially and does not
    * perform Unicode validation on its input.
    */
+  @Pure
   public static Escaper xmlAttributeEscaper() {
     return XML_ATTRIBUTE_ESCAPER;
   }

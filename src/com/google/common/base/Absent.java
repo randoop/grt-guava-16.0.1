@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -32,60 +35,74 @@ import javax.annotation.Nullable;
 final class Absent<T> extends Optional<T> {
   static final Absent<Object> INSTANCE = new Absent<Object>();
 
+  @Pure
   @SuppressWarnings("unchecked") // implementation is "fully variant"
   static <T> Optional<T> withType() {
     return (Optional<T>) INSTANCE;
   }
 
+  @SideEffectFree
   private Absent() {}
 
+  @Pure
   @Override public boolean isPresent() {
     return false;
   }
 
+  @Pure
   @Override public T get() {
     throw new IllegalStateException("Optional.get() cannot be called on an absent value");
   }
 
+  @SideEffectFree
   @Override public T or(T defaultValue) {
     return checkNotNull(defaultValue, "use Optional.orNull() instead of Optional.or(null)");
   }
 
+  @Pure
   @SuppressWarnings("unchecked") // safe covariant cast
   @Override public Optional<T> or(Optional<? extends T> secondChoice) {
     return (Optional<T>) checkNotNull(secondChoice);
   }
 
+  @Impure
   @Override public T or(Supplier<? extends T> supplier) {
     return checkNotNull(supplier.get(),
         "use Optional.orNull() instead of a Supplier that returns null");
   }
 
+  @Pure
   @Override @Nullable public T orNull() {
     return null;
   }
 
+  @SideEffectFree
   @Override public Set<T> asSet() {
     return Collections.emptySet();
   }
 
+  @Impure
   @Override public <V> Optional<V> transform(Function<? super T, V> function) {
     checkNotNull(function);
     return Optional.absent();
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object object) {
     return object == this;
   }
 
+  @Pure
   @Override public int hashCode() {
     return 0x598df91c;
   }
 
+  @Pure
   @Override public String toString() {
     return "Optional.absent()";
   }
 
+  @Pure
   private Object readResolve() {
     return INSTANCE;
   }

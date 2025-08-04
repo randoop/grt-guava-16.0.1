@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 
@@ -39,6 +41,7 @@ import java.util.concurrent.TimeUnit;
  * @since 11.0
  */
 public final class Queues {
+  @SideEffectFree
   private Queues() {}
 
   // ArrayBlockingQueue
@@ -47,6 +50,7 @@ public final class Queues {
    * Creates an empty {@code ArrayBlockingQueue} with the given (fixed) capacity
    * and nonfair access policy.
    */
+  @Impure
   public static <E> ArrayBlockingQueue<E> newArrayBlockingQueue(int capacity) {
     return new ArrayBlockingQueue<E>(capacity);
   }
@@ -58,6 +62,7 @@ public final class Queues {
    *
    * @since 12.0
    */
+  @Impure
   public static <E> ArrayDeque<E> newArrayDeque() {
     return new ArrayDeque<E>();
   }
@@ -68,6 +73,7 @@ public final class Queues {
    *
    * @since 12.0
    */
+  @Impure
   public static <E> ArrayDeque<E> newArrayDeque(Iterable<? extends E> elements) {
     if (elements instanceof Collection) {
       return new ArrayDeque<E>(Collections2.cast(elements));
@@ -82,6 +88,7 @@ public final class Queues {
   /**
    * Creates an empty {@code ConcurrentLinkedQueue}.
    */
+  @Impure
   public static <E> ConcurrentLinkedQueue<E> newConcurrentLinkedQueue() {
     return new ConcurrentLinkedQueue<E>();
   }
@@ -90,6 +97,7 @@ public final class Queues {
    * Creates a {@code ConcurrentLinkedQueue} containing the elements of the specified iterable,
    * in the order they are returned by the iterable's iterator.
    */
+  @Impure
   public static <E> ConcurrentLinkedQueue<E> newConcurrentLinkedQueue(
       Iterable<? extends E> elements) {
     if (elements instanceof Collection) {
@@ -107,6 +115,7 @@ public final class Queues {
    *
    * @since 12.0
    */
+  @Impure
   public static <E> LinkedBlockingDeque<E> newLinkedBlockingDeque() {
     return new LinkedBlockingDeque<E>();
   }
@@ -117,6 +126,7 @@ public final class Queues {
    * @throws IllegalArgumentException if {@code capacity} is less than 1
    * @since 12.0
    */
+  @Impure
   public static <E> LinkedBlockingDeque<E> newLinkedBlockingDeque(int capacity) {
     return new LinkedBlockingDeque<E>(capacity);
   }
@@ -128,6 +138,7 @@ public final class Queues {
    *
    * @since 12.0
    */
+  @Impure
   public static <E> LinkedBlockingDeque<E> newLinkedBlockingDeque(Iterable<? extends E> elements) {
     if (elements instanceof Collection) {
       return new LinkedBlockingDeque<E>(Collections2.cast(elements));
@@ -142,6 +153,7 @@ public final class Queues {
   /**
    * Creates an empty {@code LinkedBlockingQueue} with a capacity of {@link Integer#MAX_VALUE}.
    */
+  @Impure
   public static <E> LinkedBlockingQueue<E> newLinkedBlockingQueue() {
     return new LinkedBlockingQueue<E>();
   }
@@ -151,6 +163,7 @@ public final class Queues {
    *
    * @throws IllegalArgumentException if {@code capacity} is less than 1
    */
+  @Impure
   public static <E> LinkedBlockingQueue<E> newLinkedBlockingQueue(int capacity) {
     return new LinkedBlockingQueue<E>(capacity);
   }
@@ -163,6 +176,7 @@ public final class Queues {
    * @param elements the elements that the queue should contain, in order
    * @return a new {@code LinkedBlockingQueue} containing those elements
    */
+  @Impure
   public static <E> LinkedBlockingQueue<E> newLinkedBlockingQueue(Iterable<? extends E> elements) {
     if (elements instanceof Collection) {
       return new LinkedBlockingQueue<E>(Collections2.cast(elements));
@@ -182,6 +196,7 @@ public final class Queues {
    *
    * @since 11.0 (requires that {@code E} be {@code Comparable} since 15.0).
    */
+  @Impure
   public static <E extends Comparable> PriorityBlockingQueue<E> newPriorityBlockingQueue() {
     return new PriorityBlockingQueue<E>();
   }
@@ -194,6 +209,7 @@ public final class Queues {
    *
    * @since 11.0 (requires that {@code E} be {@code Comparable} since 15.0).
    */
+  @Impure
   public static <E extends Comparable> PriorityBlockingQueue<E> newPriorityBlockingQueue(
       Iterable<? extends E> elements) {
     if (elements instanceof Collection) {
@@ -212,6 +228,7 @@ public final class Queues {
    *
    * @since 11.0 (requires that {@code E} be {@code Comparable} since 15.0).
    */
+  @Impure
   public static <E extends Comparable> PriorityQueue<E> newPriorityQueue() {
     return new PriorityQueue<E>();
   }
@@ -224,6 +241,7 @@ public final class Queues {
    *
    * @since 11.0 (requires that {@code E} be {@code Comparable} since 15.0).
    */
+  @Impure
   public static <E extends Comparable> PriorityQueue<E> newPriorityQueue(
       Iterable<? extends E> elements) {
     if (elements instanceof Collection) {
@@ -239,6 +257,7 @@ public final class Queues {
   /**
    * Creates an empty {@code SynchronousQueue} with nonfair access policy.
    */
+  @Impure
   public static <E> SynchronousQueue<E> newSynchronousQueue() {
     return new SynchronousQueue<E>();
   }
@@ -256,6 +275,7 @@ public final class Queues {
    * @return the number of elements transferred
    * @throws InterruptedException if interrupted while waiting
    */
+  @Impure
   @Beta
   public static <E> int drain(BlockingQueue<E> q, Collection<? super E> buffer, int numElements,
       long timeout, TimeUnit unit) throws InterruptedException {
@@ -296,6 +316,7 @@ public final class Queues {
    * @param unit a {@code TimeUnit} determining how to interpret the timeout parameter
    * @return the number of elements transferred
    */
+  @Impure
   @Beta
   public static <E> int drainUninterruptibly(BlockingQueue<E> q, Collection<? super E> buffer, 
       int numElements, long timeout, TimeUnit unit) {
@@ -360,6 +381,7 @@ public final class Queues {
    * @return a synchronized view of the specified queue
    * @since 14.0
    */
+  @Impure
   @Beta
   public static <E> Queue<E> synchronizedQueue(Queue<E> queue) {
     return Synchronized.queue(queue, null);
@@ -392,6 +414,7 @@ public final class Queues {
    * @return a synchronized view of the specified deque
    * @since 15.0
    */
+  @Impure
   @Beta
   public static <E> Deque<E> synchronizedDeque(Deque<E> deque) {
     return Synchronized.deque(deque, null);

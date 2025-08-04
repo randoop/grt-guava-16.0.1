@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -83,6 +85,7 @@ public final class Futures {
    *
    * @since 9.0 (source-compatible since 1.0)
    */
+  @Impure
   public static <V, X extends Exception> CheckedFuture<V, X> makeChecked(
       ListenableFuture<V> future, Function<Exception, X> mapper) {
     return new MappingCheckedFuture<V, X>(checkNotNull(future), mapper);
@@ -94,6 +97,7 @@ public final class Futures {
     private static final Logger log =
         Logger.getLogger(ImmediateFuture.class.getName());
 
+    @Impure
     @Override
     public void addListener(Runnable listener, Executor executor) {
       checkNotNull(listener, "Runnable was null.");
@@ -108,25 +112,30 @@ public final class Futures {
       }
     }
 
+    @Pure
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
       return false;
     }
 
+    @Impure
     @Override
     public abstract V get() throws ExecutionException;
 
+    @Impure
     @Override
     public V get(long timeout, TimeUnit unit) throws ExecutionException {
       checkNotNull(unit);
       return get();
     }
 
+    @Pure
     @Override
     public boolean isCancelled() {
       return false;
     }
 
+    @Pure
     @Override
     public boolean isDone() {
       return true;
@@ -137,10 +146,12 @@ public final class Futures {
 
     @Nullable private final V value;
 
+    @Impure
     ImmediateSuccessfulFuture(@Nullable V value) {
       this.value = value;
     }
 
+    @Pure
     @Override
     public V get() {
       return value;
@@ -152,20 +163,24 @@ public final class Futures {
 
     @Nullable private final V value;
 
+    @Impure
     ImmediateSuccessfulCheckedFuture(@Nullable V value) {
       this.value = value;
     }
 
+    @Pure
     @Override
     public V get() {
       return value;
     }
 
+    @Pure
     @Override
     public V checkedGet() {
       return value;
     }
 
+    @Impure
     @Override
     public V checkedGet(long timeout, TimeUnit unit) {
       checkNotNull(unit);
@@ -177,10 +192,12 @@ public final class Futures {
 
     private final Throwable thrown;
 
+    @Impure
     ImmediateFailedFuture(Throwable thrown) {
       this.thrown = thrown;
     }
 
+    @Pure
     @Override
     public V get() throws ExecutionException {
       throw new ExecutionException(thrown);
@@ -191,15 +208,18 @@ public final class Futures {
 
     private final CancellationException thrown;
 
+    @Impure
     ImmediateCancelledFuture() {
       this.thrown = new CancellationException("Immediate cancelled future.");
     }
 
+    @Pure
     @Override
     public boolean isCancelled() {
       return true;
     }
 
+    @Impure
     @Override
     public V get() {
       throw AbstractFuture.cancellationExceptionWithCause(
@@ -212,20 +232,24 @@ public final class Futures {
 
     private final X thrown;
 
+    @Impure
     ImmediateFailedCheckedFuture(X thrown) {
       this.thrown = thrown;
     }
 
+    @Pure
     @Override
     public V get() throws ExecutionException {
       throw new ExecutionException(thrown);
     }
 
+    @Pure
     @Override
     public V checkedGet() throws X {
       throw thrown;
     }
 
+    @Impure
     @Override
     public V checkedGet(long timeout, TimeUnit unit) throws X {
       checkNotNull(unit);
@@ -239,6 +263,7 @@ public final class Futures {
    * be canceled or timed out and its {@code isDone()} method always returns
    * {@code true}.
    */
+  @Impure
   public static <V> ListenableFuture<V> immediateFuture(@Nullable V value) {
     return new ImmediateSuccessfulFuture<V>(value);
   }
@@ -251,6 +276,7 @@ public final class Futures {
    * method always returns {@code true}. Calling {@code get()} or {@code
    * checkedGet()} will immediately return the provided value.
    */
+  @Impure
   public static <V, X extends Exception> CheckedFuture<V, X>
       immediateCheckedFuture(@Nullable V value) {
     return new ImmediateSuccessfulCheckedFuture<V, X>(value);
@@ -265,6 +291,7 @@ public final class Futures {
    * throw the provided {@code Throwable} wrapped in an {@code
    * ExecutionException}.
    */
+  @Impure
   public static <V> ListenableFuture<V> immediateFailedFuture(
       Throwable throwable) {
     checkNotNull(throwable);
@@ -277,6 +304,7 @@ public final class Futures {
    *
    * @since 14.0
    */
+  @Impure
   public static <V> ListenableFuture<V> immediateCancelledFuture() {
     return new ImmediateCancelledFuture<V>();
   }
@@ -291,6 +319,7 @@ public final class Futures {
    * ExecutionException}, and calling {@code checkedGet()} will throw the
    * provided exception itself.
    */
+  @Impure
   public static <V, X extends Exception> CheckedFuture<V, X>
       immediateFailedCheckedFuture(X exception) {
     checkNotNull(exception);
@@ -369,6 +398,7 @@ public final class Futures {
    *     {@code input} fails
    * @since 14.0
    */
+  @Impure
   public static <V> ListenableFuture<V> withFallback(
       ListenableFuture<? extends V> input,
       FutureFallback<? extends V> fallback) {
@@ -433,6 +463,7 @@ public final class Futures {
    *     fails
    * @since 14.0
    */
+  @Impure
   public static <V> ListenableFuture<V> withFallback(
       ListenableFuture<? extends V> input,
       FutureFallback<? extends V> fallback, Executor executor) {
@@ -448,16 +479,19 @@ public final class Futures {
 
     private volatile ListenableFuture<? extends V> running;
 
+    @Impure
     FallbackFuture(ListenableFuture<? extends V> input,
         final FutureFallback<? extends V> fallback,
         final Executor executor) {
       running = input;
       addCallback(running, new FutureCallback<V>() {
+        @Impure
         @Override
         public void onSuccess(V value) {
           set(value);
         }
 
+        @Impure
         @Override
         public void onFailure(Throwable t) {
           if (isCancelled()) {
@@ -470,6 +504,7 @@ public final class Futures {
               return;
             }
             addCallback(running, new FutureCallback<V>() {
+              @Impure
               @Override
               public void onSuccess(V value) {
                 set(value);
@@ -491,6 +526,7 @@ public final class Futures {
       }, executor);
     }
 
+    @Impure
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
       if (super.cancel(mayInterruptIfRunning)) {
@@ -556,6 +592,7 @@ public final class Futures {
    *     or the original input's failure (if not)
    * @since 11.0
    */
+  @Impure
   public static <I, O> ListenableFuture<O> transform(ListenableFuture<I> input,
       AsyncFunction<? super I, ? extends O> function) {
     return transform(input, function, MoreExecutors.sameThreadExecutor());
@@ -600,6 +637,7 @@ public final class Futures {
    *     or the original input's failure (if not)
    * @since 11.0
    */
+  @Impure
   public static <I, O> ListenableFuture<O> transform(ListenableFuture<I> input,
       AsyncFunction<? super I, ? extends O> function,
       Executor executor) {
@@ -662,6 +700,7 @@ public final class Futures {
    * @return A future that holds result of the transformation.
    * @since 9.0 (in 1.0 as {@code compose})
    */
+  @Impure
   public static <I, O> ListenableFuture<O> transform(ListenableFuture<I> input,
       final Function<? super I, ? extends O> function) {
     return transform(input, function, MoreExecutors.sameThreadExecutor());
@@ -704,6 +743,7 @@ public final class Futures {
    * @return A future that holds result of the transformation.
    * @since 9.0 (in 2.0 as {@code compose})
    */
+  @Impure
   public static <I, O> ListenableFuture<O> transform(ListenableFuture<I> input,
       final Function<? super I, ? extends O> function, Executor executor) {
     checkNotNull(function);
@@ -740,6 +780,7 @@ public final class Futures {
    * @return A future that returns the result of the transformation.
    * @since 10.0
    */
+  @Impure
   public static <I, O> Future<O> lazyTransform(final Future<I> input,
       final Function<? super I, ? extends O> function) {
     checkNotNull(input);
@@ -810,6 +851,7 @@ public final class Futures {
     private volatile ListenableFuture<? extends O> outputFuture;
     private final CountDownLatch outputCreated = new CountDownLatch(1);
 
+    @Impure
     private ChainingListenableFuture(
         AsyncFunction<? super I, ? extends O> function,
         ListenableFuture<? extends I> inputFuture) {
@@ -817,6 +859,7 @@ public final class Futures {
       this.inputFuture = checkNotNull(inputFuture);
     }
 
+    @Impure
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
       /*
@@ -833,6 +876,7 @@ public final class Futures {
       return false;
     }
 
+    @Impure
     private void cancel(@Nullable Future<?> future,
         boolean mayInterruptIfRunning) {
       if (future != null) {
@@ -840,6 +884,7 @@ public final class Futures {
       }
     }
 
+    @Impure
     @Override
     public void run() {
       try {
@@ -922,6 +967,7 @@ public final class Futures {
    * @return A future that holds result of the inner future.
    * @since 13.0
    */
+  @Impure
   @SuppressWarnings({"rawtypes", "unchecked"})
   public static <V> ListenableFuture<V> dereference(
       ListenableFuture<? extends ListenableFuture<? extends V>> nested) {
@@ -954,6 +1000,7 @@ public final class Futures {
    *         futures
    * @since 10.0
    */
+  @Impure
   @Beta
   public static <V> ListenableFuture<List<V>> allAsList(
       ListenableFuture<? extends V>... futures) {
@@ -977,6 +1024,7 @@ public final class Futures {
    *         futures
    * @since 10.0
    */
+  @Impure
   @Beta
   public static <V> ListenableFuture<List<V>> allAsList(
       Iterable<? extends ListenableFuture<? extends V>> futures) {
@@ -992,6 +1040,7 @@ public final class Futures {
    *
    * @since 15.0
    */
+  @Impure
   public static <V> ListenableFuture<V> nonCancellationPropagating(
       ListenableFuture<V> future) {
     return new NonCancellationPropagatingFuture<V>(future);
@@ -1002,14 +1051,17 @@ public final class Futures {
    */
   private static class NonCancellationPropagatingFuture<V>
       extends AbstractFuture<V> {
+    @Impure
     NonCancellationPropagatingFuture(final ListenableFuture<V> delegate) {
       checkNotNull(delegate);
       addCallback(delegate, new FutureCallback<V>() {
+        @Impure
         @Override
         public void onSuccess(V result) {
           set(result);
         }
 
+        @Impure
         @Override
         public void onFailure(Throwable t) {
           if (delegate.isCancelled()) {
@@ -1037,6 +1089,7 @@ public final class Futures {
    *         futures
    * @since 10.0
    */
+  @Impure
   @Beta
   public static <V> ListenableFuture<List<V>> successfulAsList(
       ListenableFuture<? extends V>... futures) {
@@ -1059,6 +1112,7 @@ public final class Futures {
    *         futures
    * @since 10.0
    */
+  @Impure
   @Beta
   public static <V> ListenableFuture<List<V>> successfulAsList(
       Iterable<? extends ListenableFuture<? extends V>> futures) {
@@ -1115,6 +1169,7 @@ public final class Futures {
    * @param callback The callback to invoke when {@code future} is completed.
    * @since 10.0
    */
+  @Impure
   public static <V> void addCallback(ListenableFuture<V> future,
       FutureCallback<? super V> callback) {
     addCallback(future, callback, MoreExecutors.sameThreadExecutor());
@@ -1157,6 +1212,7 @@ public final class Futures {
    *    completes.
    * @since 10.0
    */
+  @Impure
   public static <V> void addCallback(final ListenableFuture<V> future,
       final FutureCallback<? super V> callback, Executor executor) {
     Preconditions.checkNotNull(callback);
@@ -1231,6 +1287,7 @@ public final class Futures {
    *         RuntimeException} or does not have a suitable constructor
    * @since 10.0
    */
+  @Impure
   public static <V, X extends Exception> V get(
       Future<V> future, Class<X> exceptionClass) throws X {
     checkNotNull(future);
@@ -1296,6 +1353,7 @@ public final class Futures {
    *         RuntimeException} or does not have a suitable constructor
    * @since 10.0
    */
+  @Impure
   public static <V, X extends Exception> V get(
       Future<V> future, long timeout, TimeUnit unit, Class<X> exceptionClass)
       throws X {
@@ -1317,6 +1375,7 @@ public final class Futures {
     }
   }
 
+  @Impure
   private static <X extends Exception> void wrapAndThrowExceptionOrError(
       Throwable cause, Class<X> exceptionClass) throws X {
     if (cause instanceof Error) {
@@ -1365,6 +1424,7 @@ public final class Futures {
    *         CancellationException}
    * @since 10.0
    */
+  @Impure
   public static <V> V getUnchecked(Future<V> future) {
     checkNotNull(future);
     try {
@@ -1375,6 +1435,7 @@ public final class Futures {
     }
   }
 
+  @Impure
   private static void wrapAndThrowUnchecked(Throwable cause) {
     if (cause instanceof Error) {
       throw new ExecutionError((Error) cause);
@@ -1404,6 +1465,7 @@ public final class Futures {
    * If you think you would use this method, let us know.
    */
 
+  @Impure
   private static <X extends Exception> X newWithCause(
       Class<X> exceptionClass, Throwable cause) {
     // getConstructors() guarantees this as long as we don't modify the array.
@@ -1424,6 +1486,7 @@ public final class Futures {
             + " in response to chained exception", cause);
   }
 
+  @Impure
   private static <X extends Exception> List<Constructor<X>>
       preferringStrings(List<Constructor<X>> constructors) {
     return WITH_STRING_PARAM_FIRST.sortedCopy(constructors);
@@ -1436,6 +1499,7 @@ public final class Futures {
         }
       }).reverse();
 
+  @Impure
   @Nullable private static <X> X newFromConstructor(
       Constructor<X> constructor, Throwable cause) {
     Class<?>[] paramTypes = constructor.getParameterTypes();
@@ -1464,6 +1528,7 @@ public final class Futures {
   }
 
   private interface FutureCombiner<V, C> {
+    @Impure
     C combine(List<Optional<V>> values);
   }
 
@@ -1479,6 +1544,7 @@ public final class Futures {
     final Object seenExceptionsLock = new Object();
     Set<Throwable> seenExceptions;
 
+    @Impure
     CombinedFuture(
         ImmutableCollection<? extends ListenableFuture<? extends V>> futures,
         boolean allMustSucceed, Executor listenerExecutor,
@@ -1494,9 +1560,11 @@ public final class Futures {
     /**
      * Must be called at the end of the constructor.
      */
+    @Impure
     protected void init(final Executor listenerExecutor) {
       // First, schedule cleanup to execute when the Future is done.
       addListener(new Runnable() {
+        @Impure
         @Override
         public void run() {
           // Cancel all the component futures.
@@ -1543,6 +1611,7 @@ public final class Futures {
       for (final ListenableFuture<? extends V> listenable : futures) {
         final int index = i++;
         listenable.addListener(new Runnable() {
+          @Impure
           @Override
           public void run() {
             setOneValue(index, listenable);
@@ -1557,6 +1626,7 @@ public final class Futures {
      * {@link #allMustSucceed} is {@code true}, the throwable did not cause
      * this future to fail, and it is the first time we've seen that particular Throwable.
      */
+    @Impure
     private void setExceptionAndMaybeLog(Throwable throwable) {
       boolean visibleFromOutputFuture = false;
       boolean firstTimeSeeingThisException = true;
@@ -1582,6 +1652,7 @@ public final class Futures {
     /**
      * Sets the value at the given index to that of the given future.
      */
+    @Impure
     private void setOneValue(int index, Future<? extends V> future) {
       List<Optional<V>> localValues = values;
       // TODO(user): This check appears to be redundant since values is
@@ -1634,6 +1705,7 @@ public final class Futures {
   }
 
   /** Used for {@link #allAsList} and {@link #successfulAsList}. */
+  @Impure
   private static <V> ListenableFuture<List<V>> listFuture(
       ImmutableList<ListenableFuture<? extends V>> futures,
       boolean allMustSucceed, Executor listenerExecutor) {
@@ -1660,6 +1732,7 @@ public final class Futures {
 
     final Function<Exception, X> mapper;
 
+    @Impure
     MappingCheckedFuture(ListenableFuture<V> delegate,
         Function<Exception, X> mapper) {
       super(delegate);
@@ -1667,6 +1740,7 @@ public final class Futures {
       this.mapper = checkNotNull(mapper);
     }
 
+    @Impure
     @Override
     protected X mapException(Exception e) {
       return mapper.apply(e);

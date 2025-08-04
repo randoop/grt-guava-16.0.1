@@ -16,6 +16,9 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Supplier;
@@ -31,14 +34,17 @@ import javax.annotation.Nullable;
  * @since 1.0
  */
 public final class Callables {
+  @SideEffectFree
   private Callables() {}
 
   /**
    * Creates a {@code Callable} which immediately returns a preset value each
    * time it is called.
    */
+  @Impure
   public static <T> Callable<T> returning(final @Nullable T value) {
     return new Callable<T>() {
+      @Pure
       @Override public T call() {
         return value;
       }
@@ -53,11 +59,13 @@ public final class Callables {
    * @param nameSupplier The supplier of thread names, {@link Supplier#get get} will be called once
    *     for each invocation of the wrapped callable.
    */
+  @Impure
   static <T> Callable<T> threadRenaming(final Callable<T> callable,
       final Supplier<String> nameSupplier) {
     checkNotNull(nameSupplier);
     checkNotNull(callable);
     return new Callable<T>() {
+      @Impure
       @Override public T call() throws Exception {
         Thread currentThread = Thread.currentThread();
         String oldName = currentThread.getName();
@@ -81,10 +89,12 @@ public final class Callables {
    * @param nameSupplier The supplier of thread names, {@link Supplier#get get} will be called once
    *     for each invocation of the wrapped callable.
    */
+  @Impure
   static Runnable threadRenaming(final Runnable task, final Supplier<String> nameSupplier) {
     checkNotNull(nameSupplier);
     checkNotNull(task);
     return new Runnable() {
+      @Impure
       @Override public void run() {
         Thread currentThread = Thread.currentThread();
         String oldName = currentThread.getName();
@@ -101,6 +111,7 @@ public final class Callables {
   }
 
   /** Tries to set name of the given {@link Thread}, returns true if successful. */
+  @Impure
   private static boolean trySetName(final String threadName, Thread currentThread) {
     // In AppEngine this will always fail, should we test for that explicitly using
     // MoreExecutors.isAppEngine.  More generally, is there a way to see if we have the modifyThread

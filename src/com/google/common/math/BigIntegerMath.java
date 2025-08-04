@@ -16,6 +16,8 @@
 
 package com.google.common.math;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.math.MathPreconditions.checkNonNegative;
@@ -52,6 +54,7 @@ public final class BigIntegerMath {
   /**
    * Returns {@code true} if {@code x} represents a power of two.
    */
+  @Impure
   public static boolean isPowerOfTwo(BigInteger x) {
     checkNotNull(x);
     return x.signum() > 0 && x.getLowestSetBit() == x.bitLength() - 1;
@@ -64,6 +67,7 @@ public final class BigIntegerMath {
    * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
    *         is not a power of two
    */
+  @Impure
   @SuppressWarnings("fallthrough")
   // TODO(kevinb): remove after this warning is disabled globally
   public static int log2(BigInteger x, RoundingMode mode) {
@@ -124,6 +128,7 @@ public final class BigIntegerMath {
    * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
    *         is not a power of ten
    */
+  @Impure
   @GwtIncompatible("TODO")
   @SuppressWarnings("fallthrough")
   public static int log10(BigInteger x, RoundingMode mode) {
@@ -202,6 +207,7 @@ public final class BigIntegerMath {
    * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
    *         {@code sqrt(x)} is not an integer
    */
+  @Impure
   @GwtIncompatible("TODO")
   @SuppressWarnings("fallthrough")
   public static BigInteger sqrt(BigInteger x, RoundingMode mode) {
@@ -234,6 +240,7 @@ public final class BigIntegerMath {
     }
   }
 
+  @Impure
   @GwtIncompatible("TODO")
   private static BigInteger sqrtFloor(BigInteger x) {
     /*
@@ -278,6 +285,7 @@ public final class BigIntegerMath {
     return sqrt0;
   }
 
+  @Impure
   @GwtIncompatible("TODO")
   private static BigInteger sqrtApproxWithDoubles(BigInteger x) {
     return DoubleMath.roundToBigInteger(Math.sqrt(DoubleUtils.bigToDouble(x)), HALF_EVEN);
@@ -290,6 +298,7 @@ public final class BigIntegerMath {
    * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
    *         is not an integer multiple of {@code b}
    */
+  @Impure
   @GwtIncompatible("TODO")
   public static BigInteger divide(BigInteger p, BigInteger q, RoundingMode mode) {
     BigDecimal pDec = new BigDecimal(p);
@@ -309,6 +318,7 @@ public final class BigIntegerMath {
    *
    * @throws IllegalArgumentException if {@code n < 0}
    */
+  @Impure
   public static BigInteger factorial(int n) {
     checkNonNegative("n", n);
 
@@ -364,10 +374,12 @@ public final class BigIntegerMath {
     return listProduct(bignums).shiftLeft(shift);
   }
 
+  @Impure
   static BigInteger listProduct(List<BigInteger> nums) {
     return listProduct(nums, 0, nums.size());
   }
 
+  @Impure
   static BigInteger listProduct(List<BigInteger> nums, int start, int end) {
     switch (end - start) {
       case 0:
@@ -393,6 +405,7 @@ public final class BigIntegerMath {
    *
    * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
    */
+  @Impure
   public static BigInteger binomial(int n, int k) {
     checkNonNegative("n", n);
     checkNonNegative("k", k);
@@ -441,10 +454,12 @@ public final class BigIntegerMath {
   }
 
   // Returns true if BigInteger.valueOf(x.longValue()).equals(x).
+  @Impure
   @GwtIncompatible("TODO")
   static boolean fitsInLong(BigInteger x) {
     return x.bitLength() <= Long.SIZE - 1;
   }
 
+  @SideEffectFree
   private BigIntegerMath() {}
 }

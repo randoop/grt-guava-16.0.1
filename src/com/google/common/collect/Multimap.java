@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Collection;
@@ -171,30 +173,35 @@ public interface Multimap<K, V> {
    * {@code asMap().size()}. See the opening section of the {@link Multimap}
    * class documentation for clarification.
    */
+  @Impure
   int size();
 
   /**
    * Returns {@code true} if this multimap contains no key-value pairs.
    * Equivalent to {@code size() == 0}, but can in some cases be more efficient.
    */
+  @Impure
   boolean isEmpty();
 
   /**
    * Returns {@code true} if this multimap contains at least one key-value pair
    * with the key {@code key}.
    */
+  @Impure
   boolean containsKey(@Nullable Object key);
 
   /**
    * Returns {@code true} if this multimap contains at least one key-value pair
    * with the value {@code value}.
    */
+  @Impure
   boolean containsValue(@Nullable Object value);
 
   /**
    * Returns {@code true} if this multimap contains at least one key-value pair
    * with the key {@code key} and the value {@code value}.
    */
+  @Impure
   boolean containsEntry(@Nullable Object key, @Nullable Object value);
 
   // Modification Operations
@@ -211,6 +218,8 @@ public interface Multimap<K, V> {
    *     {@code false} if the multimap already contained the key-value pair and
    *     doesn't allow duplicates
    */
+  @Pure
+  @Impure
   boolean put(@Nullable K key, @Nullable V value);
 
   /**
@@ -221,6 +230,7 @@ public interface Multimap<K, V> {
    *
    * @return {@code true} if the multimap changed
    */
+  @Impure
   boolean remove(@Nullable Object key, @Nullable Object value);
 
   // Bulk Operations
@@ -238,6 +248,8 @@ public interface Multimap<K, V> {
    *
    * @return {@code true} if the multimap changed
    */
+  @Pure
+  @Impure
   boolean putAll(@Nullable K key, Iterable<? extends V> values);
 
   /**
@@ -246,6 +258,8 @@ public interface Multimap<K, V> {
    *
    * @return {@code true} if the multimap changed
    */
+  @Pure
+  @Impure
   boolean putAll(Multimap<? extends K, ? extends V> multimap);
 
   /**
@@ -260,6 +274,8 @@ public interface Multimap<K, V> {
    *     <i>may</i> be modifiable, but updating it will have no effect on the
    *     multimap.
    */
+  @Pure
+  @Impure
   Collection<V> replaceValues(@Nullable K key, Iterable<? extends V> values);
 
   /**
@@ -273,12 +289,14 @@ public interface Multimap<K, V> {
    *     collection <i>may</i> be modifiable, but updating it will have no
    *     effect on the multimap.
    */
+  @Impure
   Collection<V> removeAll(@Nullable Object key);
 
   /**
    * Removes all key-value pairs from the multimap, leaving it {@linkplain
    * #isEmpty empty}.
    */
+  @Impure
   void clear();
 
   // Views
@@ -291,6 +309,7 @@ public interface Multimap<K, V> {
    * <p>Changes to the returned collection will update the underlying multimap,
    * and vice versa.
    */
+  @Impure
   Collection<V> get(@Nullable K key);
 
   /**
@@ -301,6 +320,7 @@ public interface Multimap<K, V> {
    * <p>Changes to the returned set will update the underlying multimap, and
    * vice versa. However, <i>adding</i> to the returned set is not possible.
    */
+  @Impure
   Set<K> keySet();
 
   /**
@@ -313,6 +333,7 @@ public interface Multimap<K, V> {
    * and vice versa. However, <i>adding</i> to the returned collection is not
    * possible.
    */
+  @Impure
   Multiset<K> keys();
 
   /**
@@ -324,6 +345,7 @@ public interface Multimap<K, V> {
    * and vice versa. However, <i>adding</i> to the returned collection is not
    * possible.
    */
+  @Impure
   Collection<V> values();
 
   /**
@@ -334,6 +356,7 @@ public interface Multimap<K, V> {
    * update the underlying multimap, and vice versa. However, <i>adding</i> to
    * the returned collection is not possible.
    */
+  @Impure
   Collection<Map.Entry<K, V>> entries();
 
   /**
@@ -348,6 +371,7 @@ public interface Multimap<K, V> {
    * support {@code put} or {@code putAll}, nor do its entries support {@link
    * Map.Entry#setValue setValue}.
    */
+  @Impure
   Map<K, Collection<V>> asMap();
 
   // Comparison and hashing
@@ -368,6 +392,8 @@ public interface Multimap<K, V> {
    * collections as values. However, any two empty multimaps are equal, because
    * they both have empty {@link #asMap} views.
    */
+  @Pure
+  @Impure
   @Override
   boolean equals(@Nullable Object obj);
 
@@ -377,6 +403,8 @@ public interface Multimap<K, V> {
    * <p>The hash code of a multimap is defined as the hash code of the map view,
    * as returned by {@link Multimap#asMap}.
    */
+  @Pure
+  @Impure
   @Override
   int hashCode();
 }

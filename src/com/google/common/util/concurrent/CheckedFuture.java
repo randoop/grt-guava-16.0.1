@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 
 import java.util.concurrent.CancellationException;
@@ -60,6 +61,7 @@ public interface CheckedFuture<V, X extends Exception>
    * @return the result of executing the future.
    * @throws X on interruption, cancellation or execution exceptions.
    */
+  @Impure
   V checkedGet() throws X;
 
   /**
@@ -72,5 +74,6 @@ public interface CheckedFuture<V, X extends Exception>
    * @throws TimeoutException if retrieving the result timed out.
    * @throws X on interruption, cancellation or execution exceptions.
    */
+  @Impure
   V checkedGet(long timeout, TimeUnit unit) throws TimeoutException, X;
 }

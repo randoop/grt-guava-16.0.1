@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 
@@ -50,30 +52,35 @@ public interface SortedMultiset<E> extends SortedMultisetBridge<E>, SortedIterab
    * Returns the comparator that orders this multiset, or
    * {@link Ordering#natural()} if the natural ordering of the elements is used.
    */
+  @Impure
   Comparator<? super E> comparator();
 
   /**
    * Returns the entry of the first element in this multiset, or {@code null} if
    * this multiset is empty.
    */
+  @Impure
   Entry<E> firstEntry();
 
   /**
    * Returns the entry of the last element in this multiset, or {@code null} if
    * this multiset is empty.
    */
+  @Impure
   Entry<E> lastEntry();
 
   /**
    * Returns and removes the entry associated with the lowest element in this
    * multiset, or returns {@code null} if this multiset is empty.
    */
+  @Pure
   Entry<E> pollFirstEntry();
 
   /**
    * Returns and removes the entry associated with the greatest element in this
    * multiset, or returns {@code null} if this multiset is empty.
    */
+  @Pure
   Entry<E> pollLastEntry();
 
   /**
@@ -81,6 +88,7 @@ public interface SortedMultiset<E> extends SortedMultisetBridge<E>, SortedIterab
    * 
    * @since 14.0 (present with return type {@code SortedSet} since 11.0)
    */
+  @Impure
   @Override NavigableSet<E> elementSet();
 
   /**
@@ -89,12 +97,14 @@ public interface SortedMultiset<E> extends SortedMultisetBridge<E>, SortedIterab
    * <p>The iterator returns the elements in ascending order according to this
    * multiset's comparator.
    */
+  @Pure
   @Override Iterator<E> iterator();
 
   /**
    * Returns a descending view of this multiset. Modifications made to either
    * map will be reflected in the other.
    */
+  @Impure
   SortedMultiset<E> descendingMultiset();
 
   /**
@@ -107,6 +117,7 @@ public interface SortedMultiset<E> extends SortedMultisetBridge<E>, SortedIterab
    * <p>The returned multiset will throw an {@link IllegalArgumentException} on
    * attempts to add elements outside its range.
    */
+  @Impure
   SortedMultiset<E> headMultiset(E upperBound, BoundType boundType);
 
   /**
@@ -122,6 +133,7 @@ public interface SortedMultiset<E> extends SortedMultisetBridge<E>, SortedIterab
    * {@code tailMultiset(lowerBound, lowerBoundType).headMultiset(upperBound,
    * upperBoundType)}.
    */
+  @Impure
   SortedMultiset<E> subMultiset(E lowerBound, BoundType lowerBoundType,
       E upperBound, BoundType upperBoundType);
 
@@ -135,5 +147,6 @@ public interface SortedMultiset<E> extends SortedMultisetBridge<E>, SortedIterab
    * <p>The returned multiset will throw an {@link IllegalArgumentException} on
    * attempts to add elements outside its range.
    */
+  @Impure
   SortedMultiset<E> tailMultiset(E lowerBound, BoundType boundType);
 }

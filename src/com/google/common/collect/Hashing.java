@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.primitives.Ints;
 
@@ -30,6 +33,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible
 final class Hashing {
+  @SideEffectFree
   private Hashing() {}
 
   private static final int C1 = 0xcc9e2d51;
@@ -43,16 +47,19 @@ final class Hashing {
    * MurmurHash3 was written by Austin Appleby, and is placed in the public domain. The author
    * hereby disclaims copyright to this source code.
    */
+  @Pure
   static int smear(int hashCode) {
     return C2 * Integer.rotateLeft(hashCode * C1, 15);
   }
   
+  @Impure
   static int smearedHash(@Nullable Object o) {
     return smear((o == null) ? 0 : o.hashCode());
   }
   
   private static int MAX_TABLE_SIZE = Ints.MAX_POWER_OF_TWO;
   
+  @Pure
   static int closedTableSize(int expectedEntries, double loadFactor) {
     // Get the recommended table size.
     // Round down to the nearest power of 2.
@@ -66,6 +73,7 @@ final class Hashing {
     return tableSize;
   }
   
+  @Pure
   static boolean needsResizing(int size, int tableSize, double loadFactor) {
     return size > loadFactor * tableSize && tableSize < MAX_TABLE_SIZE;
   }

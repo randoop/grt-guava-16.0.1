@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 
 import java.util.concurrent.Callable;
@@ -75,6 +76,7 @@ public interface TimeLimiter {
    * @throws IllegalArgumentException if {@code interfaceType} is a regular
    *     class, enum, or annotation type, rather than an interface
    */
+  @Impure
   <T> T newProxy(T target, Class<T> interfaceType,
       long timeoutDuration, TimeUnit timeoutUnit);
 
@@ -101,6 +103,7 @@ public interface TimeLimiter {
    * @throws UncheckedTimeoutException if the time limit is reached
    * @throws Exception
    */
+  @Impure
   <T> T callWithTimeout(Callable<T> callable, long timeoutDuration,
       TimeUnit timeoutUnit, boolean interruptible) throws Exception;
 }

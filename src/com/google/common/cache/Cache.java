@@ -16,6 +16,7 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.collect.ImmutableMap;
@@ -55,6 +56,7 @@ public interface Cache<K, V> {
    *
    * @since 11.0
    */
+  @Impure
   @Nullable
   V getIfPresent(Object key);
 
@@ -74,6 +76,7 @@ public interface Cache<K, V> {
    *
    * @since 11.0
    */
+  @Impure
   V get(K key, Callable<? extends V> valueLoader) throws ExecutionException;
 
   /**
@@ -82,6 +85,7 @@ public interface Cache<K, V> {
    *
    * @since 11.0
    */
+  @Impure
   ImmutableMap<K, V> getAllPresent(Iterable<?> keys);
 
   /**
@@ -93,6 +97,7 @@ public interface Cache<K, V> {
    *
    * @since 11.0
    */
+  @Impure
   void put(K key, V value);
 
   /**
@@ -103,11 +108,13 @@ public interface Cache<K, V> {
    *
    * @since 12.0
    */
+  @Impure
   void putAll(Map<? extends K,? extends V> m);
 
   /**
    * Discards any cached value for key {@code key}.
    */
+  @Impure
   void invalidate(Object key);
 
   /**
@@ -115,16 +122,19 @@ public interface Cache<K, V> {
    *
    * @since 11.0
    */
+  @Impure
   void invalidateAll(Iterable<?> keys);
 
   /**
    * Discards all entries in the cache.
    */
+  @Impure
   void invalidateAll();
 
   /**
    * Returns the approximate number of entries in this cache.
    */
+  @Impure
   long size();
 
   /**
@@ -132,17 +142,20 @@ public interface Cache<K, V> {
    * to zero, and are monotonically increasing over the lifetime of the cache.
    *
    */
+  @Impure
   CacheStats stats();
 
   /**
    * Returns a view of the entries stored in this cache as a thread-safe map. Modifications made to
    * the map directly affect the cache.
    */
+  @Impure
   ConcurrentMap<K, V> asMap();
 
   /**
    * Performs any pending maintenance operations needed by the cache. Exactly which activities are
    * performed -- if any -- is implementation-dependent.
    */
+  @Impure
   void cleanUp();
 }

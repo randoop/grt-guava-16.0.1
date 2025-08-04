@@ -16,6 +16,9 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.annotations.Beta;
@@ -43,16 +46,19 @@ public abstract class TypeParameter<T> extends TypeCapture<T> {
 
   final TypeVariable<?> typeVariable;
 
+  @Impure
   protected TypeParameter() {
     Type type = capture();
     checkArgument(type instanceof TypeVariable, "%s should be a type variable.", type);
     this.typeVariable = (TypeVariable<?>) type;
   }
 
+  @Pure
   @Override public final int hashCode() {
     return typeVariable.hashCode();
   }
 
+  @Pure
   @Override public final boolean equals(@Nullable Object o) {
     if (o instanceof TypeParameter) {
       TypeParameter<?> that = (TypeParameter<?>) o;
@@ -61,6 +67,7 @@ public abstract class TypeParameter<T> extends TypeCapture<T> {
     return false;
   }
 
+  @SideEffectFree
   @Override public String toString() {
     return typeVariable.toString();
   }

@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -32,6 +34,7 @@ import java.util.Map;
  * @author Jared Levy
  */
 final class Serialization {
+  @SideEffectFree
   private Serialization() {}
 
   /**
@@ -46,6 +49,7 @@ final class Serialization {
    * <p>The returned count may be used to construct an empty collection of the
    * appropriate capacity before calling any of the {@code populate} methods.
    */
+  @Impure
   static int readCount(ObjectInputStream stream) throws IOException {
     return stream.readInt();
   }
@@ -58,6 +62,7 @@ final class Serialization {
    * <p>The serialized output consists of the number of entries, first key,
    * first value, second key, second value, and so on.
    */
+  @Impure
   static <K, V> void writeMap(Map<K, V> map, ObjectOutputStream stream)
       throws IOException {
     stream.writeInt(map.size());
@@ -71,6 +76,7 @@ final class Serialization {
    * Populates a map by reading an input stream, as part of deserialization.
    * See {@link #writeMap} for the data format.
    */
+  @Impure
   static <K, V> void populateMap(Map<K, V> map, ObjectInputStream stream)
       throws IOException, ClassNotFoundException {
     int size = stream.readInt();
@@ -82,6 +88,7 @@ final class Serialization {
    * See {@link #writeMap} for the data format. The size is determined by a
    * prior call to {@link #readCount}.
    */
+  @Impure
   static <K, V> void populateMap(Map<K, V> map, ObjectInputStream stream,
       int size) throws IOException, ClassNotFoundException {
     for (int i = 0; i < size; i++) {
@@ -101,6 +108,7 @@ final class Serialization {
    * <p>The serialized output consists of the number of distinct elements, the
    * first element, its count, the second element, its count, and so on.
    */
+  @Impure
   static <E> void writeMultiset(
       Multiset<E> multiset, ObjectOutputStream stream) throws IOException {
     int entryCount = multiset.entrySet().size();
@@ -115,6 +123,7 @@ final class Serialization {
    * Populates a multiset by reading an input stream, as part of
    * deserialization. See {@link #writeMultiset} for the data format.
    */
+  @Impure
   static <E> void populateMultiset(
       Multiset<E> multiset, ObjectInputStream stream)
       throws IOException, ClassNotFoundException {
@@ -127,6 +136,7 @@ final class Serialization {
    * deserialization. See {@link #writeMultiset} for the data format. The number
    * of distinct elements is determined by a prior call to {@link #readCount}.
    */
+  @Impure
   static <E> void populateMultiset(
       Multiset<E> multiset, ObjectInputStream stream, int distinctElements)
       throws IOException, ClassNotFoundException {
@@ -148,6 +158,7 @@ final class Serialization {
    * for each distinct key: the key, the number of values for that key, and the
    * key's values.
    */
+  @Impure
   static <K, V> void writeMultimap(
       Multimap<K, V> multimap, ObjectOutputStream stream) throws IOException {
     stream.writeInt(multimap.asMap().size());
@@ -164,6 +175,7 @@ final class Serialization {
    * Populates a multimap by reading an input stream, as part of
    * deserialization. See {@link #writeMultimap} for the data format.
    */
+  @Impure
   static <K, V> void populateMultimap(
       Multimap<K, V> multimap, ObjectInputStream stream)
       throws IOException, ClassNotFoundException {
@@ -176,6 +188,7 @@ final class Serialization {
    * deserialization. See {@link #writeMultimap} for the data format. The number
    * of distinct keys is determined by a prior call to {@link #readCount}.
    */
+  @Impure
   static <K, V> void populateMultimap(
       Multimap<K, V> multimap, ObjectInputStream stream, int distinctKeys)
       throws IOException, ClassNotFoundException {
@@ -193,6 +206,7 @@ final class Serialization {
   }
 
   // Secret sauce for setting final fields; don't make it public.
+  @Impure
   static <T> FieldSetter<T> getFieldSetter(
       final Class<T> clazz, String fieldName) {
     try {
@@ -207,11 +221,13 @@ final class Serialization {
   static final class FieldSetter<T> {
     private final Field field;
 
+    @Impure
     private FieldSetter(Field field) {
       this.field = field;
       field.setAccessible(true);
     }
 
+    @Impure
     void set(T instance, Object value) {
       try {
         field.set(instance, value);
@@ -220,6 +236,7 @@ final class Serialization {
       }
     }
 
+    @Impure
     void set(T instance, int value) {
       try {
         field.set(instance, value);

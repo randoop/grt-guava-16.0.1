@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 
 /**
@@ -26,5 +27,6 @@ import com.google.common.annotations.GwtCompatible;
  */
 @GwtCompatible(emulated = true)
 class ForwardingImmutableCollection {
+  @SideEffectFree
   private ForwardingImmutableCollection() {}
 }

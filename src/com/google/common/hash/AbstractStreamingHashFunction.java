@@ -14,6 +14,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.base.Preconditions;
@@ -33,34 +36,45 @@ import java.nio.charset.Charset;
  * @author Kevin Bourrillion
  */
 abstract class AbstractStreamingHashFunction implements HashFunction {
+  @Pure
   @Override public <T> HashCode hashObject(T instance, Funnel<? super T> funnel) {
     return newHasher().putObject(instance, funnel).hash();
   }
 
+  @SideEffectFree
+  @Impure
   @Override public HashCode hashUnencodedChars(CharSequence input) {
     return newHasher().putUnencodedChars(input).hash();
   }
 
+  @Pure
   @Override public HashCode hashString(CharSequence input, Charset charset) {
     return newHasher().putString(input, charset).hash();
   }
 
+  @SideEffectFree
+  @Impure
   @Override public HashCode hashInt(int input) {
     return newHasher().putInt(input).hash();
   }
 
+  @SideEffectFree
+  @Impure
   @Override public HashCode hashLong(long input) {
     return newHasher().putLong(input).hash();
   }
 
+  @Pure
   @Override public HashCode hashBytes(byte[] input) {
     return newHasher().putBytes(input).hash();
   }
 
+  @Pure
   @Override public HashCode hashBytes(byte[] input, int off, int len) {
     return newHasher().putBytes(input, off, len).hash();
   }
 
+  @Impure
   @Override public Hasher newHasher(int expectedInputSize) {
     Preconditions.checkArgument(expectedInputSize >= 0);
     return newHasher();
@@ -91,6 +105,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
      * @param chunkSize the number of bytes available per {@link #process(ByteBuffer)} invocation;
      *        must be at least 4
      */
+    @Impure
     protected AbstractStreamingHasher(int chunkSize) {
       this(chunkSize, chunkSize);
     }
@@ -104,6 +119,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
      *        must be at least 4
      * @param bufferSize the size of the internal buffer. Must be a multiple of chunkSize
      */
+    @Impure
     protected AbstractStreamingHasher(int chunkSize, int bufferSize) {
       // TODO(kevinb): check more preconditions (as bufferSize >= chunkSize) if this is ever public
       checkArgument(bufferSize % chunkSize == 0);
@@ -119,6 +135,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
     /**
      * Processes the available bytes of the buffer (at most {@code chunk} bytes).
      */
+    @Impure
     protected abstract void process(ByteBuffer bb);
 
     /**
@@ -129,6 +146,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
      * <p>This implementation simply pads with zeros and delegates to
      * {@link #process(ByteBuffer)}.
      */
+    @Impure
     protected void processRemaining(ByteBuffer bb) {
       bb.position(bb.limit()); // move at the end
       bb.limit(chunkSize + 7); // get ready to pad with longs
@@ -140,16 +158,19 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
       process(bb);
     }
 
+    @Pure
     @Override
     public final Hasher putBytes(byte[] bytes) {
       return putBytes(bytes, 0, bytes.length);
     }
 
+    @Impure
     @Override
     public final Hasher putBytes(byte[] bytes, int off, int len) {
       return putBytes(ByteBuffer.wrap(bytes, off, len).order(ByteOrder.LITTLE_ENDIAN));
     }
 
+    @Impure
     private Hasher putBytes(ByteBuffer readBuffer) {
       // If we have room for all of it, this is easy
       if (readBuffer.remaining() <= buffer.remaining()) {
@@ -175,6 +196,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @Pure
     @Override
     public final Hasher putUnencodedChars(CharSequence charSequence) {
       for (int i = 0; i < charSequence.length(); i++) {
@@ -183,6 +205,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @Impure
     @Override
     public final Hasher putByte(byte b) {
       buffer.put(b);
@@ -190,6 +213,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @Impure
     @Override
     public final Hasher putShort(short s) {
       buffer.putShort(s);
@@ -197,6 +221,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @Impure
     @Override
     public final Hasher putChar(char c) {
       buffer.putChar(c);
@@ -204,6 +229,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @Impure
     @Override
     public final Hasher putInt(int i) {
       buffer.putInt(i);
@@ -211,6 +237,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @Impure
     @Override
     public final Hasher putLong(long l) {
       buffer.putLong(l);
@@ -218,12 +245,14 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @SideEffectFree
     @Override
     public final <T> Hasher putObject(T instance, Funnel<? super T> funnel) {
       funnel.funnel(instance, this);
       return this;
     }
 
+    @Impure
     @Override
     public final HashCode hash() {
       munch();
@@ -234,9 +263,11 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
       return makeHash();
     }
 
+    @Impure
     abstract HashCode makeHash();
 
     // Process pent-up data in chunks
+    @Impure
     private void munchIfFull() {
       if (buffer.remaining() < 8) {
         // buffer is full; not enough room for a primitive. We have at least one full chunk.
@@ -244,6 +275,7 @@ abstract class AbstractStreamingHashFunction implements HashFunction {
       }
     }
 
+    @Impure
     private void munch() {
       buffer.flip();
       while (buffer.remaining() >= chunkSize) {

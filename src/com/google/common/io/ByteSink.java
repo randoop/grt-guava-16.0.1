@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.BufferedOutputStream;
@@ -49,12 +51,15 @@ public abstract class ByteSink implements OutputSupplier<OutputStream> {
   /**
    * Constructor for use by subclasses.
    */
+  @SideEffectFree
   protected ByteSink() {}
 
   /**
    * Returns a {@link CharSink} view of this {@code ByteSink} that writes characters to this sink
    * as bytes encoded with the given {@link Charset charset}.
    */
+  @SideEffectFree
+  @Impure
   public CharSink asCharSink(Charset charset) {
     return new AsCharSink(charset);
   }
@@ -67,6 +72,7 @@ public abstract class ByteSink implements OutputSupplier<OutputStream> {
    *
    * @throws IOException if an I/O error occurs in the process of opening the stream
    */
+  @Impure
   public abstract OutputStream openStream() throws IOException;
 
   /**
@@ -78,6 +84,7 @@ public abstract class ByteSink implements OutputSupplier<OutputStream> {
    *     {@link OutputSupplier} interface and should not be called directly. Use
    *     {@link #openStream} instead. This method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Override
   @Deprecated
   public final OutputStream getOutput() throws IOException {
@@ -96,6 +103,7 @@ public abstract class ByteSink implements OutputSupplier<OutputStream> {
    * @throws IOException if an I/O error occurs in the process of opening the stream
    * @since 15.0 (in 14.0 with return type {@link BufferedOutputStream})
    */
+  @Impure
   public OutputStream openBufferedStream() throws IOException {
     OutputStream out = openStream();
     return (out instanceof BufferedOutputStream)
@@ -108,6 +116,7 @@ public abstract class ByteSink implements OutputSupplier<OutputStream> {
    *
    * @throws IOException if an I/O occurs in the process of writing to this sink
    */
+  @Impure
   public void write(byte[] bytes) throws IOException {
     checkNotNull(bytes);
 
@@ -130,6 +139,7 @@ public abstract class ByteSink implements OutputSupplier<OutputStream> {
    * @throws IOException if an I/O occurs in the process of reading from {@code input} or writing to
    *     this sink
    */
+  @Impure
   public long writeFrom(InputStream input) throws IOException {
     checkNotNull(input);
 
@@ -154,15 +164,19 @@ public abstract class ByteSink implements OutputSupplier<OutputStream> {
 
     private final Charset charset;
 
+    @SideEffectFree
+    @Impure
     private AsCharSink(Charset charset) {
       this.charset = checkNotNull(charset);
     }
 
+    @Impure
     @Override
     public Writer openStream() throws IOException {
       return new OutputStreamWriter(ByteSink.this.openStream(), charset);
     }
 
+    @SideEffectFree
     @Override
     public String toString() {
       return ByteSink.this.toString() + ".asCharSink(" + charset + ")";

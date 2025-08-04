@@ -16,6 +16,9 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -186,6 +189,7 @@ public class CycleDetectingLockFactory {
      * assumption that it is the application's wish to prohibit any cyclical
      * lock acquisitions.
      */
+    @SideEffectFree
     void handlePotentialDeadlock(PotentialDeadlockException exception);
   }
 
@@ -203,6 +207,7 @@ public class CycleDetectingLockFactory {
      * acquisition order.
      */
     THROW {
+      @SideEffectFree
       @Override
       public void handlePotentialDeadlock(PotentialDeadlockException e) {
         throw e;
@@ -216,6 +221,7 @@ public class CycleDetectingLockFactory {
      * order.
      */
     WARN {
+      @SideEffectFree
       @Override
       public void handlePotentialDeadlock(PotentialDeadlockException e) {
         logger.log(Level.SEVERE, "Detected potential deadlock", e);
@@ -233,6 +239,7 @@ public class CycleDetectingLockFactory {
      * factories.
      */
     DISABLED {
+      @SideEffectFree
       @Override
       public void handlePotentialDeadlock(PotentialDeadlockException e) {
       }
@@ -242,6 +249,7 @@ public class CycleDetectingLockFactory {
   /**
    * Creates a new factory with the specified policy.
    */
+  @Impure
   public static CycleDetectingLockFactory newInstance(Policy policy) {
     return new CycleDetectingLockFactory(policy);
   }
@@ -249,6 +257,7 @@ public class CycleDetectingLockFactory {
   /**
    * Equivalent to {@code newReentrantLock(lockName, false)}.
    */
+  @Impure
   public ReentrantLock newReentrantLock(String lockName) {
     return newReentrantLock(lockName, false);
   }
@@ -258,6 +267,7 @@ public class CycleDetectingLockFactory {
    * {@code lockName} is used in the warning or exception output to help
    * identify the locks involved in the detected deadlock.
    */
+  @Impure
   public ReentrantLock newReentrantLock(String lockName, boolean fair) {
     return policy == Policies.DISABLED ? new ReentrantLock(fair)
         : new CycleDetectingReentrantLock(
@@ -267,6 +277,7 @@ public class CycleDetectingLockFactory {
   /**
    * Equivalent to {@code newReentrantReadWriteLock(lockName, false)}.
    */
+  @Impure
   public ReentrantReadWriteLock newReentrantReadWriteLock(String lockName) {
     return newReentrantReadWriteLock(lockName, false);
   }
@@ -276,6 +287,7 @@ public class CycleDetectingLockFactory {
    * The {@code lockName} is used in the warning or exception output to help
    * identify the locks involved in the detected deadlock.
    */
+  @Impure
   public ReentrantReadWriteLock newReentrantReadWriteLock(
       String lockName, boolean fair) {
     return policy == Policies.DISABLED ? new ReentrantReadWriteLock(fair)
@@ -291,6 +303,7 @@ public class CycleDetectingLockFactory {
   /**
    * Creates a {@code CycleDetectingLockFactory.WithExplicitOrdering<E>}.
    */
+  @Impure
   public static <E extends Enum<E>> WithExplicitOrdering<E>
       newInstanceWithExplicitOrdering(Class<E> enumClass, Policy policy) {
     // createNodes maps each enumClass to a Map with the corresponding enum key
@@ -303,6 +316,7 @@ public class CycleDetectingLockFactory {
     return new WithExplicitOrdering<E>(policy, lockGraphNodes);
   }
 
+  @Impure
   private static Map<? extends Enum, LockGraphNode> getOrCreateNodes(
       Class<? extends Enum> clazz) {
     Map<? extends Enum, LockGraphNode> existing =
@@ -321,6 +335,7 @@ public class CycleDetectingLockFactory {
    * {@code allowedPriorLocks} and {@code disallowedPriorLocks} prepopulated
    * with nodes according to the natural ordering of the associated Enum values.
    */
+  @Impure
   @VisibleForTesting
   static <E extends Enum<E>> Map<E, LockGraphNode> createNodes(Class<E> clazz) {
     EnumMap<E, LockGraphNode> map = Maps.newEnumMap(clazz);
@@ -351,6 +366,7 @@ public class CycleDetectingLockFactory {
    * {@code "EnumClass.name"}, which is used in exception and warning
    * output.
    */
+  @Impure
   private static String getLockName(Enum<?> rank) {
     return rank.getDeclaringClass().getSimpleName() + "." + rank.name();
   }
@@ -422,6 +438,7 @@ public class CycleDetectingLockFactory {
 
     private final Map<E, LockGraphNode> lockGraphNodes;
 
+    @Impure
     @VisibleForTesting
     WithExplicitOrdering(
         Policy policy, Map<E, LockGraphNode> lockGraphNodes) {
@@ -432,6 +449,7 @@ public class CycleDetectingLockFactory {
     /**
      * Equivalent to {@code newReentrantLock(rank, false)}.
      */
+    @Impure
     public ReentrantLock newReentrantLock(E rank) {
       return newReentrantLock(rank, false);
     }
@@ -445,6 +463,7 @@ public class CycleDetectingLockFactory {
      * @throws IllegalStateException If the factory has already created a
      *    {@code Lock} with the specified rank.
      */
+    @Impure
     public ReentrantLock newReentrantLock(E rank, boolean fair) {
       return policy == Policies.DISABLED ? new ReentrantLock(fair)
           : new CycleDetectingReentrantLock(lockGraphNodes.get(rank), fair);
@@ -453,6 +472,7 @@ public class CycleDetectingLockFactory {
     /**
      * Equivalent to {@code newReentrantReadWriteLock(rank, false)}.
      */
+    @Impure
     public ReentrantReadWriteLock newReentrantReadWriteLock(E rank) {
       return newReentrantReadWriteLock(rank, false);
     }
@@ -466,6 +486,7 @@ public class CycleDetectingLockFactory {
      * @throws IllegalStateException If the factory has already created a
      *    {@code Lock} with the specified rank.
      */
+    @Impure
     public ReentrantReadWriteLock newReentrantReadWriteLock(
         E rank, boolean fair) {
       return policy == Policies.DISABLED ? new ReentrantReadWriteLock(fair)
@@ -481,6 +502,7 @@ public class CycleDetectingLockFactory {
 
   final Policy policy;
 
+  @Impure
   private CycleDetectingLockFactory(Policy policy) {
     this.policy = checkNotNull(policy);
   }
@@ -524,6 +546,7 @@ public class CycleDetectingLockFactory {
         ExampleStackTrace.class.getName(),
         LockGraphNode.class.getName());
 
+    @Impure
     ExampleStackTrace(LockGraphNode node1, LockGraphNode node2) {
       super(node1.getLockName() + " -> " + node2.getLockName());
       StackTraceElement[] origStackTrace = getStackTrace();
@@ -570,6 +593,7 @@ public class CycleDetectingLockFactory {
 
     private final ExampleStackTrace conflictingStackTrace;
 
+    @Impure
     private PotentialDeadlockException(
         LockGraphNode node1,
         LockGraphNode node2,
@@ -579,6 +603,7 @@ public class CycleDetectingLockFactory {
       initCause(conflictingStackTrace);
     }
 
+    @Pure
     public ExampleStackTrace getConflictingStackTrace() {
       return conflictingStackTrace;
     }
@@ -587,6 +612,7 @@ public class CycleDetectingLockFactory {
      * Appends the chain of messages from the {@code conflictingStackTrace} to
      * the original {@code message}.
      */
+    @Impure
     @Override
     public String getMessage() {
       StringBuilder message = new StringBuilder(super.getMessage());
@@ -605,9 +631,11 @@ public class CycleDetectingLockFactory {
   private interface CycleDetectingLock {
 
     /** @return the {@link LockGraphNode} associated with this lock. */
+    @Pure
     LockGraphNode getLockGraphNode();
 
     /** @return {@code true} if the current thread has acquired this lock. */
+    @Impure
     boolean isAcquiredByCurrentThread();
   }
 
@@ -634,14 +662,17 @@ public class CycleDetectingLockFactory {
 
     final String lockName;
 
+    @Impure
     LockGraphNode(String lockName) {
       this.lockName = Preconditions.checkNotNull(lockName);
     }
 
+    @Pure
     String getLockName() {
       return lockName;
     }
 
+    @Impure
     void checkAcquiredLocks(
         Policy policy, List<LockGraphNode> acquiredLocks) {
       for (int i = 0, size = acquiredLocks.size(); i < size; i++) {
@@ -658,6 +689,7 @@ public class CycleDetectingLockFactory {
      * acquire {@code this} after the {@code acquiredLock}, or in the
      * {@code disallowedPriorLocks} map, in which case it is not safe.
      */
+    @Impure
     void checkAcquiredLock(Policy policy, LockGraphNode acquiredLock) {
       // checkAcquiredLock() should never be invoked by a lock that has already
       // been acquired. For unordered locks, aboutToAcquire() ensures this by
@@ -723,6 +755,7 @@ public class CycleDetectingLockFactory {
      *     illustrating the path to the {@code lock}, or {@code null} if no path
      *     was found.
      */
+    @Impure
     @Nullable
     private ExampleStackTrace findPathTo(
         LockGraphNode node, Set<LockGraphNode> seen) {
@@ -757,6 +790,7 @@ public class CycleDetectingLockFactory {
    * CycleDetectingLock implementations must call this method before attempting
    * to acquire the lock.
    */
+  @Impure
   private void aboutToAcquire(CycleDetectingLock lock) {
     if (!lock.isAcquiredByCurrentThread()) {
       ArrayList<LockGraphNode> acquiredLockList = acquiredLocks.get();
@@ -772,6 +806,7 @@ public class CycleDetectingLockFactory {
    * including both lock and unlock attempts. Failure to do so can result in
    * corrupting the acquireLocks set.
    */
+  @Impure
   private void lockStateChanged(CycleDetectingLock lock) {
     if (!lock.isAcquiredByCurrentThread()) {
       ArrayList<LockGraphNode> acquiredLockList = acquiredLocks.get();
@@ -792,6 +827,7 @@ public class CycleDetectingLockFactory {
 
     private final LockGraphNode lockGraphNode;
 
+    @Impure
     private CycleDetectingReentrantLock(
         LockGraphNode lockGraphNode, boolean fair) {
       super(fair);
@@ -800,11 +836,13 @@ public class CycleDetectingLockFactory {
 
     ///// CycleDetectingLock methods. /////
 
+    @Pure
     @Override
     public LockGraphNode getLockGraphNode() {
       return lockGraphNode;
     }
 
+    @Impure
     @Override
     public boolean isAcquiredByCurrentThread() {
       return isHeldByCurrentThread();
@@ -812,6 +850,7 @@ public class CycleDetectingLockFactory {
 
     ///// Overridden ReentrantLock methods. /////
 
+    @Impure
     @Override
     public void lock() {
       aboutToAcquire(this);
@@ -822,6 +861,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public void lockInterruptibly() throws InterruptedException {
       aboutToAcquire(this);
@@ -832,6 +872,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public boolean tryLock() {
       aboutToAcquire(this);
@@ -842,6 +883,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public boolean tryLock(long timeout, TimeUnit unit)
         throws InterruptedException {
@@ -853,6 +895,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public void unlock() {
       try {
@@ -875,6 +918,7 @@ public class CycleDetectingLockFactory {
 
     private final LockGraphNode lockGraphNode;
 
+    @Impure
     private CycleDetectingReentrantReadWriteLock(
         LockGraphNode lockGraphNode, boolean fair) {
       super(fair);
@@ -885,11 +929,13 @@ public class CycleDetectingLockFactory {
 
     ///// Overridden ReentrantReadWriteLock methods. /////
 
+    @Pure
     @Override
     public ReadLock readLock() {
       return readLock;
     }
 
+    @Pure
     @Override
     public WriteLock writeLock() {
       return writeLock;
@@ -897,11 +943,13 @@ public class CycleDetectingLockFactory {
 
     ///// CycleDetectingLock methods. /////
 
+    @Pure
     @Override
     public LockGraphNode getLockGraphNode() {
       return lockGraphNode;
     }
 
+    @Impure
     @Override
     public boolean isAcquiredByCurrentThread() {
       return isWriteLockedByCurrentThread() || getReadHoldCount() > 0;
@@ -913,12 +961,14 @@ public class CycleDetectingLockFactory {
 
     final CycleDetectingReentrantReadWriteLock readWriteLock;
 
+    @Impure
     CycleDetectingReentrantReadLock(
         CycleDetectingReentrantReadWriteLock readWriteLock) {
       super(readWriteLock);
       this.readWriteLock = readWriteLock;
     }
 
+    @Impure
     @Override
     public void lock() {
       aboutToAcquire(readWriteLock);
@@ -929,6 +979,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public void lockInterruptibly() throws InterruptedException {
       aboutToAcquire(readWriteLock);
@@ -939,6 +990,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public boolean tryLock() {
       aboutToAcquire(readWriteLock);
@@ -949,6 +1001,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public boolean tryLock(long timeout, TimeUnit unit)
         throws InterruptedException {
@@ -960,6 +1013,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public void unlock() {
       try {
@@ -975,12 +1029,14 @@ public class CycleDetectingLockFactory {
 
     final CycleDetectingReentrantReadWriteLock readWriteLock;
 
+    @Impure
     CycleDetectingReentrantWriteLock(
         CycleDetectingReentrantReadWriteLock readWriteLock) {
       super(readWriteLock);
       this.readWriteLock = readWriteLock;
     }
 
+    @Impure
     @Override
     public void lock() {
       aboutToAcquire(readWriteLock);
@@ -991,6 +1047,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public void lockInterruptibly() throws InterruptedException {
       aboutToAcquire(readWriteLock);
@@ -1001,6 +1058,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public boolean tryLock() {
       aboutToAcquire(readWriteLock);
@@ -1011,6 +1069,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public boolean tryLock(long timeout, TimeUnit unit)
         throws InterruptedException {
@@ -1022,6 +1081,7 @@ public class CycleDetectingLockFactory {
       }
     }
 
+    @Impure
     @Override
     public void unlock() {
       try {

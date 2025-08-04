@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.NoSuchElementException;
@@ -46,30 +48,37 @@ public abstract class ForwardingQueue<E> extends ForwardingCollection<E>
     implements Queue<E> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingQueue() {}
 
+  @Pure
   @Override protected abstract Queue<E> delegate();
 
+  @Impure
   @Override
   public boolean offer(E o) {
     return delegate().offer(o);
   }
 
+  @Impure
   @Override
   public E poll() {
     return delegate().poll();
   }
 
+  @Impure
   @Override
   public E remove() {
     return delegate().remove();
   }
 
+  @Impure
   @Override
   public E peek() {
     return delegate().peek();
   }
 
+  @Impure
   @Override
   public E element() {
     return delegate().element();
@@ -82,6 +91,7 @@ public abstract class ForwardingQueue<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   protected boolean standardOffer(E e) {
     try {
       return add(e);
@@ -97,6 +107,7 @@ public abstract class ForwardingQueue<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   protected E standardPeek() {
     try {
       return element();
@@ -112,6 +123,7 @@ public abstract class ForwardingQueue<E> extends ForwardingCollection<E>
    * 
    * @since 7.0
    */
+  @Impure
   protected E standardPoll() {
     try {
       return remove();

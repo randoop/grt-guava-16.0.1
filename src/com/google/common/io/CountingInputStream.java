@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 
 import java.io.FilterInputStream;
@@ -41,15 +43,18 @@ public final class CountingInputStream extends FilterInputStream {
    *
    * @param in the input stream to be wrapped
    */
+  @Impure
   public CountingInputStream(@Nullable InputStream in) {
     super(in);
   }
 
   /** Returns the number of bytes read. */
+  @Pure
   public long getCount() {
     return count;
   }
 
+  @Impure
   @Override public int read() throws IOException {
     int result = in.read();
     if (result != -1) {
@@ -58,6 +63,7 @@ public final class CountingInputStream extends FilterInputStream {
     return result;
   }
 
+  @Impure
   @Override public int read(byte[] b, int off, int len) throws IOException {
     int result = in.read(b, off, len);
     if (result != -1) {
@@ -66,18 +72,21 @@ public final class CountingInputStream extends FilterInputStream {
     return result;
   }
 
+  @Impure
   @Override public long skip(long n) throws IOException {
     long result = in.skip(n);
     count += result;
     return result;
   }
 
+  @Impure
   @Override public synchronized void mark(int readlimit) {
     in.mark(readlimit);
     mark = count;
     // it's okay to mark even if mark isn't supported, as reset won't work
   }
 
+  @Impure
   @Override public synchronized void reset() throws IOException {
     if (!in.markSupported()) {
       throw new IOException("Mark not supported");

@@ -15,6 +15,8 @@
  */
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -33,78 +35,93 @@ import javax.annotation.Nullable;
 final class EmptyImmutableSortedMap<K, V> extends ImmutableSortedMap<K, V> {
   private final transient ImmutableSortedSet<K> keySet;
 
+  @Impure
   EmptyImmutableSortedMap(Comparator<? super K> comparator) {
     this.keySet = ImmutableSortedSet.emptySet(comparator);
   }
 
+  @Impure
   EmptyImmutableSortedMap(
       Comparator<? super K> comparator, ImmutableSortedMap<K, V> descendingMap) {
     super(descendingMap);
     this.keySet = ImmutableSortedSet.emptySet(comparator);
   }
 
+  @Pure
   @Override
   public V get(@Nullable Object key) {
     return null;
   }
 
+  @Pure
   @Override
   public ImmutableSortedSet<K> keySet() {
     return keySet;
   }
 
+  @Pure
   @Override
   public int size() {
     return 0;
   }
 
+  @Pure
   @Override
   public boolean isEmpty() {
     return true;
   }
 
+  @Impure
   @Override
   public ImmutableCollection<V> values() {
     return ImmutableList.of();
   }
 
+  @Pure
   @Override
   public String toString() {
     return "{}";
   }
 
+  @Pure
   @Override
   boolean isPartialView() {
     return false;
   }
 
+  @Impure
   @Override
   public ImmutableSet<Entry<K, V>> entrySet() {
     return ImmutableSet.of();
   }
 
+  @Pure
   @Override
   ImmutableSet<Entry<K, V>> createEntrySet() {
     throw new AssertionError("should never be called");
   }
 
+  @Impure
   @Override
   public ImmutableSetMultimap<K, V> asMultimap() {
     return ImmutableSetMultimap.of();
   }
 
+  @Impure
   @Override
   public ImmutableSortedMap<K, V> headMap(K toKey, boolean inclusive) {
     checkNotNull(toKey);
     return this;
   }
 
+  @Impure
   @Override
   public ImmutableSortedMap<K, V> tailMap(K fromKey, boolean inclusive) {
     checkNotNull(fromKey);
     return this;
   }
 
+  @Impure
   @Override
   ImmutableSortedMap<K, V> createDescendingMap() {
     return new EmptyImmutableSortedMap<K, V>(Ordering.from(comparator()).reverse(), this);

@@ -14,6 +14,8 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import java.nio.charset.Charset;
 
 /**
@@ -24,18 +26,22 @@ import java.nio.charset.Charset;
  * @author Dimitris Andreou
  */
 abstract class AbstractHasher implements Hasher {
+  @Pure
   @Override public final Hasher putBoolean(boolean b) {
     return putByte(b ? (byte) 1 : (byte) 0);
   }
 
+  @Pure
   @Override public final Hasher putDouble(double d) {
     return putLong(Double.doubleToRawLongBits(d));
   }
 
+  @Pure
   @Override public final Hasher putFloat(float f) {
     return putInt(Float.floatToRawIntBits(f));
   }
 
+  @Pure
   @Override public Hasher putUnencodedChars(CharSequence charSequence) {
     for (int i = 0, len = charSequence.length(); i < len; i++) {
       putChar(charSequence.charAt(i));
@@ -43,6 +49,7 @@ abstract class AbstractHasher implements Hasher {
     return this;
   }
 
+  @SideEffectFree
   @Override public Hasher putString(CharSequence charSequence, Charset charset) {
     return putBytes(charSequence.toString().getBytes(charset));
   }

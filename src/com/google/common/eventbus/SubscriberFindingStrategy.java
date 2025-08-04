@@ -16,6 +16,7 @@
 
 package com.google.common.eventbus;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.collect.Multimap;
 
 /**
@@ -37,6 +38,7 @@ interface SubscriberFindingStrategy {
    * @throws IllegalArgumentException if {@code source} is not appropriate for
    *         this strategy (in ways that this interface does not define).
    */
+  @Impure
   Multimap<Class<?>, EventSubscriber> findAllSubscribers(Object source);
 
 }

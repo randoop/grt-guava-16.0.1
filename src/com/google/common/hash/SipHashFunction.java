@@ -19,6 +19,8 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.io.Serializable;
@@ -49,6 +51,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
    * @param k0 the first half of the key
    * @param k1 the second half of the key
    */
+  @Impure
   SipHashFunction(int c, int d, long k0, long k1) {
     checkArgument(c > 0,
         "The number of SipRound iterations (c=%s) during Compression must be positive.", c);
@@ -60,20 +63,24 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     this.k1 = k1;
   }
 
+  @Pure
   @Override public int bits() {
     return 64;
   }
 
+  @Impure
   @Override public Hasher newHasher() {
     return new SipHasher(c, d, k0, k1);
   }
 
   // TODO(user): Implement and benchmark the hashFoo() shortcuts.
 
+  @Pure
   @Override public String toString() {
     return "Hashing.sipHash" + c + "" + d + "(" + k0 + ", " + k1 + ")";
   }
 
+  @Pure
   @Override
   public boolean equals(@Nullable Object object) {
     if (object instanceof SipHashFunction) {
@@ -86,6 +93,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     return false;
   }
 
+  @Pure
   @Override
   public int hashCode() {
     return (int) (getClass().hashCode() ^ c ^ d ^ k0 ^ k1);
@@ -115,6 +123,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
     // and ending with a byte encoding the positive integer b mod 256.
     private long finalM = 0;
 
+    @Impure
     SipHasher(int c, int d, long k0, long k1) {
       super(CHUNK_SIZE);
       this.c = c;
@@ -125,11 +134,13 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
       this.v3 ^= k1;
     }
 
+    @Impure
     @Override protected void process(ByteBuffer buffer) {
       b += CHUNK_SIZE;
       processM(buffer.getLong());
     }
 
+    @Impure
     @Override protected void processRemaining(ByteBuffer buffer) {
       b += buffer.remaining();
       for (int i = 0; buffer.hasRemaining(); i += 8) {
@@ -137,6 +148,7 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
       }
     }
 
+    @Impure
     @Override public HashCode makeHash() {
       // End with a byte encoding the positive integer b mod 256.
       finalM ^= b << 56;
@@ -148,12 +160,14 @@ final class SipHashFunction extends AbstractStreamingHashFunction implements Ser
       return HashCode.fromLong(v0 ^ v1 ^ v2 ^ v3);
     }
 
+    @Impure
     private void processM(long m) {
       v3 ^= m;
       sipRound(c);
       v0 ^= m;
     }
 
+    @Impure
     private void sipRound(int iterations) {
       for (int i = 0; i < iterations; i++) {
         v0 += v1;

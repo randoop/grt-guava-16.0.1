@@ -16,6 +16,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.base.Preconditions;
 
 import java.io.ByteArrayOutputStream;
@@ -30,21 +33,25 @@ import java.nio.charset.Charset;
  * @author Dimitris Andreou
  */
 abstract class AbstractNonStreamingHashFunction implements HashFunction {
+  @Impure
   @Override
   public Hasher newHasher() {
     return new BufferingHasher(32);
   }
 
+  @Impure
   @Override
   public Hasher newHasher(int expectedInputSize) {
     Preconditions.checkArgument(expectedInputSize >= 0);
     return new BufferingHasher(expectedInputSize);
   }
 
+  @Pure
   @Override public <T> HashCode hashObject(T instance, Funnel<? super T> funnel) {
     return newHasher().putObject(instance, funnel).hash();
   }
 
+  @Pure
   @Override public HashCode hashUnencodedChars(CharSequence input) {
     int len = input.length();
     Hasher hasher = newHasher(len * 2);
@@ -54,18 +61,22 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     return hasher.hash();
   }
 
+  @SideEffectFree
   @Override public HashCode hashString(CharSequence input, Charset charset) {
     return hashBytes(input.toString().getBytes(charset));
   }
 
+  @Pure
   @Override public HashCode hashInt(int input) {
     return newHasher(4).putInt(input).hash();
   }
 
+  @Pure
   @Override public HashCode hashLong(long input) {
     return newHasher(8).putLong(input).hash();
   }
 
+  @Pure
   @Override public HashCode hashBytes(byte[] input) {
     return hashBytes(input, 0, input.length);
   }
@@ -77,16 +88,19 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
     final ExposedByteArrayOutputStream stream;
     static final int BOTTOM_BYTE = 0xFF;
 
+    @Impure
     BufferingHasher(int expectedInputSize) {
       this.stream = new ExposedByteArrayOutputStream(expectedInputSize);
     }
 
+    @Impure
     @Override
     public Hasher putByte(byte b) {
       stream.write(b);
       return this;
     }
 
+    @Impure
     @Override
     public Hasher putBytes(byte[] bytes) {
       try {
@@ -97,12 +111,14 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @Impure
     @Override
     public Hasher putBytes(byte[] bytes, int off, int len) {
       stream.write(bytes, off, len);
       return this;
     }
 
+    @Impure
     @Override
     public Hasher putShort(short s) {
       stream.write(s & BOTTOM_BYTE);
@@ -110,6 +126,7 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @Impure
     @Override
     public Hasher putInt(int i) {
       stream.write(i & BOTTOM_BYTE);
@@ -119,6 +136,7 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @Impure
     @Override
     public Hasher putLong(long l) {
       for (int i = 0; i < 64; i += 8) {
@@ -127,6 +145,7 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @Impure
     @Override
     public Hasher putChar(char c) {
       stream.write(c & BOTTOM_BYTE);
@@ -134,12 +153,15 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
       return this;
     }
 
+    @SideEffectFree
     @Override
     public <T> Hasher putObject(T instance, Funnel<? super T> funnel) {
       funnel.funnel(instance, this);
       return this;
     }
 
+    @Pure
+    @Impure
     @Override
     public HashCode hash() {
       return hashBytes(stream.byteArray(), 0, stream.length());
@@ -148,12 +170,15 @@ abstract class AbstractNonStreamingHashFunction implements HashFunction {
 
   // Just to access the byte[] without introducing an unnecessary copy
   private static final class ExposedByteArrayOutputStream extends ByteArrayOutputStream {
+    @Impure
     ExposedByteArrayOutputStream(int expectedInputSize) {
       super(expectedInputSize);
     }
+    @Pure
     byte[] byteArray() {
       return buf;
     }
+    @Pure
     int length() {
       return count;
     }

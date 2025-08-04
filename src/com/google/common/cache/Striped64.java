@@ -11,6 +11,9 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.util.Random;
 
 /**
@@ -94,8 +97,10 @@ abstract class Striped64 extends Number {
         volatile long p0, p1, p2, p3, p4, p5, p6;
         volatile long value;
         volatile long q0, q1, q2, q3, q4, q5, q6;
+        @SideEffectFree
         Cell(long x) { value = x; }
 
+        @Impure
         final boolean cas(long cmp, long val) {
             return UNSAFE.compareAndSwapLong(this, valueOffset, cmp, val);
         }
@@ -123,6 +128,7 @@ abstract class Striped64 extends Number {
     static final class HashCode {
         static final Random rng = new Random();
         int code;
+        @Impure
         HashCode() {
             int h = rng.nextInt(); // Avoid zero to allow xorShift rehash
             code = (h == 0) ? 1 : h;
@@ -133,6 +139,7 @@ abstract class Striped64 extends Number {
      * The corresponding ThreadLocal class
      */
     static final class ThreadHashCode extends ThreadLocal<HashCode> {
+        @Impure
         public HashCode initialValue() { return new HashCode(); }
     }
 
@@ -166,12 +173,14 @@ abstract class Striped64 extends Number {
     /**
      * Package-private default constructor
      */
+    @Impure
     Striped64() {
     }
 
     /**
      * CASes the base field.
      */
+    @Impure
     final boolean casBase(long cmp, long val) {
         return UNSAFE.compareAndSwapLong(this, baseOffset, cmp, val);
     }
@@ -179,6 +188,7 @@ abstract class Striped64 extends Number {
     /**
      * CASes the busy field from 0 to 1 to acquire lock.
      */
+    @Impure
     final boolean casBusy() {
         return UNSAFE.compareAndSwapInt(this, busyOffset, 0, 1);
     }
@@ -192,6 +202,7 @@ abstract class Striped64 extends Number {
      * @param newValue the argument from a user update call
      * @return result of the update function
      */
+    @Pure
     abstract long fn(long currentValue, long newValue);
 
     /**
@@ -205,6 +216,7 @@ abstract class Striped64 extends Number {
      * @param hc the hash code holder
      * @param wasUncontended false if CAS failed before call
      */
+    @Impure
     final void retryUpdate(long x, HashCode hc, boolean wasUncontended) {
         int h = hc.code;
         boolean collide = false;                // True if last slot nonempty
@@ -284,6 +296,7 @@ abstract class Striped64 extends Number {
     /**
      * Sets base and all cells to the given value.
      */
+    @Impure
     final void internalReset(long initialValue) {
         Cell[] as = cells;
         base = initialValue;
@@ -321,6 +334,7 @@ abstract class Striped64 extends Number {
      *
      * @return a sun.misc.Unsafe
      */
+    @Impure
     private static sun.misc.Unsafe getUnsafe() {
         try {
             return sun.misc.Unsafe.getUnsafe();
@@ -328,6 +342,7 @@ abstract class Striped64 extends Number {
         try {
             return java.security.AccessController.doPrivileged
             (new java.security.PrivilegedExceptionAction<sun.misc.Unsafe>() {
+                @Impure
                 public sun.misc.Unsafe run() throws Exception {
                     Class<sun.misc.Unsafe> k = sun.misc.Unsafe.class;
                     for (java.lang.reflect.Field f : k.getDeclaredFields()) {

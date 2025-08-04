@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.GwtCompatible;
@@ -26,6 +29,7 @@ import com.google.common.annotations.GwtCompatible;
 @GwtCompatible
 final class CollectPreconditions {
 
+  @SideEffectFree
   static void checkEntryNotNull(Object key, Object value) {
     if (key == null) {
       throw new NullPointerException("null key in entry: null=" + value);
@@ -34,6 +38,7 @@ final class CollectPreconditions {
     }
   }
 
+  @Pure
   static int checkNonnegative(int value, String name) {
     if (value < 0) {
       throw new IllegalArgumentException(name + " cannot be negative but was: " + value);
@@ -45,6 +50,8 @@ final class CollectPreconditions {
    * Precondition tester for {@code Iterator.remove()} that throws an exception with a consistent
    * error message.
    */
+  @SideEffectFree
+  @Impure
   static void checkRemove(boolean canRemove) {
     checkState(canRemove, "no calls to next() since the last call to remove()");
   }

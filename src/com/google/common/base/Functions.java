@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -42,6 +45,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible
 public final class Functions {
+  @SideEffectFree
   private Functions() {}
 
   /**
@@ -52,6 +56,7 @@ public final class Functions {
    * documented at {@link Function#apply}). For example, this function yields different results for
    * the two equal instances {@code ImmutableSet.of(1, 2)} and {@code ImmutableSet.of(2, 1)}.
    */
+  @Pure
   public static Function<Object, String> toStringFunction() {
     return ToStringFunction.INSTANCE;
   }
@@ -60,12 +65,14 @@ public final class Functions {
   private enum ToStringFunction implements Function<Object, String> {
     INSTANCE;
 
+    @SideEffectFree
     @Override
     public String apply(Object o) {
       checkNotNull(o);  // eager for GWT.
       return o.toString();
     }
 
+    @Pure
     @Override public String toString() {
       return "toString";
     }
@@ -75,6 +82,7 @@ public final class Functions {
    * Returns the identity function.
    */
   // implementation is "fully variant"; E has become a "pass-through" type
+  @Pure
   @SuppressWarnings("unchecked")
   public static <E> Function<E, E> identity() {
     return (Function<E, E>) IdentityFunction.INSTANCE;
@@ -84,12 +92,14 @@ public final class Functions {
   private enum IdentityFunction implements Function<Object, Object> {
     INSTANCE;
 
+    @Pure
     @Override
     @Nullable
     public Object apply(@Nullable Object o) {
       return o;
     }
 
+    @Pure
     @Override public String toString() {
       return "identity";
     }
@@ -99,6 +109,7 @@ public final class Functions {
    * Returns a function which performs a map lookup. The returned function throws an {@link
    * IllegalArgumentException} if given a key that does not exist in the map.
    */
+  @Impure
   public static <K, V> Function<K, V> forMap(Map<K, V> map) {
     return new FunctionForMapNoDefault<K, V>(map);
   }
@@ -106,10 +117,12 @@ public final class Functions {
   private static class FunctionForMapNoDefault<K, V> implements Function<K, V>, Serializable {
     final Map<K, V> map;
 
+    @SideEffectFree
     FunctionForMapNoDefault(Map<K, V> map) {
       this.map = checkNotNull(map);
     }
 
+    @Impure
     @Override
     public V apply(@Nullable K key) {
       V result = map.get(key);
@@ -117,6 +130,7 @@ public final class Functions {
       return result;
     }
 
+    @Pure
     @Override public boolean equals(@Nullable Object o) {
       if (o instanceof FunctionForMapNoDefault) {
         FunctionForMapNoDefault<?, ?> that = (FunctionForMapNoDefault<?, ?>) o;
@@ -125,10 +139,12 @@ public final class Functions {
       return false;
     }
 
+    @Pure
     @Override public int hashCode() {
       return map.hashCode();
     }
 
+    @Pure
     @Override public String toString() {
       return "forMap(" + map + ")";
     }
@@ -146,6 +162,7 @@ public final class Functions {
    * @return function that returns {@code map.get(a)} when {@code a} is a key, or {@code
    *         defaultValue} otherwise
    */
+  @Impure
   public static <K, V> Function<K, V> forMap(Map<K, ? extends V> map, @Nullable V defaultValue) {
     return new ForMapWithDefault<K, V>(map, defaultValue);
   }
@@ -154,17 +171,20 @@ public final class Functions {
     final Map<K, ? extends V> map;
     final V defaultValue;
 
+    @SideEffectFree
     ForMapWithDefault(Map<K, ? extends V> map, @Nullable V defaultValue) {
       this.map = checkNotNull(map);
       this.defaultValue = defaultValue;
     }
 
+    @Pure
     @Override
     public V apply(@Nullable K key) {
       V result = map.get(key);
       return (result != null || map.containsKey(key)) ? result : defaultValue;
     }
 
+    @Impure
     @Override public boolean equals(@Nullable Object o) {
       if (o instanceof ForMapWithDefault) {
         ForMapWithDefault<?, ?> that = (ForMapWithDefault<?, ?>) o;
@@ -173,10 +193,12 @@ public final class Functions {
       return false;
     }
 
+    @Impure
     @Override public int hashCode() {
       return Objects.hashCode(map, defaultValue);
     }
 
+    @Pure
     @Override public String toString() {
       return "forMap(" + map + ", defaultValue=" + defaultValue + ")";
     }
@@ -193,6 +215,7 @@ public final class Functions {
    * @return the composition of {@code f} and {@code g}
    * @see <a href="//en.wikipedia.org/wiki/Function_composition">function composition</a>
    */
+  @Impure
   public static <A, B, C> Function<A, C> compose(Function<B, C> g, Function<A, ? extends B> f) {
     return new FunctionComposition<A, B, C>(g, f);
   }
@@ -201,16 +224,19 @@ public final class Functions {
     private final Function<B, C> g;
     private final Function<A, ? extends B> f;
 
+    @SideEffectFree
     public FunctionComposition(Function<B, C> g, Function<A, ? extends B> f) {
       this.g = checkNotNull(g);
       this.f = checkNotNull(f);
     }
 
+    @Impure
     @Override
     public C apply(@Nullable A a) {
       return g.apply(f.apply(a));
     }
 
+    @Pure
     @Override public boolean equals(@Nullable Object obj) {
       if (obj instanceof FunctionComposition) {
         FunctionComposition<?, ?, ?> that = (FunctionComposition<?, ?, ?>) obj;
@@ -219,10 +245,12 @@ public final class Functions {
       return false;
     }
 
+    @Pure
     @Override public int hashCode() {
       return f.hashCode() ^ g.hashCode();
     }
 
+    @SideEffectFree
     @Override public String toString() {
       return g.toString() + "(" + f.toString() + ")";
     }
@@ -236,6 +264,7 @@ public final class Functions {
    * <p>The returned function is <i>consistent with equals</i> (as documented at {@link
    * Function#apply}) if and only if {@code predicate} is itself consistent with equals.
    */
+  @Impure
   public static <T> Function<T, Boolean> forPredicate(Predicate<T> predicate) {
     return new PredicateFunction<T>(predicate);
   }
@@ -244,15 +273,18 @@ public final class Functions {
   private static class PredicateFunction<T> implements Function<T, Boolean>, Serializable {
     private final Predicate<T> predicate;
 
+    @SideEffectFree
     private PredicateFunction(Predicate<T> predicate) {
       this.predicate = checkNotNull(predicate);
     }
 
+    @Impure
     @Override
     public Boolean apply(@Nullable T t) {
       return predicate.apply(t);
     }
 
+    @Pure
     @Override public boolean equals(@Nullable Object obj) {
       if (obj instanceof PredicateFunction) {
         PredicateFunction<?> that = (PredicateFunction<?>) obj;
@@ -261,10 +293,12 @@ public final class Functions {
       return false;
     }
 
+    @Pure
     @Override public int hashCode() {
       return predicate.hashCode();
     }
 
+    @Pure
     @Override public String toString() {
       return "forPredicate(" + predicate + ")";
     }
@@ -278,6 +312,7 @@ public final class Functions {
    * @param value the constant value for the function to return
    * @return a function that always returns {@code value}
    */
+  @Impure
   public static <E> Function<Object, E> constant(@Nullable E value) {
     return new ConstantFunction<E>(value);
   }
@@ -285,15 +320,18 @@ public final class Functions {
   private static class ConstantFunction<E> implements Function<Object, E>, Serializable {
     private final E value;
 
+    @SideEffectFree
     public ConstantFunction(@Nullable E value) {
       this.value = value;
     }
 
+    @Pure
     @Override
     public E apply(@Nullable Object from) {
       return value;
     }
 
+    @Impure
     @Override public boolean equals(@Nullable Object obj) {
       if (obj instanceof ConstantFunction) {
         ConstantFunction<?> that = (ConstantFunction<?>) obj;
@@ -302,10 +340,12 @@ public final class Functions {
       return false;
     }
 
+    @Pure
     @Override public int hashCode() {
       return (value == null) ? 0 : value.hashCode();
     }
 
+    @Pure
     @Override public String toString() {
       return "constant(" + value + ")";
     }
@@ -319,6 +359,7 @@ public final class Functions {
    * 
    * @since 10.0
    */
+  @Impure
   @Beta
   public static <T> Function<Object, T> forSupplier(Supplier<T> supplier) {
     return new SupplierFunction<T>(supplier);
@@ -329,14 +370,17 @@ public final class Functions {
     
     private final Supplier<T> supplier;
 
+    @SideEffectFree
     private SupplierFunction(Supplier<T> supplier) {
       this.supplier = checkNotNull(supplier);
     }
 
+    @Impure
     @Override public T apply(@Nullable Object input) {
       return supplier.get();
     }
     
+    @Pure
     @Override public boolean equals(@Nullable Object obj) {
       if (obj instanceof SupplierFunction) {
         SupplierFunction<?> that = (SupplierFunction<?>) obj;
@@ -345,10 +389,12 @@ public final class Functions {
       return false;
     }
     
+    @Pure
     @Override public int hashCode() {
       return supplier.hashCode();
     }
     
+    @Pure
     @Override public String toString() {
       return "forSupplier(" + supplier + ")";
     }

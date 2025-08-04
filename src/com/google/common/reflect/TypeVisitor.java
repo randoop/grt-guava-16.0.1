@@ -16,6 +16,7 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.collect.Sets;
 
 import java.lang.reflect.GenericArrayType;
@@ -66,6 +67,7 @@ abstract class TypeVisitor {
    * Visits the given types. Null types are ignored. This allows subclasses to call
    * {@code visit(parameterizedType.getOwnerType())} safely without having to check nulls.
    */
+  @Impure
   public final void visit(Type... types) {
     for (Type type : types) {
       if (type == null || !visited.add(type)) {
@@ -96,9 +98,14 @@ abstract class TypeVisitor {
     }
   }
 
+  @Impure
   void visitClass(Class<?> t) {}
+  @Impure
   void visitGenericArrayType(GenericArrayType t) {}
+  @Impure
   void visitParameterizedType(ParameterizedType t) {}
+  @Impure
   void visitTypeVariable(TypeVariable<?> t) {}
+  @Impure
   void visitWildcardType(WildcardType t) {}
 }

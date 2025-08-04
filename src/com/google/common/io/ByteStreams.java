@@ -16,6 +16,9 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkPositionIndex;
@@ -64,6 +67,8 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#wrap(byte[])} instead. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @SideEffectFree
+  @Impure
   @Deprecated
   public static InputSupplier<ByteArrayInputStream> newInputStreamSupplier(
       byte[] b) {
@@ -81,6 +86,7 @@ public final class ByteStreams {
    * @deprecated Use {@code ByteSource.wrap(b).slice(off, len)} instead. This
    *     method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static InputSupplier<ByteArrayInputStream> newInputStreamSupplier(
       final byte[] b, final int off, final int len) {
@@ -96,6 +102,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSink#write(byte[])} instead. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static void write(byte[] from,
       OutputSupplier<? extends OutputStream> to) throws IOException {
@@ -113,6 +120,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#copyTo(ByteSink)} instead. This method
    *     is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static long copy(InputSupplier<? extends InputStream> from,
       OutputSupplier<? extends OutputStream> to) throws IOException {
@@ -131,6 +139,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#copyTo(OutputStream)} instead. This
    *      method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static long copy(InputSupplier<? extends InputStream> from,
       OutputStream to) throws IOException {
@@ -150,6 +159,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSink#writeFrom(InputStream)} instead. This
    *     method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static long copy(InputStream from,
       OutputSupplier<? extends OutputStream> to) throws IOException {
@@ -165,6 +175,7 @@ public final class ByteStreams {
    * @return the number of bytes copied
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static long copy(InputStream from, OutputStream to)
       throws IOException {
     checkNotNull(from);
@@ -191,6 +202,7 @@ public final class ByteStreams {
    * @return the number of bytes copied
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static long copy(ReadableByteChannel from,
       WritableByteChannel to) throws IOException {
     checkNotNull(from);
@@ -215,6 +227,7 @@ public final class ByteStreams {
    * @return a byte array containing all the bytes from the stream
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static byte[] toByteArray(InputStream in) throws IOException {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     copy(in, out);
@@ -227,6 +240,7 @@ public final class ByteStreams {
    * number of bytes read from the stream differs, the correct result will be
    * returned anyway.
    */
+  @Impure
   static byte[] toByteArray(
       InputStream in, int expectedSize) throws IOException {
     byte[] bytes = new byte[expectedSize];
@@ -269,6 +283,7 @@ public final class ByteStreams {
      * Writes the contents of the internal buffer to the given array starting
      * at the given offset. Assumes the array has space to hold count bytes.
      */
+    @SideEffectFree
     void writeTo(byte[] b, int off) {
       System.arraycopy(buf, 0, b, off, count);
     }
@@ -282,6 +297,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#read()} instead. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static byte[] toByteArray(
       InputSupplier<? extends InputStream> supplier) throws IOException {
@@ -292,6 +308,7 @@ public final class ByteStreams {
    * Returns a new {@link ByteArrayDataInput} instance to read from the {@code
    * bytes} array from the beginning.
    */
+  @Impure
   public static ByteArrayDataInput newDataInput(byte[] bytes) {
     return new ByteArrayDataInputStream(bytes);
   }
@@ -303,6 +320,7 @@ public final class ByteStreams {
    * @throws IndexOutOfBoundsException if {@code start} is negative or greater
    *     than the length of the array
    */
+  @Impure
   public static ByteArrayDataInput newDataInput(byte[] bytes, int start) {
     checkPositionIndex(start, bytes.length);
     return new ByteArrayDataInputStream(bytes, start);
@@ -311,15 +329,18 @@ public final class ByteStreams {
   private static class ByteArrayDataInputStream implements ByteArrayDataInput {
     final DataInput input;
 
+    @Impure
     ByteArrayDataInputStream(byte[] bytes) {
       this.input = new DataInputStream(new ByteArrayInputStream(bytes));
     }
 
+    @Impure
     ByteArrayDataInputStream(byte[] bytes, int start) {
       this.input = new DataInputStream(
           new ByteArrayInputStream(bytes, start, bytes.length - start));
     }
 
+    @Impure
     @Override public void readFully(byte b[]) {
       try {
         input.readFully(b);
@@ -328,6 +349,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void readFully(byte b[], int off, int len) {
       try {
         input.readFully(b, off, len);
@@ -336,6 +358,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public int skipBytes(int n) {
       try {
         return input.skipBytes(n);
@@ -344,6 +367,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public boolean readBoolean() {
       try {
         return input.readBoolean();
@@ -352,6 +376,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public byte readByte() {
       try {
         return input.readByte();
@@ -362,6 +387,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public int readUnsignedByte() {
       try {
         return input.readUnsignedByte();
@@ -370,6 +396,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public short readShort() {
       try {
         return input.readShort();
@@ -378,6 +405,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public int readUnsignedShort() {
       try {
         return input.readUnsignedShort();
@@ -386,6 +414,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public char readChar() {
       try {
         return input.readChar();
@@ -394,6 +423,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public int readInt() {
       try {
         return input.readInt();
@@ -402,6 +432,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public long readLong() {
       try {
         return input.readLong();
@@ -410,6 +441,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public float readFloat() {
       try {
         return input.readFloat();
@@ -418,6 +450,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public double readDouble() {
       try {
         return input.readDouble();
@@ -426,6 +459,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public String readLine() {
       try {
         return input.readLine();
@@ -434,6 +468,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public String readUTF() {
       try {
         return input.readUTF();
@@ -446,6 +481,7 @@ public final class ByteStreams {
   /**
    * Returns a new {@link ByteArrayDataOutput} instance with a default size.
    */
+  @Impure
   public static ByteArrayDataOutput newDataOutput() {
     return new ByteArrayDataOutputStream();
   }
@@ -456,6 +492,7 @@ public final class ByteStreams {
    *
    * @throws IllegalArgumentException if {@code size} is negative
    */
+  @Impure
   public static ByteArrayDataOutput newDataOutput(int size) {
     checkArgument(size >= 0, "Invalid size: %s", size);
     return new ByteArrayDataOutputStream(size);
@@ -468,19 +505,23 @@ public final class ByteStreams {
     final DataOutput output;
     final ByteArrayOutputStream byteArrayOutputSteam;
 
+    @Impure
     ByteArrayDataOutputStream() {
       this(new ByteArrayOutputStream());
     }
 
+    @Impure
     ByteArrayDataOutputStream(int size) {
       this(new ByteArrayOutputStream(size));
     }
 
+    @Impure
     ByteArrayDataOutputStream(ByteArrayOutputStream byteArrayOutputSteam) {
       this.byteArrayOutputSteam = byteArrayOutputSteam;
       output = new DataOutputStream(byteArrayOutputSteam);
     }
 
+    @Impure
     @Override public void write(int b) {
       try {
         output.write(b);
@@ -489,6 +530,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void write(byte[] b) {
       try {
         output.write(b);
@@ -497,6 +539,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void write(byte[] b, int off, int len) {
       try {
         output.write(b, off, len);
@@ -505,6 +548,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeBoolean(boolean v) {
       try {
         output.writeBoolean(v);
@@ -513,6 +557,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeByte(int v) {
       try {
         output.writeByte(v);
@@ -521,6 +566,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeBytes(String s) {
       try {
         output.writeBytes(s);
@@ -529,6 +575,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeChar(int v) {
       try {
         output.writeChar(v);
@@ -537,6 +584,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeChars(String s) {
       try {
         output.writeChars(s);
@@ -545,6 +593,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeDouble(double v) {
       try {
         output.writeDouble(v);
@@ -553,6 +602,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeFloat(float v) {
       try {
         output.writeFloat(v);
@@ -561,6 +611,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeInt(int v) {
       try {
         output.writeInt(v);
@@ -569,6 +620,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeLong(long v) {
       try {
         output.writeLong(v);
@@ -577,6 +629,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeShort(int v) {
       try {
         output.writeShort(v);
@@ -585,6 +638,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public void writeUTF(String s) {
       try {
         output.writeUTF(s);
@@ -593,6 +647,7 @@ public final class ByteStreams {
       }
     }
 
+    @Impure
     @Override public byte[] toByteArray() {
       return byteArrayOutputSteam.toByteArray();
     }
@@ -601,17 +656,23 @@ public final class ByteStreams {
   private static final OutputStream NULL_OUTPUT_STREAM =
       new OutputStream() {
         /** Discards the specified byte. */
+        @SideEffectFree
         @Override public void write(int b) {
         }
         /** Discards the specified byte array. */
+        @SideEffectFree
+        @Impure
         @Override public void write(byte[] b) {
           checkNotNull(b);
         }
         /** Discards the specified byte array. */
+        @SideEffectFree
+        @Impure
         @Override public void write(byte[] b, int off, int len) {
           checkNotNull(b);
         }
 
+        @Pure
         @Override
         public String toString() {
           return "ByteStreams.nullOutputStream()";
@@ -623,6 +684,7 @@ public final class ByteStreams {
    *
    * @since 14.0 (since 1.0 as com.google.common.io.NullOutputStream)
    */
+  @Pure
   public static OutputStream nullOutputStream() {
     return NULL_OUTPUT_STREAM;
   }
@@ -636,6 +698,7 @@ public final class ByteStreams {
    * @return a length-limited {@link InputStream}
    * @since 14.0 (since 1.0 as com.google.common.io.LimitInputStream)
    */
+  @Impure
   public static InputStream limit(InputStream in, long limit) {
     return new LimitedInputStream(in, limit);
   }
@@ -645,6 +708,7 @@ public final class ByteStreams {
     private long left;
     private long mark = -1;
 
+    @Impure
     LimitedInputStream(InputStream in, long limit) {
       super(in);
       checkNotNull(in);
@@ -652,16 +716,19 @@ public final class ByteStreams {
       left = limit;
     }
 
+    @Impure
     @Override public int available() throws IOException {
       return (int) Math.min(in.available(), left);
     }
 
     // it's okay to mark even if mark isn't supported, as reset won't work
+    @Impure
     @Override public synchronized void mark(int readLimit) {
       in.mark(readLimit);
       mark = left;
     }
 
+    @Impure
     @Override public int read() throws IOException {
       if (left == 0) {
         return -1;
@@ -674,6 +741,7 @@ public final class ByteStreams {
       return result;
     }
 
+    @Impure
     @Override public int read(byte[] b, int off, int len) throws IOException {
       if (left == 0) {
         return -1;
@@ -687,6 +755,7 @@ public final class ByteStreams {
       return result;
     }
 
+    @Impure
     @Override public synchronized void reset() throws IOException {
       if (!in.markSupported()) {
         throw new IOException("Mark not supported");
@@ -699,6 +768,7 @@ public final class ByteStreams {
       left = mark;
     }
 
+    @Impure
     @Override public long skip(long n) throws IOException {
       n = Math.min(n, left);
       long skipped = in.skip(n);
@@ -713,6 +783,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#size()} instead. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static long length(
       InputSupplier<? extends InputStream> supplier) throws IOException {
@@ -726,6 +797,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#contentEquals(ByteSource)} instead. This
    *     method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static boolean equal(InputSupplier<? extends InputStream> supplier1,
       InputSupplier<? extends InputStream> supplier2) throws IOException {
@@ -743,6 +815,7 @@ public final class ByteStreams {
    *     the bytes.
    * @throws IOException if an I/O error occurs.
    */
+  @Impure
   public static void readFully(InputStream in, byte[] b) throws IOException {
     readFully(in, b, 0, b.length);
   }
@@ -761,6 +834,7 @@ public final class ByteStreams {
    *     the bytes.
    * @throws IOException if an I/O error occurs.
    */
+  @Impure
   public static void readFully(
       InputStream in, byte[] b, int off, int len) throws IOException {
     int read = read(in, b, off, len);
@@ -782,6 +856,7 @@ public final class ByteStreams {
    * @throws IOException if an I/O error occurs, or the stream does not
    *     support skipping
    */
+  @Impure
   public static void skipFully(InputStream in, long n) throws IOException {
     long toSkip = n;
     while (n > 0) {
@@ -810,6 +885,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#read(ByteProcessor)} instead. This
    *     method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <T> T readBytes(
       InputSupplier<? extends InputStream> supplier,
@@ -837,6 +913,7 @@ public final class ByteStreams {
    * @throws IOException if an I/O error occurs
    * @since 14.0
    */
+  @Impure
   public static <T> T readBytes(
       InputStream input, ByteProcessor<T> processor) throws IOException {
     checkNotNull(input);
@@ -862,6 +939,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#hash(HashFunction)} instead. This method
    *     is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static HashCode hash(
       InputSupplier<? extends InputStream> supplier, HashFunction hashFunction)
@@ -893,6 +971,7 @@ public final class ByteStreams {
    * @return the number of bytes read
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static int read(InputStream in, byte[] b, int off, int len)
       throws IOException {
     checkNotNull(in);
@@ -924,6 +1003,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#slice(int, int)} instead. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static InputSupplier<InputStream> slice(
       final InputSupplier<? extends InputStream> supplier,
@@ -949,12 +1029,14 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#concat(Iterable)} instead. This method
    *     is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static InputSupplier<InputStream> join(
       final Iterable<? extends InputSupplier<? extends InputStream>> suppliers) {
     checkNotNull(suppliers);
     Iterable<ByteSource> sources = Iterables.transform(suppliers,
         new Function<InputSupplier<? extends InputStream>, ByteSource>() {
+          @Impure
           @Override
           public ByteSource apply(InputSupplier<? extends InputStream> input) {
             return asByteSource(input);
@@ -969,6 +1051,7 @@ public final class ByteStreams {
    * @deprecated Use {@link ByteSource#concat(ByteSource[])} instead. This
    *     method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   @SuppressWarnings("unchecked") // suppress "possible heap pollution" warning in JDK7
   public static InputSupplier<InputStream> join(
@@ -991,16 +1074,19 @@ public final class ByteStreams {
    *     viewing the object as a {@code ByteSource}. This method is scheduled
    *     for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static ByteSource asByteSource(
       final InputSupplier<? extends InputStream> supplier) {
     checkNotNull(supplier);
     return new ByteSource() {
+      @Impure
       @Override
       public InputStream openStream() throws IOException {
         return supplier.getInput();
       }
 
+      @Pure
       @Override
       public String toString() {
         return "ByteStreams.asByteSource(" + supplier + ")";
@@ -1021,16 +1107,19 @@ public final class ByteStreams {
    *     viewing the object as a {@code ByteSink}. This method is scheduled
    *     for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static ByteSink asByteSink(
       final OutputSupplier<? extends OutputStream> supplier) {
     checkNotNull(supplier);
     return new ByteSink() {
+      @Impure
       @Override
       public OutputStream openStream() throws IOException {
         return supplier.getOutput();
       }
 
+      @Pure
       @Override
       public String toString() {
         return "ByteStreams.asByteSink(" + supplier + ")";
@@ -1038,12 +1127,16 @@ public final class ByteStreams {
     };
   }
 
+  @Pure
+  @Impure
   @SuppressWarnings("unchecked") // used internally where known to be safe
   static <S extends InputStream> InputSupplier<S> asInputSupplier(
       final ByteSource source) {
     return (InputSupplier) checkNotNull(source);
   }
 
+  @Pure
+  @Impure
   @SuppressWarnings("unchecked") // used internally where known to be safe
   static <S extends OutputStream> OutputSupplier<S> asOutputSupplier(
       final ByteSink sink) {

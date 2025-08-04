@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -53,6 +55,7 @@ public final class EnumBiMap<K extends Enum<K>, V extends Enum<V>>
    * @param keyType the key type
    * @param valueType the value type
    */
+  @Impure
   public static <K extends Enum<K>, V extends Enum<V>> EnumBiMap<K, V>
       create(Class<K> keyType, Class<V> valueType) {
     return new EnumBiMap<K, V>(keyType, valueType);
@@ -68,6 +71,7 @@ public final class EnumBiMap<K extends Enum<K>, V extends Enum<V>>
    * @throws IllegalArgumentException if map is not an {@code EnumBiMap}
    *     instance and contains no mappings
    */
+  @Impure
   public static <K extends Enum<K>, V extends Enum<V>> EnumBiMap<K, V>
       create(Map<K, V> map) {
     EnumBiMap<K, V> bimap = create(inferKeyType(map), inferValueType(map));
@@ -75,6 +79,7 @@ public final class EnumBiMap<K extends Enum<K>, V extends Enum<V>>
     return bimap;
   }
 
+  @Impure
   private EnumBiMap(Class<K> keyType, Class<V> valueType) {
     super(WellBehavedMap.wrap(new EnumMap<K, V>(keyType)),
         WellBehavedMap.wrap(new EnumMap<V, K>(valueType)));
@@ -82,6 +87,7 @@ public final class EnumBiMap<K extends Enum<K>, V extends Enum<V>>
     this.valueType = valueType;
   }
 
+  @Impure
   static <K extends Enum<K>> Class<K> inferKeyType(Map<K, ?> map) {
     if (map instanceof EnumBiMap) {
       return ((EnumBiMap<K, ?>) map).keyType();
@@ -93,6 +99,7 @@ public final class EnumBiMap<K extends Enum<K>, V extends Enum<V>>
     return map.keySet().iterator().next().getDeclaringClass();
   }
 
+  @Impure
   private static <V extends Enum<V>> Class<V> inferValueType(Map<?, V> map) {
     if (map instanceof EnumBiMap) {
       return ((EnumBiMap<?, V>) map).valueType;
@@ -102,20 +109,24 @@ public final class EnumBiMap<K extends Enum<K>, V extends Enum<V>>
   }
 
   /** Returns the associated key type. */
+  @Pure
   public Class<K> keyType() {
     return keyType;
   }
 
   /** Returns the associated value type. */
+  @Pure
   public Class<V> valueType() {
     return valueType;
   }
 
+  @Impure
   @Override
   K checkKey(K key) {
     return checkNotNull(key);
   }
 
+  @Impure
   @Override
   V checkValue(V value) {
     return checkNotNull(value);
@@ -125,6 +136,7 @@ public final class EnumBiMap<K extends Enum<K>, V extends Enum<V>>
    * @serialData the key class, value class, number of entries, first key, first
    *     value, second key, second value, and so on.
    */
+  @Impure
   @GwtIncompatible("java.io.ObjectOutputStream")
   private void writeObject(ObjectOutputStream stream) throws IOException {
     stream.defaultWriteObject();
@@ -133,6 +145,7 @@ public final class EnumBiMap<K extends Enum<K>, V extends Enum<V>>
     Serialization.writeMap(this, stream);
   }
 
+  @Impure
   @SuppressWarnings("unchecked") // reading fields populated by writeObject
   @GwtIncompatible("java.io.ObjectInputStream")
   private void readObject(ObjectInputStream stream)

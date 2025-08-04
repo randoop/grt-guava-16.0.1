@@ -16,6 +16,8 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ForwardingObject;
@@ -40,14 +42,17 @@ import javax.annotation.Nullable;
 public abstract class ForwardingCache<K, V> extends ForwardingObject implements Cache<K, V> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingCache() {}
 
+  @Pure
   @Override
   protected abstract Cache<K, V> delegate();
 
   /**
    * @since 11.0
    */
+  @Impure
   @Override
   @Nullable
   public V getIfPresent(Object key) {
@@ -57,6 +62,7 @@ public abstract class ForwardingCache<K, V> extends ForwardingObject implements 
   /**
    * @since 11.0
    */
+  @Impure
   @Override
   public V get(K key, Callable<? extends V> valueLoader) throws ExecutionException {
     return delegate().get(key, valueLoader);
@@ -65,6 +71,7 @@ public abstract class ForwardingCache<K, V> extends ForwardingObject implements 
   /**
    * @since 11.0
    */
+  @Impure
   @Override
   public ImmutableMap<K, V> getAllPresent(Iterable<?> keys) {
     return delegate().getAllPresent(keys);
@@ -73,6 +80,7 @@ public abstract class ForwardingCache<K, V> extends ForwardingObject implements 
   /**
    * @since 11.0
    */
+  @Impure
   @Override
   public void put(K key, V value) {
     delegate().put(key, value);
@@ -81,11 +89,13 @@ public abstract class ForwardingCache<K, V> extends ForwardingObject implements 
   /**
    * @since 12.0
    */
+  @Impure
   @Override
   public void putAll(Map<? extends K,? extends V> m) {
     delegate().putAll(m);
   }
 
+  @Impure
   @Override
   public void invalidate(Object key) {
     delegate().invalidate(key);
@@ -94,31 +104,37 @@ public abstract class ForwardingCache<K, V> extends ForwardingObject implements 
   /**
    * @since 11.0
    */
+  @Impure
   @Override
   public void invalidateAll(Iterable<?> keys) {
     delegate().invalidateAll(keys);
   }
 
+  @Impure
   @Override
   public void invalidateAll() {
     delegate().invalidateAll();
   }
 
+  @Impure
   @Override
   public long size() {
     return delegate().size();
   }
 
+  @Impure
   @Override
   public CacheStats stats() {
     return delegate().stats();
   }
 
+  @Impure
   @Override
   public ConcurrentMap<K, V> asMap() {
     return delegate().asMap();
   }
 
+  @Impure
   @Override
   public void cleanUp() {
     delegate().cleanUp();
@@ -134,10 +150,12 @@ public abstract class ForwardingCache<K, V> extends ForwardingObject implements 
   public abstract static class SimpleForwardingCache<K, V> extends ForwardingCache<K, V> {
     private final Cache<K, V> delegate;
 
+    @Impure
     protected SimpleForwardingCache(Cache<K, V> delegate) {
       this.delegate = Preconditions.checkNotNull(delegate);
     }
 
+    @Pure
     @Override
     protected final Cache<K, V> delegate() {
       return delegate;

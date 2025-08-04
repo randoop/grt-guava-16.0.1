@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 
 /**
@@ -40,5 +42,7 @@ public interface Interner<E> {
    *
    * @throws NullPointerException if {@code sample} is null
    */
+  @Pure
+  @Impure
   E intern(E sample);
 }

@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Collection;
@@ -43,13 +45,16 @@ abstract class AbstractSortedSetMultimap<K, V>
    * @param map place to store the mapping from each key to its corresponding
    *     values
    */
+  @Impure
   protected AbstractSortedSetMultimap(Map<K, Collection<V>> map) {
     super(map);
   }
 
+  @Pure
   @Override
   abstract SortedSet<V> createCollection();
 
+  @Impure
   @Override
   SortedSet<V> createUnmodifiableEmptyCollection() {
     Comparator<? super V> comparator = valueComparator();
@@ -74,6 +79,7 @@ abstract class AbstractSortedSetMultimap<K, V>
    * key, this method returns a {@link SortedSet}, instead of the
    * {@link Collection} specified in the {@link Multimap} interface.
    */
+  @Impure
   @Override public SortedSet<V> get(@Nullable K key) {
     return (SortedSet<V>) super.get(key);
   }
@@ -86,6 +92,7 @@ abstract class AbstractSortedSetMultimap<K, V>
    * key, this method returns a {@link SortedSet}, instead of the
    * {@link Collection} specified in the {@link Multimap} interface.
    */
+  @Impure
   @Override public SortedSet<V> removeAll(@Nullable Object key) {
     return (SortedSet<V>) super.removeAll(key);
   }
@@ -100,6 +107,7 @@ abstract class AbstractSortedSetMultimap<K, V>
    *
    * <p>Any duplicates in {@code values} will be stored in the multimap once.
    */
+  @Impure
   @Override public SortedSet<V> replaceValues(
       @Nullable K key, Iterable<? extends V> values) {
     return (SortedSet<V>) super.replaceValues(key, values);
@@ -119,6 +127,7 @@ abstract class AbstractSortedSetMultimap<K, V>
    * <p>Though the method signature doesn't say so explicitly, the returned map
    * has {@link SortedSet} values.
    */
+  @Impure
   @Override public Map<K, Collection<V>> asMap() {
     return super.asMap();
   }
@@ -129,6 +138,7 @@ abstract class AbstractSortedSetMultimap<K, V>
    * Consequently, the values do not follow their natural ordering or the
    * ordering of the value comparator.
    */
+  @Impure
   @Override public Collection<V> values() {
     return super.values();
   }

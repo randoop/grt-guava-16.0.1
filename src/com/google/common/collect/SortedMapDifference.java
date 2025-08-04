@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.SortedMap;
@@ -29,15 +30,19 @@ import java.util.SortedMap;
 @GwtCompatible
 public interface SortedMapDifference<K, V> extends MapDifference<K, V> {
 
+  @Pure
   @Override
   SortedMap<K, V> entriesOnlyOnLeft();
 
+  @Pure
   @Override
   SortedMap<K, V> entriesOnlyOnRight();
 
+  @Pure
   @Override
   SortedMap<K, V> entriesInCommon();
 
+  @Pure
   @Override
   SortedMap<K, ValueDifference<V>> entriesDiffering();
 }

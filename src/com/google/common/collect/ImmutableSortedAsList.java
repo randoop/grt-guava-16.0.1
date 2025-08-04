@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 
@@ -31,22 +33,26 @@ import javax.annotation.Nullable;
 @SuppressWarnings("serial")
 final class ImmutableSortedAsList<E> extends RegularImmutableAsList<E>
     implements SortedIterable<E> {
+  @Impure
   ImmutableSortedAsList(
       ImmutableSortedSet<E> backingSet, ImmutableList<E> backingList) {
     super(backingSet, backingList);
   }
 
+  @Pure
   @Override
   ImmutableSortedSet<E> delegateCollection() {
     return (ImmutableSortedSet<E>) super.delegateCollection();
   }
 
+  @Pure
   @Override public Comparator<? super E> comparator() {
     return delegateCollection().comparator();
   }
 
   // Override indexOf() and lastIndexOf() to be O(log N) instead of O(N).
 
+  @Pure
   @GwtIncompatible("ImmutableSortedSet.indexOf")
   // TODO(cpovirk): consider manual binary search under GWT to preserve O(log N) lookup
   @Override public int indexOf(@Nullable Object target) {
@@ -60,17 +66,20 @@ final class ImmutableSortedAsList<E> extends RegularImmutableAsList<E>
     return (index >= 0 && get(index).equals(target)) ? index : -1;
   }
 
+  @Pure
   @GwtIncompatible("ImmutableSortedSet.indexOf")
   @Override public int lastIndexOf(@Nullable Object target) {
     return indexOf(target);
   }
 
+  @Pure
   @Override
   public boolean contains(Object target) {
     // Necessary for ISS's with comparators inconsistent with equals.
     return indexOf(target) >= 0;
   }
 
+  @Impure
   @GwtIncompatible("super.subListUnchecked does not exist; inherited subList is valid if slow")
   /*
    * TODO(cpovirk): if we start to override indexOf/lastIndexOf under GWT, we'll want some way to

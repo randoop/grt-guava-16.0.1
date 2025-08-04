@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 
 import java.io.Serializable;
@@ -29,19 +32,23 @@ final class UsingToStringOrdering
     extends Ordering<Object> implements Serializable {
   static final UsingToStringOrdering INSTANCE = new UsingToStringOrdering();
 
+  @SideEffectFree
   @Override public int compare(Object left, Object right) {
     return left.toString().compareTo(right.toString());
   }
 
   // preserve singleton-ness, so equals() and hashCode() work correctly
+  @Pure
   private Object readResolve() {
     return INSTANCE;
   }
 
+  @Pure
   @Override public String toString() {
     return "Ordering.usingToString()";
   }
 
+  @Impure
   private UsingToStringOrdering() {}
 
   private static final long serialVersionUID = 0;

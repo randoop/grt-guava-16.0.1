@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 
@@ -34,35 +37,42 @@ import javax.annotation.Nullable;
 final class ImmutableMapKeySet<K, V> extends ImmutableSet<K> {
   private final ImmutableMap<K, V> map;
 
+  @SideEffectFree
   ImmutableMapKeySet(ImmutableMap<K, V> map) {
     this.map = map;
   }
 
+  @Pure
   @Override
   public int size() {
     return map.size();
   }
 
+  @Impure
   @Override
   public UnmodifiableIterator<K> iterator() {
     return asList().iterator();
   }
 
+  @Pure
   @Override
   public boolean contains(@Nullable Object object) {
     return map.containsKey(object);
   }
 
+  @Impure
   @Override
   ImmutableList<K> createAsList() {
     final ImmutableList<Entry<K, V>> entryList = map.entrySet().asList();
     return new ImmutableAsList<K>() {
 
+      @Pure
       @Override
       public K get(int index) {
         return entryList.get(index).getKey();
       }
 
+      @Pure
       @Override
       ImmutableCollection<K> delegateCollection() {
         return ImmutableMapKeySet.this;
@@ -71,11 +81,14 @@ final class ImmutableMapKeySet<K, V> extends ImmutableSet<K> {
     };
   }
 
+  @Pure
   @Override
   boolean isPartialView() {
     return true;
   }
 
+  @SideEffectFree
+  @Impure
   @GwtIncompatible("serialization")
   @Override Object writeReplace() {
     return new KeySetSerializedForm<K>(map);
@@ -84,9 +97,11 @@ final class ImmutableMapKeySet<K, V> extends ImmutableSet<K> {
   @GwtIncompatible("serialization")
   private static class KeySetSerializedForm<K> implements Serializable {
     final ImmutableMap<K, ?> map;
+    @SideEffectFree
     KeySetSerializedForm(ImmutableMap<K, ?> map) {
       this.map = map;
     }
+    @SideEffectFree
     Object readResolve() {
       return map.keySet();
     }

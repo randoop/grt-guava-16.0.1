@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -51,14 +53,20 @@ public abstract class ForwardingSet<E> extends ForwardingCollection<E>
   // TODO(user): identify places where thread safety is actually lost
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingSet() {}
 
+  @Pure
   @Override protected abstract Set<E> delegate();
 
+  @Pure
+  @Impure
   @Override public boolean equals(@Nullable Object object) {
     return object == this || delegate().equals(object);
   }
 
+  @Pure
+  @Impure
   @Override public int hashCode() {
     return delegate().hashCode();
   }
@@ -71,6 +79,7 @@ public abstract class ForwardingSet<E> extends ForwardingCollection<E>
    *
    * @since 7.0 (this version overrides the {@code ForwardingCollection} version as of 12.0)
    */
+  @Impure
   @Override
   protected boolean standardRemoveAll(Collection<?> collection) {
     return Sets.removeAllImpl(this, checkNotNull(collection)); // for GWT
@@ -83,6 +92,7 @@ public abstract class ForwardingSet<E> extends ForwardingCollection<E>
    *
    * @since 7.0
    */
+  @Impure
   protected boolean standardEquals(@Nullable Object object) {
     return Sets.equalsImpl(this, object);
   }
@@ -94,6 +104,7 @@ public abstract class ForwardingSet<E> extends ForwardingCollection<E>
    *
    * @since 7.0
    */
+  @Impure
   protected int standardHashCode() {
     return Sets.hashCodeImpl(this);
   }

@@ -16,6 +16,7 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 
 import java.util.Map;
@@ -56,6 +57,7 @@ public interface TypeToInstanceMap<B> extends Map<TypeToken<? extends B>, B>  {
    * <p>{@code getInstance(Foo.class)} is equivalent to
    * {@code getInstance(TypeToken.of(Foo.class))}.
    */
+  @Impure
   @Nullable
   <T extends B> T getInstance(Class<T> type);
 
@@ -69,6 +71,7 @@ public interface TypeToInstanceMap<B> extends Map<TypeToken<? extends B>, B>  {
    * @return the value previously associated with this class (possibly {@code null}),
    *         or {@code null} if there was no previous entry.
    */
+  @Impure
   @Nullable
   <T extends B> T putInstance(Class<T> type, @Nullable T value);
 
@@ -77,6 +80,7 @@ public interface TypeToInstanceMap<B> extends Map<TypeToken<? extends B>, B>  {
    * entry for this type is present. This will only return a value that was
    * bound to this specific type, not a value that may have been bound to a subtype.
    */
+  @Impure
   @Nullable
   <T extends B> T getInstance(TypeToken<T> type);
 
@@ -87,6 +91,7 @@ public interface TypeToInstanceMap<B> extends Map<TypeToken<? extends B>, B>  {
    * @return the value previously associated with this type (possibly {@code null}),
    *         or {@code null} if there was no previous entry.
    */
+  @Impure
   @Nullable
   <T extends B> T putInstance(TypeToken<T> type, @Nullable T value);
 }

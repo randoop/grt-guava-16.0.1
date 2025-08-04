@@ -16,6 +16,9 @@
 
 package com.google.common.escape;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -62,6 +65,7 @@ public abstract class UnicodeEscaper extends Escaper {
   private static final int DEST_PAD = 32;
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected UnicodeEscaper() {}
 
   /**
@@ -87,6 +91,7 @@ public abstract class UnicodeEscaper extends Escaper {
    * @return the replacement characters, or {@code null} if no escaping was
    *     needed
    */
+  @Impure
   protected abstract char[] escape(int cp);
 
   /**
@@ -113,6 +118,7 @@ public abstract class UnicodeEscaper extends Escaper {
    * @throws IllegalArgumentException if the scanned sub-sequence of {@code csq}
    *     contains invalid surrogate pairs
    */
+  @Impure
   protected int nextEscapeIndex(CharSequence csq, int start, int end) {
     int index = start;
     while (index < end) {
@@ -148,6 +154,7 @@ public abstract class UnicodeEscaper extends Escaper {
    * @throws IllegalArgumentException if invalid surrogate characters are
    *         encountered
    */
+  @Impure
   @Override
   public String escape(String string) {
     checkNotNull(string);
@@ -173,6 +180,7 @@ public abstract class UnicodeEscaper extends Escaper {
    * @throws IllegalArgumentException if invalid surrogate characters are
    *         encountered
    */
+  @Impure
   protected final String escapeSlow(String s, int index) {
     int end = s.length();
 
@@ -263,6 +271,8 @@ public abstract class UnicodeEscaper extends Escaper {
    * @return the Unicode code point for the given index or the negated value of
    *         the trailing high surrogate character at the end of the sequence
    */
+  @Pure
+  @Impure
   protected static int codePointAt(CharSequence seq, int index, int end) {
     checkNotNull(seq);
     if (index < end) {
@@ -300,6 +310,7 @@ public abstract class UnicodeEscaper extends Escaper {
    * once in a while so it's ok if it's in a method call.  If the index passed
    * in is 0 then no copying will be done.
    */
+  @SideEffectFree
   private static char[] growBuffer(char[] dest, int index, int size) {
     char[] copy = new char[size];
     if (index > 0) {

@@ -14,6 +14,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkPositionIndexes;
 
 import com.google.common.annotations.Beta;
@@ -45,6 +48,7 @@ public final class Utf8 {
    * @throws IllegalArgumentException if {@code sequence} contains ill-formed UTF-16 (unpaired
    *     surrogates)
    */
+  @Impure
   public static int encodedLength(CharSequence sequence) {
     // Warning to maintainers: this implementation is highly optimized.
     int utf16Length = sequence.length();
@@ -75,6 +79,7 @@ public final class Utf8 {
     return utf8Length;
   }
 
+  @Pure
   private static int encodedLengthGeneral(CharSequence sequence, int start) {
     int utf16Length = sequence.length();
     int utf8Length = 0;
@@ -108,6 +113,7 @@ public final class Utf8 {
    * <p>This method returns {@code true} if and only if {@code Arrays.equals(bytes, new
    * String(bytes, UTF_8).getBytes(UTF_8))} does, but is more efficient in both time and space.
    */
+  @Impure
   public static boolean isWellFormed(byte[] bytes) {
     return isWellFormed(bytes, 0, bytes.length);
   }
@@ -121,6 +127,7 @@ public final class Utf8 {
    * @param off the offset in the buffer of the first byte to read
    * @param len the number of bytes to read from the buffer
    */
+  @Impure
   public static boolean isWellFormed(byte[] bytes, int off, int len) {
     int end = off + len;
     checkPositionIndexes(off, end, bytes.length);
@@ -133,6 +140,7 @@ public final class Utf8 {
     return true;
   }
 
+  @Pure
   private static boolean isWellFormedSlowPath(byte[] bytes, int off, int end) {
     int index = off;
     while (true) {
@@ -192,5 +200,6 @@ public final class Utf8 {
     }
   }
 
+  @SideEffectFree
   private Utf8() {}
 }

@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.FutureTask;
@@ -49,6 +50,7 @@ public class ListenableFutureTask<V> extends FutureTask<V>
    * @param callable the callable task
    * @since 10.0
    */
+  @Impure
   public static <V> ListenableFutureTask<V> create(Callable<V> callable) {
     return new ListenableFutureTask<V>(callable);
   }
@@ -65,19 +67,23 @@ public class ListenableFutureTask<V> extends FutureTask<V>
    *     null)}
    * @since 10.0
    */
+  @Impure
   public static <V> ListenableFutureTask<V> create(
       Runnable runnable, @Nullable V result) {
     return new ListenableFutureTask<V>(runnable, result);
   }
 
+  @Impure
   ListenableFutureTask(Callable<V> callable) {
     super(callable);
   }
 
+  @Impure
   ListenableFutureTask(Runnable runnable, @Nullable V result) {
     super(runnable, result);
   }
 
+  @Impure
   @Override
   public void addListener(Runnable listener, Executor exec) {
     executionList.add(listener, exec);
@@ -86,6 +92,7 @@ public class ListenableFutureTask<V> extends FutureTask<V>
   /**
    * Internal implementation detail used to invoke the listeners.
    */
+  @Impure
   @Override
   protected void done() {
     executionList.execute();

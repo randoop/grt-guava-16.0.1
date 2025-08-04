@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.collect.BoundType.CLOSED;
 import static com.google.common.collect.BoundType.OPEN;
 
@@ -39,6 +42,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible(emulated = true)
 final class SortedMultisets {
+  @SideEffectFree
   private SortedMultisets() {
   }
 
@@ -49,34 +53,43 @@ final class SortedMultisets {
       SortedSet<E> {
     private final SortedMultiset<E> multiset;
 
+    @Impure
     ElementSet(SortedMultiset<E> multiset) {
       this.multiset = multiset;
     }
 
+    @Pure
     @Override final SortedMultiset<E> multiset() {
       return multiset;
     }
 
+    @Pure
+    @Impure
     @Override public Comparator<? super E> comparator() {
       return multiset().comparator();
     }
 
+    @Impure
     @Override public SortedSet<E> subSet(E fromElement, E toElement) {
       return multiset().subMultiset(fromElement, CLOSED, toElement, OPEN).elementSet();
     }
 
+    @Impure
     @Override public SortedSet<E> headSet(E toElement) {
       return multiset().headMultiset(toElement, OPEN).elementSet();
     }
 
+    @Impure
     @Override public SortedSet<E> tailSet(E fromElement) {
       return multiset().tailMultiset(fromElement, CLOSED).elementSet();
     }
 
+    @Impure
     @Override public E first() {
       return getElementOrThrow(multiset().firstEntry());
     }
 
+    @Impure
     @Override public E last() {
       return getElementOrThrow(multiset().lastEntry());
     }
@@ -87,50 +100,60 @@ final class SortedMultisets {
    */
   @GwtIncompatible("Navigable")
   static class NavigableElementSet<E> extends ElementSet<E> implements NavigableSet<E> {
+    @Impure
     NavigableElementSet(SortedMultiset<E> multiset) {
       super(multiset);
     }
 
+    @Impure
     @Override
     public E lower(E e) {
       return getElementOrNull(multiset().headMultiset(e, OPEN).lastEntry());
     }
 
+    @Impure
     @Override
     public E floor(E e) {
       return getElementOrNull(multiset().headMultiset(e, CLOSED).lastEntry());
     }
 
+    @Impure
     @Override
     public E ceiling(E e) {
       return getElementOrNull(multiset().tailMultiset(e, CLOSED).firstEntry());
     }
 
+    @Impure
     @Override
     public E higher(E e) {
       return getElementOrNull(multiset().tailMultiset(e, OPEN).firstEntry());
     }
 
+    @Impure
     @Override
     public NavigableSet<E> descendingSet() {
       return new NavigableElementSet<E>(multiset().descendingMultiset());
     }
 
+    @Impure
     @Override
     public Iterator<E> descendingIterator() {
       return descendingSet().iterator();
     }
 
+    @Impure
     @Override
     public E pollFirst() {
       return getElementOrNull(multiset().pollFirstEntry());
     }
 
+    @Impure
     @Override
     public E pollLast() {
       return getElementOrNull(multiset().pollLastEntry());
     }
 
+    @Impure
     @Override
     public NavigableSet<E> subSet(
         E fromElement, boolean fromInclusive, E toElement, boolean toInclusive) {
@@ -139,12 +162,14 @@ final class SortedMultisets {
           toElement, BoundType.forBoolean(toInclusive)));
     }
 
+    @Impure
     @Override
     public NavigableSet<E> headSet(E toElement, boolean inclusive) {
       return new NavigableElementSet<E>(
           multiset().headMultiset(toElement, BoundType.forBoolean(inclusive)));
     }
 
+    @Impure
     @Override
     public NavigableSet<E> tailSet(E fromElement, boolean inclusive) {
       return new NavigableElementSet<E>(
@@ -152,6 +177,7 @@ final class SortedMultisets {
     }
   }
 
+  @Impure
   private static <E> E getElementOrThrow(Entry<E> entry) {
     if (entry == null) {
       throw new NoSuchElementException();
@@ -159,6 +185,7 @@ final class SortedMultisets {
     return entry.getElement();
   }
 
+  @Impure
   private static <E> E getElementOrNull(@Nullable Entry<E> entry) {
     return (entry == null) ? null : entry.getElement();
   }

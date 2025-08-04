@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Map.Entry;
@@ -36,20 +38,25 @@ import javax.annotation.Nullable;
 public abstract class ForwardingSetMultimap<K, V>
     extends ForwardingMultimap<K, V> implements SetMultimap<K, V> {
 
+  @Pure
   @Override protected abstract SetMultimap<K, V> delegate();
 
+  @Impure
   @Override public Set<Entry<K, V>> entries() {
     return delegate().entries();
   }
 
+  @Impure
   @Override public Set<V> get(@Nullable K key) {
     return delegate().get(key);
   }
 
+  @Impure
   @Override public Set<V> removeAll(@Nullable Object key) {
     return delegate().removeAll(key);
   }
 
+  @Impure
   @Override public Set<V> replaceValues(K key, Iterable<? extends V> values) {
     return delegate().replaceValues(key, values);
   }

@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.io.BufferedWriter;
@@ -51,6 +53,7 @@ public abstract class CharSink implements OutputSupplier<Writer> {
   /**
    * Constructor for use by subclasses.
    */
+  @SideEffectFree
   protected CharSink() {}
 
   /**
@@ -61,6 +64,7 @@ public abstract class CharSink implements OutputSupplier<Writer> {
    *
    * @throws IOException if an I/O error occurs in the process of opening the writer
    */
+  @Impure
   public abstract Writer openStream() throws IOException;
 
   /**
@@ -72,6 +76,7 @@ public abstract class CharSink implements OutputSupplier<Writer> {
    *     {@link OutputSupplier} interface and should not be called directly. Use
    *     {@link #openStream} instead. This method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Override
   @Deprecated
   public final Writer getOutput() throws IOException {
@@ -90,6 +95,7 @@ public abstract class CharSink implements OutputSupplier<Writer> {
    * @throws IOException if an I/O error occurs in the process of opening the writer
    * @since 15.0 (in 14.0 with return type {@link BufferedWriter})
    */
+  @Impure
   public Writer openBufferedStream() throws IOException {
     Writer writer = openStream();
     return (writer instanceof BufferedWriter)
@@ -102,6 +108,7 @@ public abstract class CharSink implements OutputSupplier<Writer> {
    *
    * @throws IOException if an I/O error in the process of writing to this sink
    */
+  @Impure
   public void write(CharSequence charSequence) throws IOException {
     checkNotNull(charSequence);
 
@@ -124,6 +131,7 @@ public abstract class CharSink implements OutputSupplier<Writer> {
    *
    * @throws IOException if an I/O error occurs in the process of writing to this sink
    */
+  @Impure
   public void writeLines(Iterable<? extends CharSequence> lines) throws IOException {
     writeLines(lines, System.getProperty("line.separator"));
   }
@@ -134,6 +142,7 @@ public abstract class CharSink implements OutputSupplier<Writer> {
    *
    * @throws IOException if an I/O error occurs in the process of writing to this sink
    */
+  @Impure
   public void writeLines(Iterable<? extends CharSequence> lines, String lineSeparator)
       throws IOException {
     checkNotNull(lines);
@@ -160,6 +169,7 @@ public abstract class CharSink implements OutputSupplier<Writer> {
    * @throws IOException if an I/O error occurs in the process of reading from {@code readable} or
    *     writing to this sink
    */
+  @Impure
   public long writeFrom(Readable readable) throws IOException {
     checkNotNull(readable);
 

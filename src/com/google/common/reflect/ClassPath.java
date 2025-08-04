@@ -16,6 +16,9 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -60,6 +63,7 @@ public final class ClassPath {
   private static final Logger logger = Logger.getLogger(ClassPath.class.getName());
 
   private static final Predicate<ClassInfo> IS_TOP_LEVEL = new Predicate<ClassInfo>() {
+    @Pure
     @Override public boolean apply(ClassInfo info) {
       return info.className.indexOf('$') == -1;
     }
@@ -73,6 +77,7 @@ public final class ClassPath {
 
   private final ImmutableSet<ResourceInfo> resources;
 
+  @SideEffectFree
   private ClassPath(ImmutableSet<ResourceInfo> resources) {
     this.resources = resources;
   }
@@ -86,6 +91,7 @@ public final class ClassPath {
    * @throws IOException if the attempt to read class path resources (jar files or directories)
    *         failed.
    */
+  @Impure
   public static ClassPath from(ClassLoader classloader) throws IOException {
     Scanner scanner = new Scanner();
     for (Map.Entry<URI, ClassLoader> entry : getClassPathEntries(classloader).entrySet()) {
@@ -98,6 +104,7 @@ public final class ClassPath {
    * Returns all resources loadable from the current class path, including the class files of all
    * loadable classes but excluding the "META-INF/MANIFEST.MF" file.
    */
+  @Pure
   public ImmutableSet<ResourceInfo> getResources() {
     return resources;
   }
@@ -107,16 +114,19 @@ public final class ClassPath {
    *
    * @since 16.0
    */
+  @Impure
   public ImmutableSet<ClassInfo> getAllClasses() {
     return FluentIterable.from(resources).filter(ClassInfo.class).toSet();
   }
 
   /** Returns all top level classes loadable from the current class path. */
+  @Impure
   public ImmutableSet<ClassInfo> getTopLevelClasses() {
     return FluentIterable.from(resources).filter(ClassInfo.class).filter(IS_TOP_LEVEL).toSet();
   }
 
   /** Returns all top level classes whose package name is {@code packageName}. */
+  @Impure
   public ImmutableSet<ClassInfo> getTopLevelClasses(String packageName) {
     checkNotNull(packageName);
     ImmutableSet.Builder<ClassInfo> builder = ImmutableSet.builder();
@@ -132,6 +142,7 @@ public final class ClassPath {
    * Returns all top level classes whose package name is {@code packageName} or starts with
    * {@code packageName} followed by a '.'.
    */
+  @Impure
   public ImmutableSet<ClassInfo> getTopLevelClassesRecursive(String packageName) {
     checkNotNull(packageName);
     String packagePrefix = packageName + '.';
@@ -155,6 +166,7 @@ public final class ClassPath {
     private final String resourceName;
     final ClassLoader loader;
 
+    @Impure
     static ResourceInfo of(String resourceName, ClassLoader loader) {
       if (resourceName.endsWith(CLASS_FILE_NAME_EXTENSION)) {
         return new ClassInfo(resourceName, loader);
@@ -163,26 +175,31 @@ public final class ClassPath {
       }
     }
   
+    @Impure
     ResourceInfo(String resourceName, ClassLoader loader) {
       this.resourceName = checkNotNull(resourceName);
       this.loader = checkNotNull(loader);
     }
 
     /** Returns the url identifying the resource. */
+    @Impure
     public final URL url() {
       return checkNotNull(loader.getResource(resourceName),
           "Failed to load resource: %s", resourceName);
     }
 
     /** Returns the fully qualified name of the resource. Such as "com/mycomp/foo/bar.txt". */
+    @Pure
     public final String getResourceName() {
       return resourceName;
     }
 
+    @Pure
     @Override public int hashCode() {
       return resourceName.hashCode();
     }
 
+    @Pure
     @Override public boolean equals(Object obj) {
       if (obj instanceof ResourceInfo) {
         ResourceInfo that = (ResourceInfo) obj;
@@ -193,6 +210,7 @@ public final class ClassPath {
     }
 
     // Do not change this arbitrarily. We rely on it for sorting ResourceInfo.
+    @Pure
     @Override public String toString() {
       return resourceName;
     }
@@ -207,6 +225,7 @@ public final class ClassPath {
   public static final class ClassInfo extends ResourceInfo {
     private final String className;
 
+    @Impure
     ClassInfo(String resourceName, ClassLoader loader) {
       super(resourceName, loader);
       this.className = getClassName(resourceName);
@@ -218,6 +237,7 @@ public final class ClassPath {
      * <p>Behaves identically to {@link Package#getName()} but does not require the class (or 
      * package) to be loaded.
      */
+    @Impure
     public String getPackageName() {
       return Reflection.getPackageName(className);
     }
@@ -228,6 +248,7 @@ public final class ClassPath {
      * <p>Behaves identically to {@link Class#getSimpleName()} but does not require the class to be
      * loaded.
      */
+    @Impure
     public String getSimpleName() {
       int lastDollarSign = className.lastIndexOf('$');
       if (lastDollarSign != -1) {
@@ -251,6 +272,7 @@ public final class ClassPath {
      * <p>Behaves identically to {@link Class#getName()} but does not require the class to be
      * loaded.
      */
+    @Pure
     public String getName() {
       return className;
     }
@@ -261,6 +283,7 @@ public final class ClassPath {
      * @throws LinkageError when there were errors in loading classes that this class depends on.
      *         For example, {@link NoClassDefFoundError}.
      */
+    @Impure
     public Class<?> load() {
       try {
         return loader.loadClass(className);
@@ -270,11 +293,13 @@ public final class ClassPath {
       }
     }
 
+    @Pure
     @Override public String toString() {
       return className;
     }
   }
 
+  @Impure
   @VisibleForTesting static ImmutableMap<URI, ClassLoader> getClassPathEntries(
       ClassLoader classloader) {
     LinkedHashMap<URI, ClassLoader> entries = Maps.newLinkedHashMap();
@@ -306,16 +331,19 @@ public final class ClassPath {
         new ImmutableSortedSet.Builder<ResourceInfo>(Ordering.usingToString());
     private final Set<URI> scannedUris = Sets.newHashSet();
 
+    @Impure
     ImmutableSortedSet<ResourceInfo> getResources() {
       return resources.build();
     }
 
+    @Impure
     void scan(URI uri, ClassLoader classloader) throws IOException {
       if (uri.getScheme().equals("file") && scannedUris.add(uri)) {
         scanFrom(new File(uri), classloader);
       }
     }
   
+    @Impure
     @VisibleForTesting void scanFrom(File file, ClassLoader classloader)
         throws IOException {
       if (!file.exists()) {
@@ -328,10 +356,12 @@ public final class ClassPath {
       }
     }
   
+    @Impure
     private void scanDirectory(File directory, ClassLoader classloader) throws IOException {
       scanDirectory(directory, classloader, "", ImmutableSet.<File>of());
     }
   
+    @Impure
     private void scanDirectory(
         File directory, ClassLoader classloader, String packagePrefix,
         ImmutableSet<File> ancestors) throws IOException {
@@ -363,6 +393,7 @@ public final class ClassPath {
       }
     }
   
+    @Impure
     private void scanJar(File file, ClassLoader classloader) throws IOException {
       JarFile jarFile;
       try {
@@ -396,6 +427,7 @@ public final class ClassPath {
      * JAR File Specification</a>. If {@code manifest} is null, it means the jar file has no
      * manifest, and an empty set will be returned.
      */
+    @Impure
     @VisibleForTesting static ImmutableSet<URI> getClassPathFromManifest(
         File jarFile, @Nullable Manifest manifest) {
       if (manifest == null) {
@@ -426,6 +458,7 @@ public final class ClassPath {
      * JAR File Specification</a>. Even though the specification only talks about relative urls,
      * absolute urls are actually supported too (for example, in Maven surefire plugin).
      */
+    @Impure
     @VisibleForTesting static URI getClassPathEntry(File jarFile, String path)
         throws URISyntaxException {
       URI uri = new URI(path);
@@ -437,6 +470,7 @@ public final class ClassPath {
     }
   }
 
+  @SideEffectFree
   @VisibleForTesting static String getClassName(String filename) {
     int classNameEnd = filename.length() - CLASS_FILE_NAME_EXTENSION.length();
     return filename.substring(0, classNameEnd).replace('/', '.');

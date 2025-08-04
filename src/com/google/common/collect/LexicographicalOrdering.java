@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.io.Serializable;
@@ -32,10 +35,13 @@ final class LexicographicalOrdering<T>
     extends Ordering<Iterable<T>> implements Serializable {
   final Ordering<? super T> elementOrder;
 
+  @SideEffectFree
+  @Impure
   LexicographicalOrdering(Ordering<? super T> elementOrder) {
     this.elementOrder = elementOrder;
   }
 
+  @Impure
   @Override public int compare(
       Iterable<T> leftIterable, Iterable<T> rightIterable) {
     Iterator<T> left = leftIterable.iterator();
@@ -55,6 +61,7 @@ final class LexicographicalOrdering<T>
     return 0;
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object object) {
     if (object == this) {
       return true;
@@ -66,10 +73,12 @@ final class LexicographicalOrdering<T>
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     return elementOrder.hashCode() ^ 2075626741; // meaningless
   }
 
+  @Pure
   @Override public String toString() {
     return elementOrder + ".lexicographical()";
   }

@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Objects;
 
@@ -32,17 +34,21 @@ import javax.annotation.Nullable;
 @GwtCompatible
 abstract class AbstractMapEntry<K, V> implements Entry<K, V> {
 
+  @Pure
   @Override
   public abstract K getKey();
 
+  @Impure
   @Override
   public abstract V getValue();
 
+  @Pure
   @Override
   public V setValue(V value) {
     throw new UnsupportedOperationException();
   }
 
+  @Impure
   @Override public boolean equals(@Nullable Object object) {
     if (object instanceof Entry) {
       Entry<?, ?> that = (Entry<?, ?>) object;
@@ -52,6 +58,7 @@ abstract class AbstractMapEntry<K, V> implements Entry<K, V> {
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     K k = getKey();
     V v = getValue();
@@ -61,6 +68,7 @@ abstract class AbstractMapEntry<K, V> implements Entry<K, V> {
   /**
    * Returns a string representation of the form {@code {key}={value}}.
    */
+  @Pure
   @Override public String toString() {
     return getKey() + "=" + getValue();
   }

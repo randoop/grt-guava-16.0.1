@@ -16,6 +16,9 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,6 +51,7 @@ import java.util.RandomAccess;
  */
 @GwtCompatible(emulated = true)
 public final class Shorts {
+  @SideEffectFree
   private Shorts() {}
 
   /**
@@ -70,6 +74,7 @@ public final class Shorts {
    * @param value a primitive {@code short} value
    * @return a hash code for the value
    */
+  @Pure
   public static int hashCode(short value) {
     return value;
   }
@@ -83,6 +88,7 @@ public final class Shorts {
    * @throws IllegalArgumentException if {@code value} is greater than {@link
    *     Short#MAX_VALUE} or less than {@link Short#MIN_VALUE}
    */
+  @Pure
   public static short checkedCast(long value) {
     short result = (short) value;
     if (result != value) {
@@ -100,6 +106,7 @@ public final class Shorts {
    *     {@code short} type, {@link Short#MAX_VALUE} if it is too large,
    *     or {@link Short#MIN_VALUE} if it is too small
    */
+  @Pure
   public static short saturatedCast(long value) {
     if (value > Short.MAX_VALUE) {
       return Short.MAX_VALUE;
@@ -123,6 +130,7 @@ public final class Shorts {
    *     value if {@code a} is greater than {@code b}; or zero if they are equal
    */
   // TODO(kevinb): if JDK 6 ever becomes a non-concern, remove this
+  @Pure
   public static int compare(short a, short b) {
     return a - b; // safe due to restricted range
   }
@@ -136,6 +144,7 @@ public final class Shorts {
    * @return {@code true} if {@code array[i] == target} for some value of {@code
    *     i}
    */
+  @Pure
   public static boolean contains(short[] array, short target) {
     for (short value : array) {
       if (value == target) {
@@ -154,11 +163,14 @@ public final class Shorts {
    * @return the least index {@code i} for which {@code array[i] == target}, or
    *     {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int indexOf(short[] array, short target) {
     return indexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int indexOf(
       short[] array, short target, int start, int end) {
     for (int i = start; i < end; i++) {
@@ -180,6 +192,8 @@ public final class Shorts {
    * @param array the array to search for the sequence {@code target}
    * @param target the array to search for as a sub-sequence of {@code array}
    */
+  @Impure
+  @SideEffectFree
   public static int indexOf(short[] array, short[] target) {
     checkNotNull(array, "array");
     checkNotNull(target, "target");
@@ -208,11 +222,14 @@ public final class Shorts {
    * @return the greatest index {@code i} for which {@code array[i] == target},
    *     or {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int lastIndexOf(short[] array, short target) {
     return lastIndexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int lastIndexOf(
       short[] array, short target, int start, int end) {
     for (int i = end - 1; i >= start; i--) {
@@ -231,6 +248,8 @@ public final class Shorts {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
+  @SideEffectFree
   public static short min(short... array) {
     checkArgument(array.length > 0);
     short min = array[0];
@@ -250,6 +269,8 @@ public final class Shorts {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
+  @SideEffectFree
   public static short max(short... array) {
     checkArgument(array.length > 0);
     short max = array[0];
@@ -270,6 +291,7 @@ public final class Shorts {
    * @return a single array containing all the values from the source arrays, in
    *     order
    */
+  @SideEffectFree
   public static short[] concat(short[]... arrays) {
     int length = 0;
     for (short[] array : arrays) {
@@ -296,6 +318,7 @@ public final class Shorts {
    * {@link com.google.common.io.ByteStreams#newDataOutput()} to get a growable
    * buffer.
    */
+  @Pure
   @GwtIncompatible("doesn't work")
   public static byte[] toByteArray(short value) {
     return new byte[] {
@@ -315,6 +338,7 @@ public final class Shorts {
    * @throws IllegalArgumentException if {@code bytes} has fewer than 2
    *     elements
    */
+  @Impure
   @GwtIncompatible("doesn't work")
   public static short fromByteArray(byte[] bytes) {
     checkArgument(bytes.length >= BYTES,
@@ -329,6 +353,7 @@ public final class Shorts {
    *
    * @since 7.0
    */
+  @Pure
   @GwtIncompatible("doesn't work")
   public static short fromBytes(byte b1, byte b2) {
     return (short) ((b1 << 8) | (b2 & 0xFF));
@@ -338,21 +363,25 @@ public final class Shorts {
       extends Converter<String, Short> implements Serializable {
     static final ShortConverter INSTANCE = new ShortConverter();
 
+    @SideEffectFree
     @Override
     protected Short doForward(String value) {
       return Short.decode(value);
     }
 
+    @SideEffectFree
     @Override
     protected String doBackward(Short value) {
       return value.toString();
     }
 
+    @Pure
     @Override
     public String toString() {
       return "Shorts.stringConverter()";
     }
 
+    @Pure
     private Object readResolve() {
       return INSTANCE;
     }
@@ -365,6 +394,7 @@ public final class Shorts {
    *
    * @since 16.0
    */
+  @Pure
   @Beta
   public static Converter<String, Short> stringConverter() {
     return ShortConverter.INSTANCE;
@@ -386,6 +416,7 @@ public final class Shorts {
    * @return an array containing the values of {@code array}, with guaranteed
    *     minimum length {@code minLength}
    */
+  @Impure
   public static short[] ensureCapacity(
       short[] array, int minLength, int padding) {
     checkArgument(minLength >= 0, "Invalid minLength: %s", minLength);
@@ -396,6 +427,7 @@ public final class Shorts {
   }
 
   // Arrays.copyOf() requires Java 6
+  @SideEffectFree
   private static short[] copyOf(short[] original, int length) {
     short[] copy = new short[length];
     System.arraycopy(original, 0, copy, 0, Math.min(original.length, length));
@@ -411,6 +443,7 @@ public final class Shorts {
    *     the resulting string (but not at the start or end)
    * @param array an array of {@code short} values, possibly empty
    */
+  @Impure
   public static String join(String separator, short... array) {
     checkNotNull(separator);
     if (array.length == 0) {
@@ -442,6 +475,7 @@ public final class Shorts {
    *     Lexicographical order article at Wikipedia</a>
    * @since 2.0
    */
+  @Pure
   public static Comparator<short[]> lexicographicalComparator() {
     return LexicographicalComparator.INSTANCE;
   }
@@ -449,6 +483,8 @@ public final class Shorts {
   private enum LexicographicalComparator implements Comparator<short[]> {
     INSTANCE;
 
+    @Pure
+    @Impure
     @Override
     public int compare(short[] left, short[] right) {
       int minLength = Math.min(left.length, right.length);
@@ -477,6 +513,7 @@ public final class Shorts {
    *     is null
    * @since 1.0 (parameter was {@code Collection<Short>} before 12.0)
    */
+  @Impure
   public static short[] toArray(Collection<? extends Number> collection) {
     if (collection instanceof ShortArrayAsList) {
       return ((ShortArrayAsList) collection).toShortArray();
@@ -506,6 +543,7 @@ public final class Shorts {
    * @param backingArray the array to back the list
    * @return a list view of the array
    */
+  @Impure
   public static List<Short> asList(short... backingArray) {
     if (backingArray.length == 0) {
       return Collections.emptyList();
@@ -520,35 +558,45 @@ public final class Shorts {
     final int start;
     final int end;
 
+    @SideEffectFree
+    @Impure
     ShortArrayAsList(short[] array) {
       this(array, 0, array.length);
     }
 
+    @SideEffectFree
     ShortArrayAsList(short[] array, int start, int end) {
       this.array = array;
       this.start = start;
       this.end = end;
     }
 
+    @Pure
     @Override public int size() {
       return end - start;
     }
 
+    @Pure
     @Override public boolean isEmpty() {
       return false;
     }
 
+    @Impure
     @Override public Short get(int index) {
       checkElementIndex(index, size());
       return array[start + index];
     }
 
+    @Pure
+    @Impure
     @Override public boolean contains(Object target) {
       // Overridden to prevent a ton of boxing
       return (target instanceof Short)
           && Shorts.indexOf(array, (Short) target, start, end) != -1;
     }
 
+    @Pure
+    @Impure
     @Override public int indexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Short) {
@@ -560,6 +608,8 @@ public final class Shorts {
       return -1;
     }
 
+    @Pure
+    @Impure
     @Override public int lastIndexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Short) {
@@ -571,6 +621,7 @@ public final class Shorts {
       return -1;
     }
 
+    @Impure
     @Override public Short set(int index, Short element) {
       checkElementIndex(index, size());
       short oldValue = array[start + index];
@@ -579,6 +630,7 @@ public final class Shorts {
       return oldValue;
     }
 
+    @Impure
     @Override public List<Short> subList(int fromIndex, int toIndex) {
       int size = size();
       checkPositionIndexes(fromIndex, toIndex, size);
@@ -588,6 +640,7 @@ public final class Shorts {
       return new ShortArrayAsList(array, start + fromIndex, start + toIndex);
     }
 
+    @Pure
     @Override public boolean equals(Object object) {
       if (object == this) {
         return true;
@@ -608,6 +661,8 @@ public final class Shorts {
       return super.equals(object);
     }
 
+    @Pure
+    @Impure
     @Override public int hashCode() {
       int result = 1;
       for (int i = start; i < end; i++) {
@@ -616,6 +671,7 @@ public final class Shorts {
       return result;
     }
 
+    @Impure
     @Override public String toString() {
       StringBuilder builder = new StringBuilder(size() * 6);
       builder.append('[').append(array[start]);
@@ -625,6 +681,7 @@ public final class Shorts {
       return builder.append(']').toString();
     }
 
+    @SideEffectFree
     short[] toShortArray() {
       // Arrays.copyOfRange() is not available under GWT
       int size = size();

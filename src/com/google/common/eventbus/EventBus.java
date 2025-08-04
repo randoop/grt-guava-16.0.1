@@ -16,6 +16,9 @@
 
 package com.google.common.eventbus;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -122,6 +125,7 @@ public class EventBus {
       CacheBuilder.newBuilder()
           .weakKeys()
           .build(new CacheLoader<Class<?>, Set<Class<?>>>() {
+            @Impure
             @SuppressWarnings({"unchecked", "rawtypes"}) // safe cast
             @Override
             public Set<Class<?>> load(Class<?> concreteClass) {
@@ -149,6 +153,7 @@ public class EventBus {
   /** queues of events for the current thread to dispatch */
   private final ThreadLocal<Queue<EventWithSubscriber>> eventsToDispatch =
       new ThreadLocal<Queue<EventWithSubscriber>>() {
+    @Impure
     @Override protected Queue<EventWithSubscriber> initialValue() {
       return new LinkedList<EventWithSubscriber>();
     }
@@ -157,6 +162,7 @@ public class EventBus {
   /** true if the current thread is currently dispatching an event */
   private final ThreadLocal<Boolean> isDispatching =
       new ThreadLocal<Boolean>() {
+    @Pure
     @Override protected Boolean initialValue() {
       return false;
     }
@@ -177,6 +183,7 @@ public class EventBus {
    * @param identifier  a brief name for this bus, for logging purposes.  Should
    *                    be a valid Java identifier.
    */
+  @Impure
   public EventBus(String identifier) {
     this(new LoggingSubscriberExceptionHandler(identifier));
   }
@@ -187,6 +194,7 @@ public class EventBus {
    * @param subscriberExceptionHandler Handler for subscriber exceptions.
    * @since 16.0
    */
+  @Impure
   public EventBus(SubscriberExceptionHandler subscriberExceptionHandler) {
     this.subscriberExceptionHandler = checkNotNull(subscriberExceptionHandler);
   }
@@ -199,6 +207,7 @@ public class EventBus {
    *
    * @param object  object whose subscriber methods should be registered.
    */
+  @Impure
   public void register(Object object) {
     Multimap<Class<?>, EventSubscriber> methodsInListener =
         finder.findAllSubscribers(object);
@@ -216,6 +225,7 @@ public class EventBus {
    * @param object  object whose subscriber methods should be unregistered.
    * @throws IllegalArgumentException if the object was not previously registered.
    */
+  @Impure
   public void unregister(Object object) {
     Multimap<Class<?>, EventSubscriber> methodsInListener = finder.findAllSubscribers(object);
     for (Entry<Class<?>, Collection<EventSubscriber>> entry :
@@ -248,6 +258,7 @@ public class EventBus {
    *
    * @param event  event to post.
    */
+  @Impure
   public void post(Object event) {
     Set<Class<?>> dispatchTypes = flattenHierarchy(event.getClass());
 
@@ -280,6 +291,7 @@ public class EventBus {
    * {@link #dispatchQueuedEvents()}. Events are queued in-order of occurrence
    * so they can be dispatched in the same order.
    */
+  @Impure
   void enqueueEvent(Object event, EventSubscriber subscriber) {
     eventsToDispatch.get().offer(new EventWithSubscriber(event, subscriber));
   }
@@ -288,6 +300,7 @@ public class EventBus {
    * Drain the queue of events to be dispatched. As the queue is being drained,
    * new events may be posted to the end of the queue.
    */
+  @Impure
   void dispatchQueuedEvents() {
     // don't dispatch if we're already dispatching, that would allow reentrancy
     // and out-of-order events. Instead, leave the events to be dispatched
@@ -317,6 +330,7 @@ public class EventBus {
    * @param event  event to dispatch.
    * @param wrapper  wrapper that will call the subscriber.
    */
+  @Impure
   void dispatch(Object event, EventSubscriber wrapper) {
     try {
       wrapper.handleEvent(event);
@@ -348,6 +362,7 @@ public class EventBus {
    * @param concreteClass  class whose type hierarchy will be retrieved.
    * @return {@code clazz}'s complete type hierarchy, flattened and uniqued.
    */
+  @Impure
   @VisibleForTesting
   Set<Class<?>> flattenHierarchy(Class<?> concreteClass) {
     try {
@@ -373,11 +388,14 @@ public class EventBus {
      * @param identifier a brief name for this bus, for logging purposes. Should
      *        be a valid Java identifier.
      */
+    @Impure
     public LoggingSubscriberExceptionHandler(String identifier) {
       logger = Logger.getLogger(
           EventBus.class.getName() + "." + checkNotNull(identifier));
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     public void handleException(Throwable exception,
         SubscriberExceptionContext context) {
@@ -391,6 +409,7 @@ public class EventBus {
   static class EventWithSubscriber {
     final Object event;
     final EventSubscriber subscriber;
+    @Impure
     public EventWithSubscriber(Object event, EventSubscriber subscriber) {
       this.event = checkNotNull(event);
       this.subscriber = checkNotNull(subscriber);

@@ -16,6 +16,8 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -37,6 +39,7 @@ public final class Reflection {
    * 6.7). Unlike {@link Class#getPackage}, this method only parses the class name, without
    * attempting to define the {@link Package} and hence load files.
    */
+  @Impure
   public static String getPackageName(Class<?> clazz) {
     return getPackageName(clazz.getName());
   }
@@ -46,6 +49,7 @@ public final class Reflection {
    * (section 6.7). Unlike {@link Class#getPackage}, this method only parses the class name, without
    * attempting to define the {@link Package} and hence load files.
    */
+  @SideEffectFree
   public static String getPackageName(String classFullName) {
     int lastDot = classFullName.lastIndexOf('.');
     return (lastDot < 0) ? "" : classFullName.substring(0, lastDot);
@@ -63,6 +67,7 @@ public final class Reflection {
    * @throws ExceptionInInitializerError if an exception is thrown during
    *   initialization of a class
    */
+  @Impure
   public static void initialize(Class<?>... classes) {
     for (Class<?> clazz : classes) {
       try {
@@ -83,6 +88,7 @@ public final class Reflection {
    * @throws IllegalArgumentException if {@code interfaceType} does not specify
    *     the type of a Java interface
    */
+  @Impure
   public static <T> T newProxy(
       Class<T> interfaceType, InvocationHandler handler) {
     checkNotNull(handler);
@@ -94,5 +100,6 @@ public final class Reflection {
     return interfaceType.cast(object);
   }
 
+  @SideEffectFree
   private Reflection() {}
 }

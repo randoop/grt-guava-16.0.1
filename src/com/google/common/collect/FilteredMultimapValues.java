@@ -14,6 +14,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -38,25 +39,30 @@ import javax.annotation.Nullable;
 final class FilteredMultimapValues<K, V> extends AbstractCollection<V> {
   private final FilteredMultimap<K, V> multimap;
 
+  @Impure
   FilteredMultimapValues(FilteredMultimap<K, V> multimap) {
     this.multimap = checkNotNull(multimap);
   }
 
+  @Impure
   @Override
   public Iterator<V> iterator() {
     return Maps.valueIterator(multimap.entries().iterator());
   }
 
+  @Impure
   @Override
   public boolean contains(@Nullable Object o) {
     return multimap.containsValue(o);
   }
 
+  @Impure
   @Override
   public int size() {
     return multimap.size();
   }
 
+  @Impure
   @Override
   public boolean remove(@Nullable Object o) {
     Predicate<? super Entry<K, V>> entryPredicate = multimap.entryPredicate();
@@ -71,6 +77,7 @@ final class FilteredMultimapValues<K, V> extends AbstractCollection<V> {
     return false;
   }
 
+  @Impure
   @Override
   public boolean removeAll(Collection<?> c) {
     return Iterables.removeIf(multimap.unfiltered().entries(),
@@ -79,6 +86,7 @@ final class FilteredMultimapValues<K, V> extends AbstractCollection<V> {
             Maps.<V>valuePredicateOnEntries(Predicates.in(c))));
   }
 
+  @Impure
   @Override
   public boolean retainAll(Collection<?> c) {
     return Iterables.removeIf(multimap.unfiltered().entries(),
@@ -87,6 +95,7 @@ final class FilteredMultimapValues<K, V> extends AbstractCollection<V> {
             Maps.<V>valuePredicateOnEntries(Predicates.not(Predicates.in(c)))));
   }
 
+  @Impure
   @Override
   public void clear() {
     multimap.clear();

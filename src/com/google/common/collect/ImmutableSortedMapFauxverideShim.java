@@ -15,6 +15,7 @@
  */
 
 package com.google.common.collect;
+import org.checkerframework.dataflow.qual.Pure;
 
 /**
  * "Overrides" the {@link ImmutableMap} static methods that lack
@@ -34,6 +35,7 @@ abstract class ImmutableSortedMapFauxverideShim<K, V>
    * @deprecated Use {@link ImmutableSortedMap#naturalOrder}, which offers
    *     better type-safety.
    */
+  @Pure
   @Deprecated public static <K, V> ImmutableSortedMap.Builder<K, V> builder() {
     throw new UnsupportedOperationException();
   }
@@ -47,6 +49,7 @@ abstract class ImmutableSortedMapFauxverideShim<K, V>
    * @deprecated <b>Pass a key of type {@code Comparable} to use {@link
    *     ImmutableSortedMap#of(Comparable, Object)}.</b>
    */
+  @Pure
   @Deprecated public static <K, V> ImmutableSortedMap<K, V> of(K k1, V v1) {
     throw new UnsupportedOperationException();
   }
@@ -60,6 +63,7 @@ abstract class ImmutableSortedMapFauxverideShim<K, V>
    * @deprecated <b>Pass keys of type {@code Comparable} to use {@link
    *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object)}.</b>
    */
+  @Pure
   @Deprecated public static <K, V> ImmutableSortedMap<K, V> of(
       K k1, V v1, K k2, V v2) {
     throw new UnsupportedOperationException();
@@ -75,6 +79,7 @@ abstract class ImmutableSortedMapFauxverideShim<K, V>
    *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,
    *     Comparable, Object)}.</b>
    */
+  @Pure
   @Deprecated public static <K, V> ImmutableSortedMap<K, V> of(
       K k1, V v1, K k2, V v2, K k3, V v3) {
     throw new UnsupportedOperationException();
@@ -90,6 +95,7 @@ abstract class ImmutableSortedMapFauxverideShim<K, V>
    *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,
    *     Comparable, Object, Comparable, Object)}.</b>
    */
+  @Pure
   @Deprecated public static <K, V> ImmutableSortedMap<K, V> of(
       K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4) {
     throw new UnsupportedOperationException();
@@ -105,6 +111,7 @@ abstract class ImmutableSortedMapFauxverideShim<K, V>
    *     ImmutableSortedMap#of(Comparable, Object, Comparable, Object,
    *     Comparable, Object, Comparable, Object, Comparable, Object)}.</b>
    */
+  @Pure
   @Deprecated public static <K, V> ImmutableSortedMap<K, V> of(
       K k1, V v1, K k2, V v2, K k3, V v3, K k4, V v4, K k5, V v5) {
     throw new UnsupportedOperationException();

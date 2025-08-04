@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 /**
@@ -28,10 +30,12 @@ class EmptyImmutableListMultimap extends ImmutableListMultimap<Object, Object> {
   static final EmptyImmutableListMultimap INSTANCE
       = new EmptyImmutableListMultimap();
 
+  @Impure
   private EmptyImmutableListMultimap() {
     super(ImmutableMap.<Object, ImmutableList<Object>>of(), 0);
   }
 
+  @Pure
   private Object readResolve() {
     return INSTANCE; // preserve singleton property
   }

@@ -14,6 +14,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -37,11 +40,13 @@ import javax.annotation.Nullable;
  */
 @Beta
 public abstract class HashCode {
+  @SideEffectFree
   HashCode() {}
 
   /**
    * Returns the number of bits in this hash code; a positive multiple of 8.
    */
+  @Pure
   public abstract int bits();
 
   /**
@@ -50,6 +55,7 @@ public abstract class HashCode {
    *
    * @throws IllegalStateException if {@code bits() < 32}
    */
+  @Impure
   public abstract int asInt();
 
   /**
@@ -58,6 +64,7 @@ public abstract class HashCode {
    *
    * @throws IllegalStateException if {@code bits() < 64}
    */
+  @Impure
   public abstract long asLong();
 
   /**
@@ -67,6 +74,7 @@ public abstract class HashCode {
    *
    * @since 14.0 (since 11.0 as {@code Hashing.padToLong(HashCode)})
    */
+  @Impure
   public abstract long padToLong();
 
   /**
@@ -75,6 +83,7 @@ public abstract class HashCode {
    * returned by this method.
    */
   // TODO(user): consider ByteString here, when that is available
+  @SideEffectFree
   public abstract byte[] asBytes();
 
   /**
@@ -86,6 +95,7 @@ public abstract class HashCode {
    * @return the number of bytes written to {@code dest}
    * @throws IndexOutOfBoundsException if there is not enough room in {@code dest}
    */
+  @Impure
   public int writeBytesTo(byte[] dest, int offset, int maxLength) {
     maxLength = Ints.min(maxLength, bits() / 8);
     Preconditions.checkPositionIndexes(offset, offset + maxLength, dest.length);
@@ -93,6 +103,7 @@ public abstract class HashCode {
     return maxLength;
   }
 
+  @Impure
   abstract void writeBytesToImpl(byte[] dest, int offset, int maxLength);
 
   /**
@@ -101,6 +112,8 @@ public abstract class HashCode {
    *
    * @since 15.0 (since 12.0 in HashCodes)
    */
+  @SideEffectFree
+  @Impure
   public static HashCode fromInt(int hash) {
     return new IntHashCode(hash);
   }
@@ -108,15 +121,19 @@ public abstract class HashCode {
   private static final class IntHashCode extends HashCode implements Serializable {
     final int hash;
 
+    @SideEffectFree
+    @Impure
     IntHashCode(int hash) {
       this.hash = hash;
     }
 
+    @Pure
     @Override
     public int bits() {
       return 32;
     }
 
+    @Pure
     @Override
     public byte[] asBytes() {
       return new byte[] {
@@ -126,21 +143,25 @@ public abstract class HashCode {
           (byte) (hash >> 24)};
     }
 
+    @Pure
     @Override
     public int asInt() {
       return hash;
     }
 
+    @Pure
     @Override
     public long asLong() {
       throw new IllegalStateException("this HashCode only has 32 bits; cannot create a long");
     }
 
+    @Impure
     @Override
     public long padToLong() {
       return UnsignedInts.toLong(hash);
     }
 
+    @Impure
     @Override
     void writeBytesToImpl(byte[] dest, int offset, int maxLength) {
       for (int i = 0; i < maxLength; i++) {
@@ -157,6 +178,8 @@ public abstract class HashCode {
    *
    * @since 15.0 (since 12.0 in HashCodes)
    */
+  @SideEffectFree
+  @Impure
   public static HashCode fromLong(long hash) {
     return new LongHashCode(hash);
   }
@@ -164,15 +187,19 @@ public abstract class HashCode {
   private static final class LongHashCode extends HashCode implements Serializable {
     final long hash;
 
+    @SideEffectFree
+    @Impure
     LongHashCode(long hash) {
       this.hash = hash;
     }
 
+    @Pure
     @Override
     public int bits() {
       return 64;
     }
 
+    @Pure
     @Override
     public byte[] asBytes() {
       return new byte[] {
@@ -186,21 +213,25 @@ public abstract class HashCode {
           (byte) (hash >> 56)};
     }
 
+    @Pure
     @Override
     public int asInt() {
       return (int) hash;
     }
 
+    @Pure
     @Override
     public long asLong() {
       return hash;
     }
 
+    @Pure
     @Override
     public long padToLong() {
       return hash;
     }
 
+    @Impure
     @Override
     void writeBytesToImpl(byte[] dest, int offset, int maxLength) {
       for (int i = 0; i < maxLength; i++) {
@@ -217,6 +248,8 @@ public abstract class HashCode {
    *
    * @since 15.0 (since 12.0 in HashCodes)
    */
+  @SideEffectFree
+  @Impure
   public static HashCode fromBytes(byte[] bytes) {
     checkArgument(bytes.length >= 1, "A HashCode must contain at least 1 byte.");
     return fromBytesNoCopy(bytes.clone());
@@ -226,6 +259,8 @@ public abstract class HashCode {
    * Creates a {@code HashCode} from a byte array. The array is <i>not</i> copied defensively,
    * so it must be handed-off so as to preserve the immutability contract of {@code HashCode}.
    */
+  @SideEffectFree
+  @Impure
   static HashCode fromBytesNoCopy(byte[] bytes) {
     return new BytesHashCode(bytes);
   }
@@ -233,20 +268,25 @@ public abstract class HashCode {
   private static final class BytesHashCode extends HashCode implements Serializable {
     final byte[] bytes;
 
+    @SideEffectFree
+    @Impure
     BytesHashCode(byte[] bytes) {
       this.bytes = checkNotNull(bytes);
     }
 
+    @Pure
     @Override
     public int bits() {
       return bytes.length * 8;
     }
 
+    @SideEffectFree
     @Override
     public byte[] asBytes() {
       return bytes.clone();
     }
 
+    @Impure
     @Override
     public int asInt() {
       checkState(bytes.length >= 4,
@@ -257,6 +297,7 @@ public abstract class HashCode {
           | ((bytes[3] & 0xFF) << 24);
     }
 
+    @Impure
     @Override
     public long asLong() {
       checkState(bytes.length >= 8,
@@ -264,6 +305,7 @@ public abstract class HashCode {
       return padToLong();
     }
 
+    @Pure
     @Override
     public long padToLong() {
       long retVal = (bytes[0] & 0xFF);
@@ -273,6 +315,7 @@ public abstract class HashCode {
       return retVal;
     }
 
+    @SideEffectFree
     @Override
     void writeBytesToImpl(byte[] dest, int offset, int maxLength) {
       System.arraycopy(bytes, 0, dest, offset, maxLength);
@@ -291,6 +334,7 @@ public abstract class HashCode {
    *
    * @since 15.0
    */
+  @Impure
   public static HashCode fromString(String string) {
     checkArgument(string.length() >= 2,
         "input string (%s) must have at least 2 characters", string);
@@ -306,6 +350,7 @@ public abstract class HashCode {
     return fromBytesNoCopy(bytes);
   }
 
+  @Pure
   private static int decode(char ch) {
     if (ch >= '0' && ch <= '9') {
       return ch - '0';
@@ -316,6 +361,7 @@ public abstract class HashCode {
     throw new IllegalArgumentException("Illegal hexadecimal character: " + ch);
   }
 
+  @Impure
   @Override
   public final boolean equals(@Nullable Object object) {
     if (object instanceof HashCode) {
@@ -332,6 +378,7 @@ public abstract class HashCode {
    * (so, for example, you can safely put {@code HashCode} instances into a {@code
    * HashSet}) but is otherwise probably not what you want to use.
    */
+  @Impure
   @Override
   public final int hashCode() {
     // If we have at least 4 bytes (32 bits), just take the first 4 bytes. Since this is
@@ -359,6 +406,7 @@ public abstract class HashCode {
    *
    * <p>To create a {@code HashCode} from its string representation, see {@link #fromString}.
    */
+  @Impure
   @Override
   public final String toString() {
     byte[] bytes = asBytes();

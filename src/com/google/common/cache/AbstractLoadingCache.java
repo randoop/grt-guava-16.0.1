@@ -16,6 +16,8 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -45,8 +47,11 @@ public abstract class AbstractLoadingCache<K, V>
     extends AbstractCache<K, V> implements LoadingCache<K, V> {
 
   /** Constructor for use by subclasses. */
+  @SideEffectFree
+  @Impure
   protected AbstractLoadingCache() {}
 
+  @Impure
   @Override
   public V getUnchecked(K key) {
     try {
@@ -56,6 +61,7 @@ public abstract class AbstractLoadingCache<K, V>
     }
   }
 
+  @Impure
   @Override
   public ImmutableMap<K, V> getAll(Iterable<? extends K> keys) throws ExecutionException {
     Map<K, V> result = Maps.newLinkedHashMap();
@@ -67,11 +73,13 @@ public abstract class AbstractLoadingCache<K, V>
     return ImmutableMap.copyOf(result);
   }
 
+  @Impure
   @Override
   public final V apply(K key) {
     return getUnchecked(key);
   }
 
+  @SideEffectFree
   @Override
   public void refresh(K key) {
     throw new UnsupportedOperationException();

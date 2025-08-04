@@ -16,6 +16,9 @@
 
 package com.google.common.escape;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -42,6 +45,7 @@ public final class Escapers {
    * Returns an {@link Escaper} that does no escaping, passing all character
    * data through unchanged.
    */
+  @Pure
   public static Escaper nullEscaper() {
     return NULL_ESCAPER;
   }
@@ -49,10 +53,12 @@ public final class Escapers {
   // An Escaper that efficiently performs no escaping.
   // Extending CharEscaper (instead of Escaper) makes Escapers.compose() easier.
   private static final Escaper NULL_ESCAPER = new CharEscaper() {
+    @Impure
     @Override public String escape(String string) {
       return checkNotNull(string);
     }
 
+    @Pure
     @Override protected char[] escape(char c) {
       // TODO: Fix tests not to call this directly and make it throw an error.
       return null;
@@ -74,6 +80,8 @@ public final class Escapers {
    * <p>For performance reasons escapers created by this builder are not
    * Unicode aware and will not validate the well-formedness of their input.
    */
+  @SideEffectFree
+  @Impure
   public static Builder builder() {
     return new Builder();
   }
@@ -99,6 +107,7 @@ public final class Escapers {
     private String unsafeReplacement = null;
 
     // The constructor is exposed via the builder() method above.
+    @SideEffectFree
     private Builder() {}
 
     /**
@@ -111,6 +120,7 @@ public final class Escapers {
      * @param safeMax the highest 'safe' character
      * @return the builder instance
      */
+    @Impure
     public Builder setSafeRange(char safeMin, char safeMax) {
       this.safeMin = safeMin;
       this.safeMax = safeMax;
@@ -126,6 +136,7 @@ public final class Escapers {
      * @param unsafeReplacement the string to replace unsafe chracters
      * @return the builder instance
      */
+    @Impure
     public Builder setUnsafeReplacement(@Nullable String unsafeReplacement) {
       this.unsafeReplacement = unsafeReplacement;
       return this;
@@ -142,6 +153,7 @@ public final class Escapers {
      * @return the builder instance
      * @throws NullPointerException if {@code replacement} is null
      */
+    @Impure
     public Builder addEscape(char c, String replacement) {
       checkNotNull(replacement);
       // This can replace an existing character (the builder is re-usable).
@@ -152,10 +164,12 @@ public final class Escapers {
     /**
      * Returns a new escaper based on the current state of the builder.
      */
+    @Impure
     public Escaper build() {
       return new ArrayBasedCharEscaper(replacementMap, safeMin, safeMax) {
         private final char[] replacementChars =
             unsafeReplacement != null ? unsafeReplacement.toCharArray() : null;
+        @Pure
         @Override protected char[] escapeUnsafe(char c) {
           return replacementChars;
         }
@@ -179,6 +193,7 @@ public final class Escapers {
    * @throws IllegalArgumentException if escaper is not a UnicodeEscaper or a
    *         CharEscaper
    */
+  @Impure
   static UnicodeEscaper asUnicodeEscaper(Escaper escaper) {
     checkNotNull(escaper);
     if (escaper instanceof UnicodeEscaper) {
@@ -202,6 +217,8 @@ public final class Escapers {
    * @param c the character to escape if necessary
    * @return the replacement string, or {@code null} if no escaping was needed
    */
+  @SideEffectFree
+  @Impure
   public static String computeReplacement(CharEscaper escaper, char c) {
     return stringOrNull(escaper.escape(c));
   }
@@ -216,15 +233,18 @@ public final class Escapers {
    * @param cp the Unicode code point to escape if necessary
    * @return the replacement string, or {@code null} if no escaping was needed
    */
+  @Impure
   public static String computeReplacement(UnicodeEscaper escaper, int cp) {
     return stringOrNull(escaper.escape(cp));
   }
 
+  @SideEffectFree
   private static String stringOrNull(char[] in) {
     return (in == null) ? null : new String(in);
   }
 
   /** Private helper to wrap a CharEscaper as a UnicodeEscaper. */
+  @Impure
   private static UnicodeEscaper wrap(final CharEscaper escaper) {
     return new UnicodeEscaper() {
       @Override protected char[] escape(int cp) {

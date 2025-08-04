@@ -16,6 +16,8 @@
 
 package com.google.common.eventbus;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -43,6 +45,7 @@ public class DeadEvent {
    *                {@link EventBus}).
    * @param event   the event that could not be delivered.
    */
+  @Impure
   public DeadEvent(Object source, Object event) {
     this.source = checkNotNull(source);
     this.event = checkNotNull(event);
@@ -54,6 +57,7 @@ public class DeadEvent {
    *
    * @return the source of this event.
    */
+  @Pure
   public Object getSource() {
     return source;
   }
@@ -64,6 +68,7 @@ public class DeadEvent {
    *
    * @return the 'dead' event that could not be delivered.
    */
+  @Pure
   public Object getEvent() {
     return event;
   }

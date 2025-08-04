@@ -15,6 +15,9 @@
  */
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -142,12 +145,14 @@ public final class ServiceManager {
      * {@linkplain State#FAILED fail}/{@linkplain State#TERMINATED terminate} before all other 
      * services have started {@linkplain State#RUNNING running} then this method will not be called.
      */
+    @SideEffectFree
     public void healthy() {}
     
     /** 
      * Called when the all of the component services have reached a terminal state, either 
      * {@linkplain State#TERMINATED terminated} or {@linkplain State#FAILED failed}.
      */
+    @SideEffectFree
     public void stopped() {}
     
     /** 
@@ -155,6 +160,7 @@ public final class ServiceManager {
      * 
      * @param service The service that failed.
      */
+    @SideEffectFree
     public void failure(Service service) {}
   }
   
@@ -176,6 +182,7 @@ public final class ServiceManager {
    * @throws IllegalArgumentException if not all services are {@link State#NEW new} or if there are
    *     any duplicate services.
    */
+  @Impure
   public ServiceManager(Iterable<? extends Service> services) {
     ImmutableList<Service> copy = ImmutableList.copyOf(services);
     if (copy.isEmpty()) {
@@ -229,6 +236,7 @@ public final class ServiceManager {
    * @param listener the listener to run when the manager changes state
    * @param executor the executor in which the listeners callback methods will be run.
    */
+  @Impure
   public void addListener(Listener listener, Executor executor) {
     state.addListener(listener, executor);
   }
@@ -245,6 +253,7 @@ public final class ServiceManager {
    * 
    * @param listener the listener to run when the manager changes state
    */
+  @Impure
   public void addListener(Listener listener) {
     state.addListener(listener, MoreExecutors.sameThreadExecutor());
   }
@@ -257,6 +266,7 @@ public final class ServiceManager {
    * @throws IllegalStateException if any of the Services are not {@link State#NEW new} when the 
    *     method is called.
    */
+  @Impure
   public ServiceManager startAsync() {
     for (Service service : services) {
       State state = service.state();
@@ -284,6 +294,7 @@ public final class ServiceManager {
    * @throws IllegalStateException if the service manager reaches a state from which it cannot 
    *     become {@linkplain #isHealthy() healthy}.
    */
+  @Impure
   public void awaitHealthy() {
     state.awaitHealthy();
   }
@@ -299,6 +310,7 @@ public final class ServiceManager {
    * @throws IllegalStateException if the service manager reaches a state from which it cannot 
    *     become {@linkplain #isHealthy() healthy}.
    */
+  @Impure
   public void awaitHealthy(long timeout, TimeUnit unit) throws TimeoutException {
     state.awaitHealthy(timeout, unit);
   }
@@ -309,6 +321,7 @@ public final class ServiceManager {
    *    
    * @return this
    */
+  @Impure
   public ServiceManager stopAsync() {
     for (Service service : services) {
       service.stopAsync();
@@ -321,6 +334,7 @@ public final class ServiceManager {
    * services will either be {@link Service.State#TERMINATED terminated} or 
    * {@link Service.State#FAILED failed}
    */
+  @Impure
   public void awaitStopped() {
     state.awaitStopped();
   }
@@ -334,6 +348,7 @@ public final class ServiceManager {
    * @param unit the time unit of the timeout argument
    * @throws TimeoutException if not all of the services have stopped within the deadline
    */
+  @Impure
   public void awaitStopped(long timeout, TimeUnit unit) throws TimeoutException {
     state.awaitStopped(timeout, unit);
   }
@@ -344,6 +359,7 @@ public final class ServiceManager {
    * <p>Users who want more detailed information should use the {@link #servicesByState} method to 
    * get detailed information about which services are not running.
    */
+  @Impure
   public boolean isHealthy() {
     for (Service service : services) {
       if (!service.isRunning()) {
@@ -359,6 +375,7 @@ public final class ServiceManager {
    * <p>N.B. This snapshot is guaranteed to be consistent, i.e. the set of states returned will
    * correspond to a point in time view of the services.
    */
+  @Impure
   public ImmutableMultimap<State, Service> servicesByState() {
     return state.servicesByState();
   }
@@ -370,10 +387,12 @@ public final class ServiceManager {
    * @return Map of services and their corresponding startup time in millis, the map entries will be
    *     ordered by startup time.
    */
+  @Impure
   public ImmutableMap<Service, Long> startupTimes() {
     return state.startupTimes();
   }
   
+  @Impure
   @Override public String toString() {
     return Objects.toStringHelper(ServiceManager.class)
         .add("services", Collections2.filter(services, not(instanceOf(NoOpService.class))))
@@ -391,6 +410,7 @@ public final class ServiceManager {
     final SetMultimap<State, Service> servicesByState =
         Multimaps.newSetMultimap(new EnumMap<State, Collection<Service>>(State.class),
             new Supplier<Set<Service>>() {
+              @Impure
               @Override public Set<Service> get() {
                 return Sets.newLinkedHashSet();
               }
@@ -426,6 +446,7 @@ public final class ServiceManager {
      * state from which it is guaranteed that it can never become healthy.
      */
     final Monitor.Guard awaitHealthGuard = new Monitor.Guard(monitor) {
+      @Impure
       @Override public boolean isSatisfied() {
         // All services have started or some service has terminated/failed.
         return states.count(RUNNING) == numberOfServices
@@ -439,6 +460,7 @@ public final class ServiceManager {
      * Controls how long to wait for all services to reach a terminal state.
      */
     final Monitor.Guard stoppedGuard = new Monitor.Guard(monitor) {
+      @Impure
       @Override public boolean isSatisfied() {
         return states.count(TERMINATED) + states.count(FAILED) == numberOfServices;
       }
@@ -465,6 +487,7 @@ public final class ServiceManager {
      * responsibility to only call {@link #markReady()} if all services were new at the time this
      * method was called and when all the listeners were installed.
      */
+    @Impure
     ServiceManagerState(ImmutableCollection<Service> services) {
       this.numberOfServices = services.size();
       servicesByState.putAll(NEW, services);
@@ -477,6 +500,7 @@ public final class ServiceManager {
      * Marks the {@link State} as ready to receive transitions. Returns true if no transitions have
      * been observed yet.
      */
+    @Impure
     void markReady() {
       monitor.enter();
       try {
@@ -499,6 +523,7 @@ public final class ServiceManager {
       }
     }
 
+    @Impure
     void addListener(Listener listener, Executor executor) {
       checkNotNull(listener, "listener");
       checkNotNull(executor, "executor");
@@ -513,6 +538,7 @@ public final class ServiceManager {
       }
     }
     
+    @Impure
     void awaitHealthy() {
       monitor.enterWhenUninterruptibly(awaitHealthGuard);
       try {
@@ -522,6 +548,7 @@ public final class ServiceManager {
       }
     }
 
+    @Impure
     void awaitHealthy(long timeout, TimeUnit unit) throws TimeoutException {
       monitor.enter();
       try {
@@ -536,11 +563,13 @@ public final class ServiceManager {
       }
     }
     
+    @Impure
     void awaitStopped() {
       monitor.enterWhenUninterruptibly(stoppedGuard);
       monitor.leave();
     }
     
+    @Impure
     void awaitStopped(long timeout, TimeUnit unit) throws TimeoutException {
       monitor.enter();
       try {
@@ -555,6 +584,7 @@ public final class ServiceManager {
       }
     }
 
+    @Impure
     ImmutableMultimap<State, Service> servicesByState() {
       ImmutableSetMultimap.Builder<State, Service> builder = ImmutableSetMultimap.builder();
       monitor.enter();
@@ -570,6 +600,7 @@ public final class ServiceManager {
       return builder.build();
     }
     
+    @Impure
     ImmutableMap<Service, Long> startupTimes() {
       List<Entry<Service, Long>> loadTimes;
       monitor.enter();
@@ -593,6 +624,7 @@ public final class ServiceManager {
       }
       Collections.sort(loadTimes, Ordering.<Long>natural()
           .onResultOf(new Function<Entry<Service, Long>, Long>() {
+            @Pure
             @Override public Long apply(Map.Entry<Service, Long> input) {
               return input.getValue();
             }
@@ -615,6 +647,7 @@ public final class ServiceManager {
      *      <li>Run the listeners (outside of the lock)
      * </ol>
      */
+    @Impure
     void transitionService(final Service service, State from, State to) {
       checkNotNull(service);
       checkArgument(from != to);
@@ -665,10 +698,12 @@ public final class ServiceManager {
       }
     }
 
+    @Impure
     @GuardedBy("monitor")
     void fireStoppedListeners() {
       for (final ListenerExecutorPair pair : listeners) {
         queuedListeners.add(new Runnable() {
+          @Impure
           @Override public void run() {
             pair.listener.stopped();
           }
@@ -676,10 +711,12 @@ public final class ServiceManager {
       }
     }
 
+    @Impure
     @GuardedBy("monitor")
     void fireHealthyListeners() {
       for (final ListenerExecutorPair pair : listeners) {
         queuedListeners.add(new Runnable() {
+          @Impure
           @Override public void run() {
             pair.listener.healthy();
           }
@@ -687,10 +724,12 @@ public final class ServiceManager {
       }
     }
 
+    @Impure
     @GuardedBy("monitor")
     void fireFailedListeners(final Service service) {
       for (final ListenerExecutorPair pair : listeners) {
         queuedListeners.add(new Runnable() {
+          @Impure
           @Override public void run() {
             pair.listener.failure(service);
           }
@@ -699,12 +738,14 @@ public final class ServiceManager {
     }
 
     /** Attempts to execute all the listeners in {@link #queuedListeners}. */
+    @Impure
     void executeListeners() {
       checkState(!monitor.isOccupiedByCurrentThread(), 
           "It is incorrect to execute listeners with the monitor held.");
       queuedListeners.execute();
     }
 
+    @Impure
     @GuardedBy("monitor")
     void checkHealthy() {
       if (states.count(RUNNING) != numberOfServices) {
@@ -726,11 +767,13 @@ public final class ServiceManager {
     // constructing the ServiceManager we don't pointlessly keep updating the state.
     final WeakReference<ServiceManagerState> state;
     
+    @Impure
     ServiceListener(Service service, WeakReference<ServiceManagerState> state) {
       this.service = service;
       this.state = state;
     }
     
+    @Impure
     @Override public void starting() {
       ServiceManagerState state = this.state.get();
       if (state != null) {
@@ -741,6 +784,7 @@ public final class ServiceManager {
       }
     }
 
+    @Impure
     @Override public void running() {
       ServiceManagerState state = this.state.get();
       if (state != null) {
@@ -748,6 +792,7 @@ public final class ServiceManager {
       }
     }
     
+    @Impure
     @Override public void stopping(State from) {
       ServiceManagerState state = this.state.get();
       if (state != null) {
@@ -755,6 +800,7 @@ public final class ServiceManager {
       }
     }
     
+    @Impure
     @Override public void terminated(State from) {
       ServiceManagerState state = this.state.get();
       if (state != null) {
@@ -766,6 +812,7 @@ public final class ServiceManager {
       }
     }
     
+    @Impure
     @Override public void failed(State from, Throwable failure) {
       ServiceManagerState state = this.state.get();
       if (state != null) {
@@ -785,6 +832,7 @@ public final class ServiceManager {
     final Listener listener;
     final Executor executor;
     
+    @SideEffectFree
     ListenerExecutorPair(Listener listener, Executor executor) {
       this.listener = listener;
       this.executor = executor;
@@ -800,7 +848,9 @@ public final class ServiceManager {
    * logging statements.
    */
   private static final class NoOpService extends AbstractService {
+    @Impure
     @Override protected void doStart() { notifyStarted(); }
+    @Impure
     @Override protected void doStop() { notifyStopped(); }
   }
   
@@ -814,6 +864,7 @@ public final class ServiceManager {
    * submitted.
    */
   private static final class SynchronizedExecutor implements Executor {
+    @Impure
     @Override public synchronized void execute(Runnable command) {
       command.run();
     }

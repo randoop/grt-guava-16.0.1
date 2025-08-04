@@ -16,6 +16,9 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,6 +56,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible(emulated = true)
 public final class Doubles {
+  @SideEffectFree
   private Doubles() {}
 
   /**
@@ -70,6 +74,7 @@ public final class Doubles {
    * @param value a primitive {@code double} value
    * @return a hash code for the value
    */
+  @Pure
   public static int hashCode(double value) {
     return ((Double) value).hashCode();
     // TODO(kevinb): do it this way when we can (GWT problem):
@@ -93,6 +98,7 @@ public final class Doubles {
    *     value if {@code a} is greater than {@code b}; or zero if they are equal
    */
   // TODO(kevinb): if Ints.compare etc. are ever removed, remove this one too
+  @Pure
   public static int compare(double a, double b) {
     return Double.compare(a, b);
   }
@@ -104,6 +110,7 @@ public final class Doubles {
    *
    * @since 10.0
    */
+  @Pure
   public static boolean isFinite(double value) {
     return NEGATIVE_INFINITY < value & value < POSITIVE_INFINITY;
   }
@@ -118,6 +125,7 @@ public final class Doubles {
    * @return {@code true} if {@code array[i] == target} for some value of {@code
    *     i}
    */
+  @Pure
   public static boolean contains(double[] array, double target) {
     for (double value : array) {
       if (value == target) {
@@ -137,11 +145,14 @@ public final class Doubles {
    * @return the least index {@code i} for which {@code array[i] == target}, or
    *     {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int indexOf(double[] array, double target) {
     return indexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int indexOf(
       double[] array, double target, int start, int end) {
     for (int i = start; i < end; i++) {
@@ -166,6 +177,8 @@ public final class Doubles {
    * @param array the array to search for the sequence {@code target}
    * @param target the array to search for as a sub-sequence of {@code array}
    */
+  @Impure
+  @SideEffectFree
   public static int indexOf(double[] array, double[] target) {
     checkNotNull(array, "array");
     checkNotNull(target, "target");
@@ -195,11 +208,14 @@ public final class Doubles {
    * @return the greatest index {@code i} for which {@code array[i] == target},
    *     or {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int lastIndexOf(double[] array, double target) {
     return lastIndexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int lastIndexOf(
       double[] array, double target, int start, int end) {
     for (int i = end - 1; i >= start; i--) {
@@ -219,6 +235,8 @@ public final class Doubles {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
+  @SideEffectFree
   public static double min(double... array) {
     checkArgument(array.length > 0);
     double min = array[0];
@@ -237,6 +255,8 @@ public final class Doubles {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
+  @SideEffectFree
   public static double max(double... array) {
     checkArgument(array.length > 0);
     double max = array[0];
@@ -255,6 +275,7 @@ public final class Doubles {
    * @return a single array containing all the values from the source arrays, in
    *     order
    */
+  @SideEffectFree
   public static double[] concat(double[]... arrays) {
     int length = 0;
     for (double[] array : arrays) {
@@ -273,21 +294,25 @@ public final class Doubles {
       extends Converter<String, Double> implements Serializable {
     static final DoubleConverter INSTANCE = new DoubleConverter();
 
+    @SideEffectFree
     @Override
     protected Double doForward(String value) {
       return Double.valueOf(value);
     }
 
+    @SideEffectFree
     @Override
     protected String doBackward(Double value) {
       return value.toString();
     }
 
+    @Pure
     @Override
     public String toString() {
       return "Doubles.stringConverter()";
     }
 
+    @Pure
     private Object readResolve() {
       return INSTANCE;
     }
@@ -300,6 +325,7 @@ public final class Doubles {
    *
    * @since 16.0
    */
+  @Pure
   @Beta
   public static Converter<String, Double> stringConverter() {
     return DoubleConverter.INSTANCE;
@@ -321,6 +347,7 @@ public final class Doubles {
    * @return an array containing the values of {@code array}, with guaranteed
    *     minimum length {@code minLength}
    */
+  @Impure
   public static double[] ensureCapacity(
       double[] array, int minLength, int padding) {
     checkArgument(minLength >= 0, "Invalid minLength: %s", minLength);
@@ -331,6 +358,7 @@ public final class Doubles {
   }
 
   // Arrays.copyOf() requires Java 6
+  @SideEffectFree
   private static double[] copyOf(double[] original, int length) {
     double[] copy = new double[length];
     System.arraycopy(original, 0, copy, 0, Math.min(original.length, length));
@@ -351,6 +379,7 @@ public final class Doubles {
    *     the resulting string (but not at the start or end)
    * @param array an array of {@code double} values, possibly empty
    */
+  @Impure
   public static String join(String separator, double... array) {
     checkNotNull(separator);
     if (array.length == 0) {
@@ -382,6 +411,7 @@ public final class Doubles {
    *     Lexicographical order article at Wikipedia</a>
    * @since 2.0
    */
+  @Pure
   public static Comparator<double[]> lexicographicalComparator() {
     return LexicographicalComparator.INSTANCE;
   }
@@ -389,6 +419,8 @@ public final class Doubles {
   private enum LexicographicalComparator implements Comparator<double[]> {
     INSTANCE;
 
+    @Pure
+    @Impure
     @Override
     public int compare(double[] left, double[] right) {
       int minLength = Math.min(left.length, right.length);
@@ -417,6 +449,7 @@ public final class Doubles {
    *     is null
    * @since 1.0 (parameter was {@code Collection<Double>} before 12.0)
    */
+  @Impure
   public static double[] toArray(Collection<? extends Number> collection) {
     if (collection instanceof DoubleArrayAsList) {
       return ((DoubleArrayAsList) collection).toDoubleArray();
@@ -449,6 +482,7 @@ public final class Doubles {
    * @param backingArray the array to back the list
    * @return a list view of the array
    */
+  @Impure
   public static List<Double> asList(double... backingArray) {
     if (backingArray.length == 0) {
       return Collections.emptyList();
@@ -463,35 +497,45 @@ public final class Doubles {
     final int start;
     final int end;
 
+    @SideEffectFree
+    @Impure
     DoubleArrayAsList(double[] array) {
       this(array, 0, array.length);
     }
 
+    @SideEffectFree
     DoubleArrayAsList(double[] array, int start, int end) {
       this.array = array;
       this.start = start;
       this.end = end;
     }
 
+    @Pure
     @Override public int size() {
       return end - start;
     }
 
+    @Pure
     @Override public boolean isEmpty() {
       return false;
     }
 
+    @Impure
     @Override public Double get(int index) {
       checkElementIndex(index, size());
       return array[start + index];
     }
 
+    @Pure
+    @Impure
     @Override public boolean contains(Object target) {
       // Overridden to prevent a ton of boxing
       return (target instanceof Double)
           && Doubles.indexOf(array, (Double) target, start, end) != -1;
     }
 
+    @Pure
+    @Impure
     @Override public int indexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Double) {
@@ -503,6 +547,8 @@ public final class Doubles {
       return -1;
     }
 
+    @Pure
+    @Impure
     @Override public int lastIndexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Double) {
@@ -514,6 +560,7 @@ public final class Doubles {
       return -1;
     }
 
+    @Impure
     @Override public Double set(int index, Double element) {
       checkElementIndex(index, size());
       double oldValue = array[start + index];
@@ -522,6 +569,7 @@ public final class Doubles {
       return oldValue;
     }
 
+    @Impure
     @Override public List<Double> subList(int fromIndex, int toIndex) {
       int size = size();
       checkPositionIndexes(fromIndex, toIndex, size);
@@ -531,6 +579,7 @@ public final class Doubles {
       return new DoubleArrayAsList(array, start + fromIndex, start + toIndex);
     }
 
+    @Pure
     @Override public boolean equals(Object object) {
       if (object == this) {
         return true;
@@ -551,6 +600,8 @@ public final class Doubles {
       return super.equals(object);
     }
 
+    @Pure
+    @Impure
     @Override public int hashCode() {
       int result = 1;
       for (int i = start; i < end; i++) {
@@ -559,6 +610,7 @@ public final class Doubles {
       return result;
     }
 
+    @Impure
     @Override public String toString() {
       StringBuilder builder = new StringBuilder(size() * 12);
       builder.append('[').append(array[start]);
@@ -568,6 +620,7 @@ public final class Doubles {
       return builder.append(']').toString();
     }
 
+    @SideEffectFree
     double[] toDoubleArray() {
       // Arrays.copyOfRange() is not available under GWT
       int size = size();
@@ -588,6 +641,7 @@ public final class Doubles {
   @GwtIncompatible("regular expressions")
   static final Pattern FLOATING_POINT_PATTERN = fpPattern();
 
+  @Pure
   @GwtIncompatible("regular expressions")
   private static Pattern fpPattern() {
     String decimal = "(?:\\d++(?:\\.\\d*+)?|\\.\\d++)";
@@ -617,6 +671,7 @@ public final class Doubles {
    *     parsed as a {@code double} value
    * @since 14.0
    */
+  @SideEffectFree
   @GwtIncompatible("regular expressions")
   @Nullable
   @Beta

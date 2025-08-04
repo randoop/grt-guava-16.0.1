@@ -16,6 +16,7 @@
 
 package com.google.common.eventbus;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -36,10 +37,12 @@ final class SynchronizedEventSubscriber extends EventSubscriber {
    * @param target  object to which the method applies.
    * @param method  subscriber method.
    */
+  @Impure
   public SynchronizedEventSubscriber(Object target, Method method) {
     super(target, method);
   }
 
+  @Impure
   @Override
   public void handleEvent(Object event) throws InvocationTargetException {
     // https://code.google.com/p/guava-libraries/issues/detail?id=1403

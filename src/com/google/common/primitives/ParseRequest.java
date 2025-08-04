@@ -14,6 +14,8 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 
 /**
@@ -24,11 +26,13 @@ final class ParseRequest {
   final String rawValue;
   final int radix;
 
+  @SideEffectFree
   private ParseRequest(String rawValue, int radix) {
     this.rawValue = rawValue;
     this.radix = radix;
   }
 
+  @Impure
   static ParseRequest fromString(String stringValue) {
     if (stringValue.length() == 0) {
       throw new NumberFormatException("empty string");

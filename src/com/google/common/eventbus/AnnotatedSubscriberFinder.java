@@ -16,6 +16,8 @@
 
 package com.google.common.eventbus;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
@@ -54,6 +56,7 @@ class AnnotatedSubscriberFinder implements SubscriberFindingStrategy {
       CacheBuilder.newBuilder()
           .weakKeys()
           .build(new CacheLoader<Class<?>, ImmutableList<Method>>() {
+            @Impure
             @Override
             public ImmutableList<Method> load(Class<?> concreteClass) throws Exception {
               return getAnnotatedMethodsInternal(concreteClass);
@@ -65,6 +68,7 @@ class AnnotatedSubscriberFinder implements SubscriberFindingStrategy {
    *
    * This implementation finds all methods marked with a {@link Subscribe} annotation.
    */
+  @Impure
   @Override
   public Multimap<Class<?>, EventSubscriber> findAllSubscribers(Object listener) {
     Multimap<Class<?>, EventSubscriber> methodsInListener = HashMultimap.create();
@@ -78,6 +82,7 @@ class AnnotatedSubscriberFinder implements SubscriberFindingStrategy {
     return methodsInListener;
   }
 
+  @Impure
   private static ImmutableList<Method> getAnnotatedMethods(Class<?> clazz) {
     try {
       return subscriberMethodsCache.getUnchecked(clazz);
@@ -90,16 +95,19 @@ class AnnotatedSubscriberFinder implements SubscriberFindingStrategy {
     private final String name;
     private final List<Class<?>> parameterTypes;
     
+    @Impure
     MethodIdentifier(Method method) {
       this.name = method.getName();
       this.parameterTypes = Arrays.asList(method.getParameterTypes());
     }
     
+    @Impure
     @Override
     public int hashCode() {
       return Objects.hashCode(name, parameterTypes);
     }
     
+    @Pure
     @Override
     public boolean equals(@Nullable Object o) {
       if (o instanceof MethodIdentifier) {
@@ -110,6 +118,7 @@ class AnnotatedSubscriberFinder implements SubscriberFindingStrategy {
     }
   }
 
+  @Impure
   private static ImmutableList<Method> getAnnotatedMethodsInternal(Class<?> clazz) {
     Set<? extends Class<?>> supers = TypeToken.of(clazz).getTypes().rawTypes();
     Map<MethodIdentifier, Method> identifiers = Maps.newHashMap();
@@ -144,6 +153,7 @@ class AnnotatedSubscriberFinder implements SubscriberFindingStrategy {
    * @return an EventSubscriber that will call {@code method} on {@code listener}
    *         when invoked.
    */
+  @Impure
   private static EventSubscriber makeSubscriber(Object listener, Method method) {
     EventSubscriber wrapper;
     if (methodIsDeclaredThreadSafe(method)) {
@@ -162,6 +172,7 @@ class AnnotatedSubscriberFinder implements SubscriberFindingStrategy {
    * @return {@code true} if {@code subscriber} is marked as thread-safe,
    *         {@code false} otherwise.
    */
+  @Impure
   private static boolean methodIsDeclaredThreadSafe(Method method) {
     return method.getAnnotation(AllowConcurrentEvents.class) != null;
   }

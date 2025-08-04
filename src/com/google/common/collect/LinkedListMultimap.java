@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkPositionIndex;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.CollectPreconditions.checkRemove;
@@ -116,21 +119,25 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
     Node<K, V> nextSibling; // the next node with the same key
     Node<K, V> previousSibling; // the previous node with the same key
 
+    @Impure
     Node(@Nullable K key, @Nullable V value) {
       this.key = key;
       this.value = value;
     }
 
+    @Pure
     @Override
     public K getKey() {
       return key;
     }
 
+    @Pure
     @Override
     public V getValue() {
       return value;
     }
 
+    @Impure
     @Override
     public V setValue(@Nullable V newValue) {
       V result = value;
@@ -144,6 +151,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
     Node<K, V> tail;
     int count;
     
+    @Impure
     KeyList(Node<K, V> firstNode) {
       this.head = firstNode;
       this.tail = firstNode;
@@ -169,6 +177,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    * Creates a new, empty {@code LinkedListMultimap} with the default initial
    * capacity.
    */
+  @Impure
   public static <K, V> LinkedListMultimap<K, V> create() {
     return new LinkedListMultimap<K, V>();
   }
@@ -180,6 +189,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    * @param expectedKeys the expected number of distinct keys
    * @throws IllegalArgumentException if {@code expectedKeys} is negative
    */
+  @Impure
   public static <K, V> LinkedListMultimap<K, V> create(int expectedKeys) {
     return new LinkedListMultimap<K, V>(expectedKeys);
   }
@@ -191,19 +201,23 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    *
    * @param multimap the multimap whose contents are copied to this multimap
    */
+  @Impure
   public static <K, V> LinkedListMultimap<K, V> create(
       Multimap<? extends K, ? extends V> multimap) {
     return new LinkedListMultimap<K, V>(multimap);
   }
 
+  @Impure
   LinkedListMultimap() {
     keyToKeyList = Maps.newHashMap();
   }
 
+  @Impure
   private LinkedListMultimap(int expectedKeys) {
     keyToKeyList = new HashMap<K, KeyList<K, V>>(expectedKeys);
   }
 
+  @Impure
   private LinkedListMultimap(Multimap<? extends K, ? extends V> multimap) {
     this(multimap.keySet().size());
     putAll(multimap);
@@ -215,6 +229,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    * nextSibling} is null. Note: if {@code nextSibling} is specified, it MUST be
    * for an node for the same {@code key}!
    */
+  @Impure
   private Node<K, V> addNode(
       @Nullable K key, @Nullable V value, @Nullable Node<K, V> nextSibling) {
     Node<K, V> node = new Node<K, V>(key, value);
@@ -266,6 +281,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    * intended to be used from the {@code Iterator} classes. See also {@link
    * LinkedListMultimap#removeAllNodes(Object)}.
    */
+  @Impure
   private void removeNode(Node<K, V> node) {
     if (node.previous != null) {
       node.previous.next = node.next;
@@ -301,11 +317,13 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
   }
 
   /** Removes all nodes for the specified key. */
+  @Impure
   private void removeAllNodes(@Nullable Object key) {
     Iterators.clear(new ValueForKeyIterator(key));
   }
 
   /** Helper method for verifying that an iterator element is present. */
+  @Impure
   private static void checkElement(@Nullable Object node) {
     if (node == null) {
       throw new NoSuchElementException();
@@ -320,6 +338,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
     Node<K, V> previous;
     int expectedModCount = modCount;
 
+    @Impure
     NodeIterator(int index) {
       int size = size();
       checkPositionIndex(index, size);
@@ -337,16 +356,19 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
       }
       current = null;
     }
+    @Impure
     private void checkForConcurrentModification() {
       if (modCount != expectedModCount) {
         throw new ConcurrentModificationException();
       }
     }
+    @Impure
     @Override
     public boolean hasNext() {
       checkForConcurrentModification();
       return next != null;
     }
+    @Impure
     @Override
     public Node<K, V> next() {
       checkForConcurrentModification();
@@ -356,6 +378,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
       nextIndex++;
       return current;
     }
+    @Impure
     @Override
     public void remove() {
       checkForConcurrentModification();
@@ -370,11 +393,13 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
       current = null;
       expectedModCount = modCount;
     }
+    @Impure
     @Override
     public boolean hasPrevious() {
       checkForConcurrentModification();
       return previous != null;
     }
+    @Impure
     @Override
     public Node<K, V> previous() {
       checkForConcurrentModification();
@@ -384,22 +409,27 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
       nextIndex--;
       return current;
     }
+    @Pure
     @Override
     public int nextIndex() {
       return nextIndex;
     }
+    @Pure
     @Override
     public int previousIndex() {
       return nextIndex - 1;
     }
+    @SideEffectFree
     @Override
     public void set(Entry<K, V> e) {
       throw new UnsupportedOperationException();
     }
+    @SideEffectFree
     @Override
     public void add(Entry<K, V> e) {
       throw new UnsupportedOperationException();
     }
+    @Impure
     void setValue(V value) {
       checkState(current != null);
       current.value = value;
@@ -413,16 +443,19 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
     Node<K, V> current;
     int expectedModCount = modCount;
     
+    @Impure
     private void checkForConcurrentModification() {
       if (modCount != expectedModCount) {
         throw new ConcurrentModificationException();
       }
     }
+    @Impure
     @Override
     public boolean hasNext() {
       checkForConcurrentModification();
       return next != null;
     }
+    @Impure
     @Override
     public K next() {
       checkForConcurrentModification();
@@ -434,6 +467,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
       } while ((next != null) && !seenKeys.add(next.key));
       return current.key;
     }
+    @Impure
     @Override
     public void remove() {
       checkForConcurrentModification();
@@ -453,6 +487,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
     Node<K, V> previous;
 
     /** Constructs a new iterator over all values for the specified key. */
+    @SideEffectFree
     ValueForKeyIterator(@Nullable Object key) {
       this.key = key;
       KeyList<K, V> keyList = keyToKeyList.get(key);
@@ -468,6 +503,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
      *
      * @throws IndexOutOfBoundsException if index is invalid
      */
+    @Impure
     public ValueForKeyIterator(@Nullable Object key, int index) {
       KeyList<K, V> keyList = keyToKeyList.get(key);
       int size = (keyList == null) ? 0 : keyList.count;
@@ -488,11 +524,13 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
       current = null;
     }
 
+    @Pure
     @Override
     public boolean hasNext() {
       return next != null;
     }
 
+    @Impure
     @Override
     public V next() {
       checkElement(next);
@@ -502,11 +540,13 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
       return current.value;
     }
 
+    @Pure
     @Override
     public boolean hasPrevious() {
       return previous != null;
     }
 
+    @Impure
     @Override
     public V previous() {
       checkElement(previous);
@@ -516,16 +556,19 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
       return current.value;
     }
 
+    @Pure
     @Override
     public int nextIndex() {
       return nextIndex;
     }
 
+    @Pure
     @Override
     public int previousIndex() {
       return nextIndex - 1;
     }
 
+    @Impure
     @Override
     public void remove() {
       checkRemove(current != null);
@@ -539,12 +582,14 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
       current = null;
     }
 
+    @Impure
     @Override
     public void set(V value) {
       checkState(current != null);
       current.value = value;
     }
 
+    @Impure
     @Override
     @SuppressWarnings("unchecked")
     public void add(V value) {
@@ -556,21 +601,25 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
 
   // Query Operations
 
+  @Pure
   @Override
   public int size() {
     return size;
   }
 
+  @Pure
   @Override
   public boolean isEmpty() {
     return head == null;
   }
 
+  @Pure
   @Override
   public boolean containsKey(@Nullable Object key) {
     return keyToKeyList.containsKey(key);
   }
 
+  @Impure
   @Override
   public boolean containsValue(@Nullable Object value) {
     return values().contains(value);
@@ -585,6 +634,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    * @param value value to store in the multimap
    * @return {@code true} always
    */
+  @Impure
   @Override
   public boolean put(@Nullable K key, @Nullable V value) {
     addNode(key, value, null);
@@ -603,6 +653,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    * <p>The returned list is immutable and implements
    * {@link java.util.RandomAccess}.
    */
+  @Impure
   @Override
   public List<V> replaceValues(@Nullable K key, Iterable<? extends V> values) {
     List<V> oldValues = getCopy(key);
@@ -629,6 +680,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
     return oldValues;
   }
 
+  @Impure
   private List<V> getCopy(@Nullable Object key) {
     return unmodifiableList(Lists.newArrayList(new ValueForKeyIterator(key)));
   }
@@ -639,6 +691,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    * <p>The returned list is immutable and implements
    * {@link java.util.RandomAccess}.
    */
+  @Impure
   @Override
   public List<V> removeAll(@Nullable Object key) {
     List<V> oldValues = getCopy(key);
@@ -646,6 +699,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
     return oldValues;
   }
 
+  @Impure
   @Override
   public void clear() {
     head = null;
@@ -666,31 +720,39 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    *
    * <p>The returned list is not serializable and does not have random access.
    */
+  @Impure
   @Override
   public List<V> get(final @Nullable K key) {
     return new AbstractSequentialList<V>() {
+      @Pure
       @Override public int size() {
         KeyList<K, V> keyList = keyToKeyList.get(key);
         return (keyList == null) ? 0 : keyList.count;
       }
+      @Impure
       @Override public ListIterator<V> listIterator(int index) {
         return new ValueForKeyIterator(key, index);
       }
     };
   }
 
+  @Impure
   @Override
   Set<K> createKeySet() {
     return new Sets.ImprovedAbstractSet<K>() {
+      @Pure
       @Override public int size() {
         return keyToKeyList.size();
       }
+      @Impure
       @Override public Iterator<K> iterator() {
         return new DistinctKeyIterator();
       }
+      @Impure
       @Override public boolean contains(Object key) { // for performance
         return containsKey(key);
       }
+      @Impure
       @Override
       public boolean remove(Object o) { // for performance
         return !LinkedListMultimap.this.removeAll(o).isEmpty();
@@ -707,26 +769,32 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    * List}, instead of the {@link Collection} specified in the {@link
    * ListMultimap} interface.
    */
+  @Impure
   @Override
   public List<V> values() {
     return (List<V>) super.values();
   }
 
+  @Impure
   @Override
   List<V> createValues() {
     return new AbstractSequentialList<V>() {
+      @Pure
       @Override public int size() {
         return size;
       }
 
+      @Impure
       @Override public ListIterator<V> listIterator(int index) {
         final NodeIterator nodeItr = new NodeIterator(index);
         return new TransformedListIterator<Entry<K, V>, V>(nodeItr) {
+          @Pure
           @Override
           V transform(Entry<K, V> entry) {
             return entry.getValue();
           }
 
+          @Impure
           @Override
           public void set(V value) {
             nodeItr.setValue(value);
@@ -754,29 +822,35 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    * subsequent {@code setValue()} call won't update the multimap but will lead
    * to a revised value being returned by {@code getValue()}.
    */
+  @Impure
   @Override
   public List<Entry<K, V>> entries() {
     return (List<Entry<K, V>>) super.entries();
   }
 
+  @Impure
   @Override
   List<Entry<K, V>> createEntries() {
     return new AbstractSequentialList<Entry<K, V>>() {
+      @Pure
       @Override public int size() {
         return size;
       }
 
+      @Impure
       @Override public ListIterator<Entry<K, V>> listIterator(int index) {
         return new NodeIterator(index);
       }
     };
   }
 
+  @Pure
   @Override
   Iterator<Entry<K, V>> entryIterator() {
     throw new AssertionError("should never be called");
   }
 
+  @Impure
   @Override
   Map<K, Collection<V>> createAsMap() {
     return new Multimaps.AsMap<K, V>(this);
@@ -787,6 +861,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
    *     the first key, the number of values for that key, and the key's values,
    *     followed by successive keys and values from the entries() ordering
    */
+  @Impure
   @GwtIncompatible("java.io.ObjectOutputStream")
   private void writeObject(ObjectOutputStream stream) throws IOException {
     stream.defaultWriteObject();
@@ -797,6 +872,7 @@ public class LinkedListMultimap<K, V> extends AbstractMultimap<K, V>
     }
   }
 
+  @Impure
   @GwtIncompatible("java.io.ObjectInputStream")
   private void readObject(ObjectInputStream stream)
       throws IOException, ClassNotFoundException {

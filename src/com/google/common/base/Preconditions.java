@@ -14,6 +14,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import javax.annotation.Nullable;
@@ -98,6 +101,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible
 public final class Preconditions {
+  @SideEffectFree
   private Preconditions() {}
 
   /**
@@ -106,6 +110,7 @@ public final class Preconditions {
    * @param expression a boolean expression
    * @throws IllegalArgumentException if {@code expression} is false
    */
+  @SideEffectFree
   public static void checkArgument(boolean expression) {
     if (!expression) {
       throw new IllegalArgumentException();
@@ -120,6 +125,7 @@ public final class Preconditions {
    *     string using {@link String#valueOf(Object)}
    * @throws IllegalArgumentException if {@code expression} is false
    */
+  @SideEffectFree
   public static void checkArgument(boolean expression, @Nullable Object errorMessage) {
     if (!expression) {
       throw new IllegalArgumentException(String.valueOf(errorMessage));
@@ -141,6 +147,7 @@ public final class Preconditions {
    * @throws NullPointerException if the check fails and either {@code errorMessageTemplate} or
    *     {@code errorMessageArgs} is null (don't let this happen)
    */
+  @Impure
   public static void checkArgument(boolean expression,
       @Nullable String errorMessageTemplate,
       @Nullable Object... errorMessageArgs) {
@@ -156,6 +163,7 @@ public final class Preconditions {
    * @param expression a boolean expression
    * @throws IllegalStateException if {@code expression} is false
    */
+  @SideEffectFree
   public static void checkState(boolean expression) {
     if (!expression) {
       throw new IllegalStateException();
@@ -171,6 +179,7 @@ public final class Preconditions {
    *     string using {@link String#valueOf(Object)}
    * @throws IllegalStateException if {@code expression} is false
    */
+  @SideEffectFree
   public static void checkState(boolean expression, @Nullable Object errorMessage) {
     if (!expression) {
       throw new IllegalStateException(String.valueOf(errorMessage));
@@ -193,6 +202,7 @@ public final class Preconditions {
    * @throws NullPointerException if the check fails and either {@code errorMessageTemplate} or
    *     {@code errorMessageArgs} is null (don't let this happen)
    */
+  @Impure
   public static void checkState(boolean expression,
       @Nullable String errorMessageTemplate,
       @Nullable Object... errorMessageArgs) {
@@ -208,6 +218,7 @@ public final class Preconditions {
    * @return the non-null reference that was validated
    * @throws NullPointerException if {@code reference} is null
    */
+  @Pure
   public static <T> T checkNotNull(T reference) {
     if (reference == null) {
       throw new NullPointerException();
@@ -224,6 +235,7 @@ public final class Preconditions {
    * @return the non-null reference that was validated
    * @throws NullPointerException if {@code reference} is null
    */
+  @SideEffectFree
   public static <T> T checkNotNull(T reference, @Nullable Object errorMessage) {
     if (reference == null) {
       throw new NullPointerException(String.valueOf(errorMessage));
@@ -245,6 +257,7 @@ public final class Preconditions {
    * @return the non-null reference that was validated
    * @throws NullPointerException if {@code reference} is null
    */
+  @Impure
   public static <T> T checkNotNull(T reference,
       @Nullable String errorMessageTemplate,
       @Nullable Object... errorMessageArgs) {
@@ -291,6 +304,7 @@ public final class Preconditions {
    * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
    * @throws IllegalArgumentException if {@code size} is negative
    */
+  @Impure
   public static int checkElementIndex(int index, int size) {
     return checkElementIndex(index, size, "index");
   }
@@ -306,6 +320,7 @@ public final class Preconditions {
    * @throws IndexOutOfBoundsException if {@code index} is negative or is not less than {@code size}
    * @throws IllegalArgumentException if {@code size} is negative
    */
+  @Impure
   public static int checkElementIndex(
       int index, int size, @Nullable String desc) {
     // Carefully optimized for execution by hotspot (explanatory comment above)
@@ -315,6 +330,7 @@ public final class Preconditions {
     return index;
   }
 
+  @Impure
   private static String badElementIndex(int index, int size, String desc) {
     if (index < 0) {
       return format("%s (%s) must not be negative", desc, index);
@@ -335,6 +351,7 @@ public final class Preconditions {
    * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
    * @throws IllegalArgumentException if {@code size} is negative
    */
+  @Impure
   public static int checkPositionIndex(int index, int size) {
     return checkPositionIndex(index, size, "index");
   }
@@ -350,6 +367,7 @@ public final class Preconditions {
    * @throws IndexOutOfBoundsException if {@code index} is negative or is greater than {@code size}
    * @throws IllegalArgumentException if {@code size} is negative
    */
+  @Impure
   public static int checkPositionIndex(int index, int size, @Nullable String desc) {
     // Carefully optimized for execution by hotspot (explanatory comment above)
     if (index < 0 || index > size) {
@@ -358,6 +376,7 @@ public final class Preconditions {
     return index;
   }
 
+  @Impure
   private static String badPositionIndex(int index, int size, String desc) {
     if (index < 0) {
       return format("%s (%s) must not be negative", desc, index);
@@ -380,6 +399,7 @@ public final class Preconditions {
    *     or if {@code end} is less than {@code start}
    * @throws IllegalArgumentException if {@code size} is negative
    */
+  @Impure
   public static void checkPositionIndexes(int start, int end, int size) {
     // Carefully optimized for execution by hotspot (explanatory comment above)
     if (start < 0 || end < start || end > size) {
@@ -387,6 +407,7 @@ public final class Preconditions {
     }
   }
 
+  @Impure
   private static String badPositionIndexes(int start, int end, int size) {
     if (start < 0 || start > size) {
       return badPositionIndex(start, size, "start index");
@@ -409,6 +430,7 @@ public final class Preconditions {
    *     to strings using {@link String#valueOf(Object)}. Arguments can be null.
    */
   // Note that this is somewhat-improperly used from Verify.java as well.
+  @Impure
   static String format(String template, @Nullable Object... args) {
     template = String.valueOf(template); // null -> "null"
 

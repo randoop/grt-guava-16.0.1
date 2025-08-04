@@ -16,6 +16,8 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -31,6 +33,7 @@ import java.util.concurrent.Executor;
 @Beta
 public final class RemovalListeners {
 
+  @SideEffectFree
   private RemovalListeners() {}
 
   /**
@@ -41,14 +44,17 @@ public final class RemovalListeners {
    * @param executor the executor with which removal notifications are
    *     asynchronously executed
    */
+  @Impure
   public static <K, V> RemovalListener<K, V> asynchronous(
       final RemovalListener<K, V> listener, final Executor executor) {
     checkNotNull(listener);
     checkNotNull(executor);
     return new RemovalListener<K, V>() {
+      @Impure
       @Override
       public void onRemoval(final RemovalNotification<K, V> notification) {
         executor.execute(new Runnable() {
+          @Impure
           @Override
           public void run() {
             listener.onRemoval(notification);

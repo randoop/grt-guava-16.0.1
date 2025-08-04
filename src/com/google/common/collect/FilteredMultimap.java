@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Predicate;
 
@@ -28,7 +29,9 @@ import java.util.Map.Entry;
  */
 @GwtCompatible
 interface FilteredMultimap<K, V> extends Multimap<K, V> {  
+  @Impure
   Multimap<K, V> unfiltered();
 
+  @Impure
   Predicate<? super Entry<K, V>> entryPredicate();
 }

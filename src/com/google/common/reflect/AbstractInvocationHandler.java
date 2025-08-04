@@ -16,6 +16,9 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 
 import java.lang.reflect.InvocationHandler;
@@ -60,6 +63,7 @@ public abstract class AbstractInvocationHandler implements InvocationHandler {
    * <li>other method calls are dispatched to {@link #handleInvocation}.
    * </ul>
    */
+  @Impure
   @Override public final Object invoke(Object proxy, Method method, @Nullable Object[] args)
       throws Throwable {
     if (args == null) {
@@ -95,6 +99,7 @@ public abstract class AbstractInvocationHandler implements InvocationHandler {
    * <p>Unlike {@link #invoke}, {@code args} will never be null. When the method has no parameter,
    * an empty array is passed in.
    */
+  @Pure
   protected abstract Object handleInvocation(Object proxy, Method method, Object[] args)
       throws Throwable;
 
@@ -106,6 +111,7 @@ public abstract class AbstractInvocationHandler implements InvocationHandler {
    * </ul>
    * <p>Subclasses can override this method to provide custom equality.
    */
+  @Pure
   @Override public boolean equals(Object obj) {
     return super.equals(obj);
   }
@@ -114,6 +120,7 @@ public abstract class AbstractInvocationHandler implements InvocationHandler {
    * By default delegates to {@link Object#hashCode}. The dynamic proxies' {@code hashCode()} will
    * delegate to this method. Subclasses can override this method to provide custom equality.
    */
+  @Pure
   @Override public int hashCode() {
     return super.hashCode();
   }
@@ -123,10 +130,12 @@ public abstract class AbstractInvocationHandler implements InvocationHandler {
    * delegate to this method. Subclasses can override this method to provide custom string
    * representation for the proxies.
    */
+  @SideEffectFree
   @Override public String toString() {
     return super.toString();
   }
 
+  @Impure
   private static boolean isProxyOfSameInterfaces(Object arg, Class<?> proxyClass) {
     return proxyClass.isInstance(arg)
         // Equal proxy instances should mostly be instance of proxyClass

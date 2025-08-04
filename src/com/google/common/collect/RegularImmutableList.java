@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Preconditions;
 
@@ -33,25 +36,30 @@ class RegularImmutableList<E> extends ImmutableList<E> {
   private final transient int size;
   private final transient Object[] array;
 
+  @SideEffectFree
   RegularImmutableList(Object[] array, int offset, int size) {
     this.offset = offset;
     this.size = size;
     this.array = array;
   }
 
+  @Impure
   RegularImmutableList(Object[] array) {
     this(array, 0, array.length);
   }
 
+  @Pure
   @Override
   public int size() {
     return size;
   }
 
+  @Pure
   @Override boolean isPartialView() {
     return size != array.length;
   }
 
+  @SideEffectFree
   @Override
   int copyIntoArray(Object[] dst, int dstOff) {
     System.arraycopy(array, offset, dst, dstOff, size);
@@ -59,6 +67,7 @@ class RegularImmutableList<E> extends ImmutableList<E> {
   }
 
   // The fake cast to E is safe because the creation methods only allow E's
+  @Impure
   @Override
   @SuppressWarnings("unchecked")
   public E get(int index) {
@@ -66,6 +75,7 @@ class RegularImmutableList<E> extends ImmutableList<E> {
     return (E) array[index + offset];
   }
 
+  @Pure
   @Override
   public int indexOf(@Nullable Object object) {
     if (object == null) {
@@ -79,6 +89,7 @@ class RegularImmutableList<E> extends ImmutableList<E> {
     return -1;
   }
 
+  @Pure
   @Override
   public int lastIndexOf(@Nullable Object object) {
     if (object == null) {
@@ -92,12 +103,14 @@ class RegularImmutableList<E> extends ImmutableList<E> {
     return -1;
   }
 
+  @Impure
   @Override
   ImmutableList<E> subListUnchecked(int fromIndex, int toIndex) {
     return new RegularImmutableList<E>(
         array, offset + fromIndex, toIndex - fromIndex);
   }
 
+  @Impure
   @SuppressWarnings("unchecked")
   @Override
   public UnmodifiableListIterator<E> listIterator(int index) {

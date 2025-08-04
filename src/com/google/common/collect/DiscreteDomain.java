@@ -16,6 +16,10 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Deterministic;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 
@@ -50,6 +54,7 @@ public abstract class DiscreteDomain<C extends Comparable> {
    * 
    * @since 14.0 (since 10.0 as {@code DiscreteDomains.integers()})
    */
+  @Pure
   public static DiscreteDomain<Integer> integers() {
     return IntegerDomain.INSTANCE;
   }
@@ -58,32 +63,39 @@ public abstract class DiscreteDomain<C extends Comparable> {
       implements Serializable {
     private static final IntegerDomain INSTANCE = new IntegerDomain();
 
+    @Pure
     @Override public Integer next(Integer value) {
       int i = value;
       return (i == Integer.MAX_VALUE) ? null : i + 1;
     }
 
+    @Pure
     @Override public Integer previous(Integer value) {
       int i = value;
       return (i == Integer.MIN_VALUE) ? null : i - 1;
     }
 
+    @Pure
     @Override public long distance(Integer start, Integer end) {
       return (long) end - start;
     }
 
+    @Pure
     @Override public Integer minValue() {
       return Integer.MIN_VALUE;
     }
 
+    @Pure
     @Override public Integer maxValue() {
       return Integer.MAX_VALUE;
     }
 
+    @Pure
     private Object readResolve() {
       return INSTANCE;
     }
 
+    @Pure
     @Override
     public String toString() {
       return "DiscreteDomain.integers()";
@@ -97,6 +109,7 @@ public abstract class DiscreteDomain<C extends Comparable> {
    * 
    * @since 14.0 (since 10.0 as {@code DiscreteDomains.longs()})
    */
+  @Pure
   public static DiscreteDomain<Long> longs() {
     return LongDomain.INSTANCE;
   }
@@ -105,16 +118,19 @@ public abstract class DiscreteDomain<C extends Comparable> {
       implements Serializable {
     private static final LongDomain INSTANCE = new LongDomain();
 
+    @Pure
     @Override public Long next(Long value) {
       long l = value;
       return (l == Long.MAX_VALUE) ? null : l + 1;
     }
 
+    @Pure
     @Override public Long previous(Long value) {
       long l = value;
       return (l == Long.MIN_VALUE) ? null : l - 1;
     }
 
+    @Pure
     @Override public long distance(Long start, Long end) {
       long result = end - start;
       if (end > start && result < 0) { // overflow
@@ -126,18 +142,22 @@ public abstract class DiscreteDomain<C extends Comparable> {
       return result;
     }
 
+    @Pure
     @Override public Long minValue() {
       return Long.MIN_VALUE;
     }
 
+    @Pure
     @Override public Long maxValue() {
       return Long.MAX_VALUE;
     }
 
+    @Pure
     private Object readResolve() {
       return INSTANCE;
     }
 
+    @Pure
     @Override
     public String toString() {
       return "DiscreteDomain.longs()";
@@ -151,6 +171,7 @@ public abstract class DiscreteDomain<C extends Comparable> {
    *
    * @since 15.0
    */
+  @Pure
   public static DiscreteDomain<BigInteger> bigIntegers() {
     return BigIntegerDomain.INSTANCE;
   }
@@ -164,22 +185,27 @@ public abstract class DiscreteDomain<C extends Comparable> {
     private static final BigInteger MAX_LONG =
         BigInteger.valueOf(Long.MAX_VALUE);
 
+    @Impure
     @Override public BigInteger next(BigInteger value) {
       return value.add(BigInteger.ONE);
     }
 
+    @Impure
     @Override public BigInteger previous(BigInteger value) {
       return value.subtract(BigInteger.ONE);
     }
 
+    @Impure
     @Override public long distance(BigInteger start, BigInteger end) {
       return end.subtract(start).max(MIN_LONG).min(MAX_LONG).longValue();
     }
 
+    @Pure
     private Object readResolve() {
       return INSTANCE;
     }
 
+    @Pure
     @Override
     public String toString() {
       return "DiscreteDomain.bigIntegers()";
@@ -189,6 +215,7 @@ public abstract class DiscreteDomain<C extends Comparable> {
   }
   
   /** Constructor for use by subclasses. */
+  @SideEffectFree
   protected DiscreteDomain() {}
 
   /**
@@ -200,6 +227,7 @@ public abstract class DiscreteDomain<C extends Comparable> {
    * @return the least value greater than {@code value}, or {@code null} if
    *     {@code value} is {@code maxValue()}
    */
+  @Impure
   public abstract C next(C value);
 
   /**
@@ -211,6 +239,7 @@ public abstract class DiscreteDomain<C extends Comparable> {
    * @return the greatest value less than {@code value}, or {@code null} if
    *     {@code value} is {@code minValue()}
    */
+  @Impure
   public abstract C previous(C value);
 
   /**
@@ -228,6 +257,7 @@ public abstract class DiscreteDomain<C extends Comparable> {
    *     {@link Long#MAX_VALUE} if the distance is too small or too large,
    *     respectively.
    */
+  @Impure
   public abstract long distance(C start, C end);
 
   /**
@@ -241,6 +271,7 @@ public abstract class DiscreteDomain<C extends Comparable> {
    * @throws NoSuchElementException if the type has no (practical) minimum
    *     value; for example, {@link java.math.BigInteger}
    */
+  @Deterministic
   public C minValue() {
     throw new NoSuchElementException();
   }
@@ -256,6 +287,7 @@ public abstract class DiscreteDomain<C extends Comparable> {
    * @throws NoSuchElementException if the type has no (practical) maximum
    *     value; for example, {@link java.math.BigInteger}
    */
+  @Deterministic
   public C maxValue() {
     throw new NoSuchElementException();
   }

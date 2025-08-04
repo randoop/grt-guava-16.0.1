@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 
@@ -43,6 +44,7 @@ public interface RowSortedTable<R, C, V> extends Table<R, C, V> {
    * <p>This method returns a {@link SortedSet}, instead of the {@code Set}
    * specified in the {@link Table} interface.
    */
+  @Pure
   @Override SortedSet<R> rowKeySet();
 
   /**
@@ -51,5 +53,6 @@ public interface RowSortedTable<R, C, V> extends Table<R, C, V> {
    * <p>This method returns a {@link SortedMap}, instead of the {@code Map}
    * specified in the {@link Table} interface.
    */
+  @Pure
   @Override SortedMap<R, Map<C, V>> rowMap();
 }

@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -32,22 +34,27 @@ import java.util.Iterator;
 abstract class TransformedIterator<F, T> implements Iterator<T> {
   final Iterator<? extends F> backingIterator;
 
+  @Impure
   TransformedIterator(Iterator<? extends F> backingIterator) {
     this.backingIterator = checkNotNull(backingIterator);
   }
 
+  @Impure
   abstract T transform(F from);
 
+  @Pure
   @Override
   public final boolean hasNext() {
     return backingIterator.hasNext();
   }
 
+  @Impure
   @Override
   public final T next() {
     return transform(backingIterator.next());
   }
 
+  @Impure
   @Override
   public final void remove() {
     backingIterator.remove();

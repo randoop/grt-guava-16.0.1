@@ -16,6 +16,8 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Function;
@@ -73,6 +75,7 @@ public interface LoadingCache<K, V> extends Cache<K, V>, Function<K, V> {
    *     value
    * @throws ExecutionError if an error was thrown while loading the value
    */
+  @Impure
   V get(K key) throws ExecutionException;
 
   /**
@@ -99,6 +102,7 @@ public interface LoadingCache<K, V> extends Cache<K, V>, Function<K, V> {
    *     explained in the last paragraph above, this should be an unchecked exception only.)
    * @throws ExecutionError if an error was thrown while loading the value
    */
+  @Impure
   V getUnchecked(K key);
 
   /**
@@ -125,6 +129,7 @@ public interface LoadingCache<K, V> extends Cache<K, V>, Function<K, V> {
    * @throws ExecutionError if an error was thrown while loading the values
    * @since 11.0
    */
+  @Impure
   ImmutableMap<K, V> getAll(Iterable<? extends K> keys) throws ExecutionException;
 
   /**
@@ -134,6 +139,7 @@ public interface LoadingCache<K, V> extends Cache<K, V>, Function<K, V> {
    *     described in the documentation for {@link #getUnchecked}, {@code LoadingCache} should be
    *     used as a {@code Function} only with cache loaders that throw only unchecked exceptions.)
    */
+  @Impure
   @Deprecated
   @Override
   V apply(K key);
@@ -156,6 +162,7 @@ public interface LoadingCache<K, V> extends Cache<K, V>, Function<K, V> {
    *
    * @since 11.0
    */
+  @Impure
   void refresh(K key);
 
   /**
@@ -164,6 +171,7 @@ public interface LoadingCache<K, V> extends Cache<K, V>, Function<K, V> {
    * <p><b>Note that although the view <i>is</i> modifiable, no method on the returned map will ever
    * cause entries to be automatically loaded.</b>
    */
+  @Pure
   @Override
   ConcurrentMap<K, V> asMap();
 }

@@ -16,6 +16,8 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.io.Serializable;
@@ -29,10 +31,12 @@ final class PairwiseEquivalence<T> extends Equivalence<Iterable<T>>
 
   final Equivalence<? super T> elementEquivalence;
 
+  @Impure
   PairwiseEquivalence(Equivalence<? super T> elementEquivalence) {
     this.elementEquivalence = Preconditions.checkNotNull(elementEquivalence);
   }
 
+  @Impure
   @Override
   protected boolean doEquivalent(Iterable<T> iterableA, Iterable<T> iterableB) {
     Iterator<T> iteratorA = iterableA.iterator();
@@ -47,6 +51,7 @@ final class PairwiseEquivalence<T> extends Equivalence<Iterable<T>>
     return !iteratorA.hasNext() && !iteratorB.hasNext();
   }
 
+  @Impure
   @Override
   protected int doHash(Iterable<T> iterable) {
     int hash = 78721;
@@ -56,6 +61,7 @@ final class PairwiseEquivalence<T> extends Equivalence<Iterable<T>>
     return hash;
   }
 
+  @Pure
   @Override
   public boolean equals(@Nullable Object object) {
     if (object instanceof PairwiseEquivalence) {
@@ -66,11 +72,13 @@ final class PairwiseEquivalence<T> extends Equivalence<Iterable<T>>
     return false;
   }
 
+  @Pure
   @Override
   public int hashCode() {
     return elementEquivalence.hashCode() ^ 0x46a3eb07;
   }
 
+  @Pure
   @Override
   public String toString() {
     return elementEquivalence + ".pairwise()";

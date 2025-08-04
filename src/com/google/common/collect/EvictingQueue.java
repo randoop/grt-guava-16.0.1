@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -50,6 +52,7 @@ public final class EvictingQueue<E> extends ForwardingQueue<E> implements Serial
   @VisibleForTesting
   final int maxSize;
 
+  @Impure
   private EvictingQueue(int maxSize) {
     checkArgument(maxSize >= 0, "maxSize (%s) must >= 0", maxSize);
     this.delegate = new ArrayDeque<E>(maxSize);
@@ -62,6 +65,7 @@ public final class EvictingQueue<E> extends ForwardingQueue<E> implements Serial
    * <p>When {@code maxSize} is zero, elements will be evicted immediately after being added to the
    * queue.
    */
+  @Impure
   public static <E> EvictingQueue<E> create(int maxSize) {
     return new EvictingQueue<E>(maxSize);
   }
@@ -72,10 +76,12 @@ public final class EvictingQueue<E> extends ForwardingQueue<E> implements Serial
    *
    * @since 16.0
    */
+  @Pure
   public int remainingCapacity() {
     return maxSize - size();
   }
 
+  @Pure
   @Override protected Queue<E> delegate() {
     return delegate;
   }
@@ -86,6 +92,7 @@ public final class EvictingQueue<E> extends ForwardingQueue<E> implements Serial
    *
    * @return {@code true} always
    */
+  @Impure
   @Override public boolean offer(E e) {
     return add(e);
   }
@@ -96,6 +103,7 @@ public final class EvictingQueue<E> extends ForwardingQueue<E> implements Serial
    *
    * @return {@code true} always
    */
+  @Impure
   @Override public boolean add(E e) {
     checkNotNull(e);  // check before removing
     if (maxSize == 0) {
@@ -108,15 +116,18 @@ public final class EvictingQueue<E> extends ForwardingQueue<E> implements Serial
     return true;
   }
 
+  @Impure
   @Override public boolean addAll(Collection<? extends E> collection) {
     return standardAddAll(collection);
   }
 
+  @Impure
   @Override
   public boolean contains(Object object) {
     return delegate().contains(checkNotNull(object));
   }
 
+  @Impure
   @Override
   public boolean remove(Object object) {
     return delegate().remove(checkNotNull(object));

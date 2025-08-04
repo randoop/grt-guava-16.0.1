@@ -16,6 +16,7 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import java.lang.reflect.ParameterizedType;
@@ -29,6 +30,7 @@ import java.lang.reflect.Type;
 abstract class TypeCapture<T> {
 
   /** Returns the captured type. */
+  @Impure
   final Type capture() {
     Type superclass = getClass().getGenericSuperclass();
     checkArgument(superclass instanceof ParameterizedType,

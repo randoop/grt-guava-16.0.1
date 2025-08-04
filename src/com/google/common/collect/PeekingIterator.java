@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Iterator;
@@ -43,6 +44,7 @@ public interface PeekingIterator<E> extends Iterator<E> {
    * @throws NoSuchElementException if the iteration has no more elements
    *     according to {@link #hasNext()}
    */
+  @Impure
   E peek();
 
   /**
@@ -51,6 +53,7 @@ public interface PeekingIterator<E> extends Iterator<E> {
    * <p>The objects returned by consecutive calls to {@link #peek()} then {@link
    * #next()} are guaranteed to be equal to each other.
    */
+  @Impure
   @Override
   E next();
 
@@ -64,6 +67,7 @@ public interface PeekingIterator<E> extends Iterator<E> {
    *     since the most recent call to {@link #next()} and this implementation
    *     does not support this sequence of calls (optional)
    */
+  @Impure
   @Override
   void remove();
 }

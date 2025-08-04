@@ -16,6 +16,9 @@
 
 package com.google.common.escape;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -46,6 +49,7 @@ import com.google.common.annotations.GwtCompatible;
 @GwtCompatible
 public abstract class CharEscaper extends Escaper {
   /** Constructor for use by subclasses. */
+  @Impure
   protected CharEscaper() {}
 
   /**
@@ -55,6 +59,7 @@ public abstract class CharEscaper extends Escaper {
    * @return the escaped form of {@code string}
    * @throws NullPointerException if {@code string} is null
    */
+  @Impure
   @Override public String escape(String string) {
     checkNotNull(string);  // GWT specific check (do not optimize)
     // Inlineable fast-path loop which hands off to escapeSlow() only if needed
@@ -78,6 +83,7 @@ public abstract class CharEscaper extends Escaper {
    * @return the escaped form of {@code string}
    * @throws NullPointerException if {@code string} is null
    */
+  @Impure
   protected final String escapeSlow(String s, int index) {
     int slen = s.length();
 
@@ -152,12 +158,15 @@ public abstract class CharEscaper extends Escaper {
    * @param c the character to escape if necessary
    * @return the replacement characters, or {@code null} if no escaping was needed
    */
+  @Pure
+  @Impure
   protected abstract char[] escape(char c);
 
   /**
    * Helper method to grow the character buffer as needed, this only happens once in a while so it's
    * ok if it's in a method call. If the index passed in is 0 then no copying will be done.
    */
+  @SideEffectFree
   private static char[] growBuffer(char[] dest, int index, int size) {
     char[] copy = new char[size];
     if (index > 0) {

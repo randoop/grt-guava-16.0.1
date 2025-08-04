@@ -16,6 +16,8 @@
 
 package com.google.common.escape;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -71,6 +73,7 @@ public abstract class ArrayBasedCharEscaper extends CharEscaper {
    * @param safeMin the lowest character value in the safe range
    * @param safeMax the highest character value in the safe range
    */
+  @Impure
   protected ArrayBasedCharEscaper(Map<Character, String> replacementMap,
       char safeMin, char safeMax) {
 
@@ -92,6 +95,7 @@ public abstract class ArrayBasedCharEscaper extends CharEscaper {
    * @param safeMin the lowest character value in the safe range
    * @param safeMax the highest character value in the safe range
    */
+  @Impure
   protected ArrayBasedCharEscaper(ArrayBasedEscaperMap escaperMap,
       char safeMin, char safeMax) {
 
@@ -113,6 +117,7 @@ public abstract class ArrayBasedCharEscaper extends CharEscaper {
    * this almost doubles the speed when processing strings that do not require
    * any escaping.
    */
+  @Impure
   @Override
   public final String escape(String s) {
     checkNotNull(s);  // GWT specific check (do not optimize).
@@ -131,6 +136,8 @@ public abstract class ArrayBasedCharEscaper extends CharEscaper {
    * values. If the given character does not have an explicit replacement and
    * lies outside the safe range then {@link #escapeUnsafe} is called.
    */
+  @Pure
+  @Impure
   @Override protected final char[] escape(char c) {
     if (c < replacementsLength) {
       char[] chars = replacements[c];
@@ -158,5 +165,6 @@ public abstract class ArrayBasedCharEscaper extends CharEscaper {
    *         required
    */
   // TODO(user,cpovirk): Rename this something better once refactoring done
+  @Pure
   protected abstract char[] escapeUnsafe(char c);
 }

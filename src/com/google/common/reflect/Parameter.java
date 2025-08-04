@@ -16,6 +16,9 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -40,6 +43,7 @@ public final class Parameter implements AnnotatedElement {
   private final TypeToken<?> type;
   private final ImmutableList<Annotation> annotations;
 
+  @Impure
   Parameter(
       Invokable<?, ?> declaration,
       int position,
@@ -52,19 +56,23 @@ public final class Parameter implements AnnotatedElement {
   }
 
   /** Returns the type of the parameter. */
+  @Pure
   public TypeToken<?> getType() {
     return type;
   }
 
   /** Returns the {@link Invokable} that declares this parameter. */
+  @Pure
   public Invokable<?, ?> getDeclaringInvokable() {
     return declaration;
   }
 
+  @Impure
   @Override public boolean isAnnotationPresent(Class<? extends Annotation> annotationType) {
     return getAnnotation(annotationType) != null;
   }
 
+  @Impure
   @Override
   @Nullable
   public <A extends Annotation> A getAnnotation(Class<A> annotationType) {
@@ -77,14 +85,17 @@ public final class Parameter implements AnnotatedElement {
     return null;
   }
 
+  @Impure
   @Override public Annotation[] getAnnotations() {
     return getDeclaredAnnotations();
   }
 
+  @SideEffectFree
   @Override public Annotation[] getDeclaredAnnotations() {
     return annotations.toArray(new Annotation[annotations.size()]);
   }
 
+  @Pure
   @Override public boolean equals(@Nullable Object obj) {
     if (obj instanceof Parameter) {
       Parameter that = (Parameter) obj;
@@ -93,10 +104,12 @@ public final class Parameter implements AnnotatedElement {
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     return position;
   }
 
+  @Pure
   @Override public String toString() {
     return type + " arg" + position;
   }

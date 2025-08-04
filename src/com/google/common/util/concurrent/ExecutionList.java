@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
@@ -58,6 +60,7 @@ public final class ExecutionList {
   private boolean executed;
 
   /** Creates a new, empty {@link ExecutionList}. */
+  @SideEffectFree
   public ExecutionList() {}
 
   /**
@@ -78,6 +81,7 @@ public final class ExecutionList {
    * listeners are prevented from running, even if those listeners are to run
    * in other executors.
    */
+  @Impure
   public void add(Runnable runnable, Executor executor) {
     // Fail fast on a null.  We throw NPE here because the contract of
     // Executor states that it throws NPE on null listener, so we propagate
@@ -113,6 +117,7 @@ public final class ExecutionList {
    *
    * @since 10.0 (present in 1.0 as {@code run})
    */
+  @Impure
   public void execute() {
     // Lock while we update our state so the add method above will finish adding
     // any listeners before we start to run them.
@@ -151,6 +156,7 @@ public final class ExecutionList {
    * Submits the given runnable to the given {@link Executor} catching and logging all 
    * {@linkplain RuntimeException runtime exceptions} thrown by the executor.
    */
+  @Impure
   private static void executeListener(Runnable runnable, Executor executor) {
     try {
       executor.execute(runnable);
@@ -168,6 +174,7 @@ public final class ExecutionList {
     final Executor executor;
     @Nullable RunnableExecutorPair next;
 
+    @SideEffectFree
     RunnableExecutorPair(Runnable runnable, Executor executor, RunnableExecutorPair next) {
       this.runnable = runnable;
       this.executor = executor;

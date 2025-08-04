@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.concurrent.TimeUnit.DAYS;
@@ -85,6 +88,7 @@ public final class Stopwatch {
    *
    * @since 15.0
    */
+  @Impure
   public static Stopwatch createUnstarted() {
     return new Stopwatch();
   }
@@ -95,6 +99,7 @@ public final class Stopwatch {
    *
    * @since 15.0
    */
+  @Impure
   public static Stopwatch createUnstarted(Ticker ticker) {
     return new Stopwatch(ticker);
   }
@@ -105,6 +110,7 @@ public final class Stopwatch {
    *
    * @since 15.0
    */
+  @Impure
   public static Stopwatch createStarted() {
     return new Stopwatch().start();
   }
@@ -115,6 +121,7 @@ public final class Stopwatch {
    *
    * @since 15.0
    */
+  @Impure
   public static Stopwatch createStarted(Ticker ticker) {
     return new Stopwatch(ticker).start();
   }
@@ -126,6 +133,7 @@ public final class Stopwatch {
    * @deprecated Use {@link Stopwatch#createUnstarted()} instead. This
    *     constructor is scheduled to be removed in Guava release 17.0.
    */
+  @Impure
   @Deprecated
   public Stopwatch() {
     this(Ticker.systemTicker());
@@ -138,6 +146,7 @@ public final class Stopwatch {
    * @deprecated Use {@link Stopwatch#createUnstarted(Ticker)} instead. This
    *     constructor is scheduled to be removed in Guava release 17.0.
    */
+  @SideEffectFree
   @Deprecated
   public Stopwatch(Ticker ticker) {
     this.ticker = checkNotNull(ticker, "ticker");
@@ -148,6 +157,7 @@ public final class Stopwatch {
    * and {@link #stop()} has not been called since the last call to {@code
    * start()}.
    */
+  @Pure
   public boolean isRunning() {
     return isRunning;
   }
@@ -158,6 +168,7 @@ public final class Stopwatch {
    * @return this {@code Stopwatch} instance
    * @throws IllegalStateException if the stopwatch is already running.
    */
+  @Impure
   public Stopwatch start() {
     checkState(!isRunning, "This stopwatch is already running.");
     isRunning = true;
@@ -172,6 +183,7 @@ public final class Stopwatch {
    * @return this {@code Stopwatch} instance
    * @throws IllegalStateException if the stopwatch is already stopped.
    */
+  @Impure
   public Stopwatch stop() {
     long tick = ticker.read();
     checkState(isRunning, "This stopwatch is already stopped.");
@@ -186,12 +198,14 @@ public final class Stopwatch {
    *
    * @return this {@code Stopwatch} instance
    */
+  @Impure
   public Stopwatch reset() {
     elapsedNanos = 0;
     isRunning = false;
     return this;
   }
 
+  @Impure
   private long elapsedNanos() {
     return isRunning ? ticker.read() - startTick + elapsedNanos : elapsedNanos;
   }
@@ -206,6 +220,7 @@ public final class Stopwatch {
    *
    * @since 14.0 (since 10.0 as {@code elapsedTime()})
    */
+  @Impure
   public long elapsed(TimeUnit desiredUnit) {
     return desiredUnit.convert(elapsedNanos(), NANOSECONDS);
   }
@@ -213,6 +228,7 @@ public final class Stopwatch {
   /**
    * Returns a string representation of the current elapsed time.
    */
+  @Impure
   @GwtIncompatible("String.format()")
   @Override public String toString() {
     long nanos = elapsedNanos();
@@ -224,6 +240,7 @@ public final class Stopwatch {
     return String.format("%.4g %s", value, abbreviate(unit));
   }
 
+  @Impure
   private static TimeUnit chooseUnit(long nanos) {
     if (DAYS.convert(nanos, NANOSECONDS) > 0) {
       return DAYS;
@@ -246,6 +263,7 @@ public final class Stopwatch {
     return NANOSECONDS;
   }
 
+  @Pure
   private static String abbreviate(TimeUnit unit) {
     switch (unit) {
       case NANOSECONDS:

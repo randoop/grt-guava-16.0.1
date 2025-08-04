@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 
@@ -29,6 +31,7 @@ import com.google.common.annotations.GwtCompatible;
 public final class Runnables {
 
   private static final Runnable EMPTY_RUNNABLE = new Runnable() {
+    @SideEffectFree
     @Override
     public void run() {
     }
@@ -37,6 +40,7 @@ public final class Runnables {
   /**
    * Returns a {@link Runnable} instance that does nothing when run.
    */
+  @Pure
   public static Runnable doNothing() {
     return EMPTY_RUNNABLE;
   }

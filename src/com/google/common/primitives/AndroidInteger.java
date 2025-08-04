@@ -17,6 +17,9 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -29,6 +32,7 @@ final class AndroidInteger {
   /**
    * See {@link Ints#tryParse(String)} for the public interface.
    */
+  @Impure
   @CheckForNull
   static Integer tryParse(String string) {
     return tryParse(string, 10);
@@ -37,6 +41,7 @@ final class AndroidInteger {
   /**
    * See {@link Ints#tryParse(String, int)} for the public interface.
    */
+  @Impure
   @CheckForNull
   static Integer tryParse(String string, int radix) {
     checkNotNull(string);
@@ -55,6 +60,7 @@ final class AndroidInteger {
     return tryParse(string, i, radix, negative);
   }
 
+  @Pure
   @CheckForNull
   private static Integer tryParse(String string, int offset, int radix,
       boolean negative) {
@@ -87,5 +93,6 @@ final class AndroidInteger {
     return result;
   }
 
+  @SideEffectFree
   private AndroidInteger() {}
 }

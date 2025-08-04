@@ -14,6 +14,7 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 
 import java.io.Serializable;
@@ -49,5 +50,6 @@ public interface Funnel<T> extends Serializable {
    *
    * @since 12.0 (in Guava 11.0, {@code PrimitiveSink} was named {@code Sink})
    */
+  @SideEffectFree
   void funnel(T from, PrimitiveSink into);
 }

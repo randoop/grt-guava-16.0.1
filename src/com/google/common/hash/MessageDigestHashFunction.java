@@ -14,6 +14,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -36,6 +39,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction
   private final boolean supportsClone;
   private final String toString;
 
+  @Impure
   MessageDigestHashFunction(String algorithmName, String toString) {
     this.prototype = getMessageDigest(algorithmName);
     this.bytes = prototype.getDigestLength();
@@ -43,6 +47,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction
     this.supportsClone = supportsClone();
   }
 
+  @Impure
   MessageDigestHashFunction(String algorithmName, int bytes, String toString) {
     this.toString = checkNotNull(toString);
     this.prototype = getMessageDigest(algorithmName);
@@ -53,6 +58,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction
     this.supportsClone = supportsClone();
   }
 
+  @SideEffectFree
   private boolean supportsClone() {
     try {
       prototype.clone();
@@ -62,14 +68,17 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction
     }
   }
 
+  @Pure
   @Override public int bits() {
     return bytes * Byte.SIZE;
   }
 
+  @Pure
   @Override public String toString() {
     return toString;
   }
 
+  @Impure
   private static MessageDigest getMessageDigest(String algorithmName) {
     try {
       return MessageDigest.getInstance(algorithmName);
@@ -78,6 +87,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction
     }
   }
 
+  @Impure
   @Override public Hasher newHasher() {
     if (supportsClone) {
       try {
@@ -94,12 +104,14 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction
     private final int bytes;
     private final String toString;
 
+    @SideEffectFree
     private SerializedForm(String algorithmName, int bytes, String toString) {
       this.algorithmName = algorithmName;
       this.bytes = bytes;
       this.toString = toString;
     }
 
+    @Impure
     private Object readResolve() {
       return new MessageDigestHashFunction(algorithmName, bytes, toString);
     }
@@ -107,6 +119,7 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction
     private static final long serialVersionUID = 0;
   }
 
+  @Impure
   Object writeReplace() {
     return new SerializedForm(prototype.getAlgorithm(), bytes, toString);
   }
@@ -120,33 +133,39 @@ final class MessageDigestHashFunction extends AbstractStreamingHashFunction
     private final int bytes;
     private boolean done;
 
+    @Impure
     private MessageDigestHasher(MessageDigest digest, int bytes) {
       this.digest = digest;
       this.bytes = bytes;
     }
 
+    @Impure
     @Override
     protected void update(byte b) {
       checkNotDone();
       digest.update(b);
     }
 
+    @Impure
     @Override
     protected void update(byte[] b) {
       checkNotDone();
       digest.update(b);
     }
 
+    @Impure
     @Override
     protected void update(byte[] b, int off, int len) {
       checkNotDone();
       digest.update(b, off, len);
     }
 
+    @Impure
     private void checkNotDone() {
       checkState(!done, "Cannot use Hasher after calling #hash() on it");
     }
 
+    @Impure
     @Override
     public HashCode hash() {
       done = true;

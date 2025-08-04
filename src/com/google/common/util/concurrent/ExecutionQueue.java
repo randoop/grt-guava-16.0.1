@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Queues;
@@ -67,6 +68,7 @@ import javax.annotation.concurrent.ThreadSafe;
    * Adds the {@code Runnable} and accompanying {@code Executor} to the queue of listeners to
    * execute. 
    */
+  @Impure
   void add(Runnable runnable, Executor executor) {
     queuedListeners.add(new RunnableExecutorPair(runnable, executor));
   }
@@ -76,6 +78,7 @@ import javax.annotation.concurrent.ThreadSafe;
    * method may be executed as part of this call or not, so there is no guarantee that the queue is
    * empty after calling this method.
    */
+  @Impure
   void execute() {
     // We need to make sure that listeners are submitted to their executors in the correct order. So
     // we cannot remove a listener from the queue until we know that it has been submited to its
@@ -116,12 +119,14 @@ import javax.annotation.concurrent.ThreadSafe;
     @GuardedBy("lock")
     private boolean hasBeenExecuted = false;
   
+    @Impure
     RunnableExecutorPair(Runnable runnable, Executor executor) {
       this.runnable = checkNotNull(runnable);
       this.executor = checkNotNull(executor);
     }
   
     /** Submit this listener to its executor */
+    @Impure
     private void submit() {
       lock.lock();
       try {
@@ -143,6 +148,7 @@ import javax.annotation.concurrent.ThreadSafe;
       }
     }
   
+    @Impure
     @Override public final void run() {
       // If the executor was the sameThreadExecutor then we might still be holding the lock and
       // hasBeenExecuted may not have been assigned yet so we unlock now to ensure that we are not

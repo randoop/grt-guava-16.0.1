@@ -16,6 +16,7 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
 
@@ -35,6 +36,7 @@ public abstract class FinalizableWeakReference<T> extends WeakReference<T>
    * @param referent to weakly reference
    * @param queue that should finalize the referent
    */
+  @Impure
   protected FinalizableWeakReference(T referent, FinalizableReferenceQueue queue) {
     super(referent, queue.queue);
     queue.cleanUp();

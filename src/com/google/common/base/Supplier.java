@@ -16,6 +16,7 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 /**
@@ -34,5 +35,6 @@ public interface Supplier<T> {
    *
    * @return an instance of the appropriate type
    */
+  @Impure
   T get();
 }

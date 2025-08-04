@@ -25,6 +25,8 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.primitives.UnsignedBytes.toInt;
 
 import java.io.Serializable;
@@ -44,23 +46,28 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
   // TODO(user): when the shortcuts are implemented, update BloomFilterStrategies
   private final int seed;
 
+  @Impure
   Murmur3_128HashFunction(int seed) {
     this.seed = seed;
   }
 
+  @Pure
   @Override public int bits() {
     return 128;
   }
 
+  @Impure
   @Override public Hasher newHasher() {
     return new Murmur3_128Hasher(seed);
   }
 
+  @Pure
   @Override
   public String toString() {
     return "Hashing.murmur3_128(" + seed + ")";
   }
 
+  @Pure
   @Override
   public boolean equals(@Nullable Object object) {
     if (object instanceof Murmur3_128HashFunction) {
@@ -70,6 +77,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     return false;
   }
 
+  @Pure
   @Override
   public int hashCode() {
     return getClass().hashCode() ^ seed;
@@ -83,6 +91,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
     private long h2;
     private int length;
 
+    @Impure
     Murmur3_128Hasher(int seed) {
       super(CHUNK_SIZE);
       this.h1 = seed;
@@ -90,6 +99,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
       this.length = 0;
     }
 
+    @Impure
     @Override protected void process(ByteBuffer bb) {
       long k1 = bb.getLong();
       long k2 = bb.getLong();
@@ -97,6 +107,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
       length += CHUNK_SIZE;
     }
 
+    @Impure
     private void bmix64(long k1, long k2) {
       h1 ^= mixK1(k1);
 
@@ -111,6 +122,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
       h2 = h2 * 5 + 0x38495ab5;
     }
 
+    @Impure
     @Override protected void processRemaining(ByteBuffer bb) {
       long k1 = 0;
       long k2 = 0;
@@ -155,6 +167,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
       h2 ^= mixK2(k2);
     }
 
+    @Impure
     @Override public HashCode makeHash() {
       h1 ^= length;
       h2 ^= length;
@@ -176,6 +189,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
           .array());
     }
 
+    @Pure
     private static long fmix64(long k) {
       k ^= k >>> 33;
       k *= 0xff51afd7ed558ccdL;
@@ -185,6 +199,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
       return k;
     }
 
+    @Pure
     private static long mixK1(long k1) {
       k1 *= C1;
       k1 = Long.rotateLeft(k1, 31);
@@ -192,6 +207,7 @@ final class Murmur3_128HashFunction extends AbstractStreamingHashFunction implem
       return k1;
     }
 
+    @Pure
     private static long mixK2(long k2) {
       k2 *= C2;
       k2 = Long.rotateLeft(k2, 33);

@@ -14,6 +14,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import javax.annotation.Nullable;
 
 /**
@@ -22,36 +25,45 @@ import javax.annotation.Nullable;
  * @author Louis Wasserman
  */
 abstract class AbstractRangeSet<C extends Comparable> implements RangeSet<C> {
+  @SideEffectFree
   AbstractRangeSet() {}
 
+  @Pure
+  @Impure
   @Override
   public boolean contains(C value) {
     return rangeContaining(value) != null;
   }
 
+  @Pure
   @Override
   public abstract Range<C> rangeContaining(C value);
 
+  @Impure
   @Override
   public boolean isEmpty() {
     return asRanges().isEmpty();
   }
 
+  @SideEffectFree
   @Override
   public void add(Range<C> range) {
     throw new UnsupportedOperationException();
   }
 
+  @SideEffectFree
   @Override
   public void remove(Range<C> range) {
     throw new UnsupportedOperationException();
   }
   
+  @Impure
   @Override
   public void clear() {
     remove(Range.<C>all());
   }
 
+  @Impure
   @Override
   public boolean enclosesAll(RangeSet<C> other) {
     for (Range<C> range : other.asRanges()) {
@@ -62,6 +74,7 @@ abstract class AbstractRangeSet<C extends Comparable> implements RangeSet<C> {
     return true;
   }
 
+  @Impure
   @Override
   public void addAll(RangeSet<C> other) {
     for (Range<C> range : other.asRanges()) {
@@ -69,6 +82,7 @@ abstract class AbstractRangeSet<C extends Comparable> implements RangeSet<C> {
     }
   }
 
+  @Impure
   @Override
   public void removeAll(RangeSet<C> other) {
     for (Range<C> range : other.asRanges()) {
@@ -76,9 +90,11 @@ abstract class AbstractRangeSet<C extends Comparable> implements RangeSet<C> {
     }
   }
 
+  @Pure
   @Override
   public abstract boolean encloses(Range<C> otherRange);
 
+  @Impure
   @Override
   public boolean equals(@Nullable Object obj) {
     if (obj == this) {
@@ -90,11 +106,13 @@ abstract class AbstractRangeSet<C extends Comparable> implements RangeSet<C> {
     return false;
   }
 
+  @Impure
   @Override
   public final int hashCode() {
     return asRanges().hashCode();
   }
 
+  @Impure
   @Override
   public final String toString() {
     return asRanges().toString();

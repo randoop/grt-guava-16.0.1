@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
@@ -29,6 +31,7 @@ import javax.annotation.Nullable;
  * @since 10.0
  */
 public final class Atomics {
+  @SideEffectFree
   private Atomics() {}
 
   /**
@@ -36,6 +39,7 @@ public final class Atomics {
    *
    * @return a new {@code AtomicReference} with no initial value
    */
+  @Impure
   public static <V> AtomicReference<V> newReference() {
     return new AtomicReference<V>();
   }
@@ -46,6 +50,7 @@ public final class Atomics {
    * @param initialValue the initial value
    * @return a new {@code AtomicReference} with the given initial value
    */
+  @Impure
   public static <V> AtomicReference<V> newReference(@Nullable V initialValue) {
     return new AtomicReference<V>(initialValue);
   }
@@ -56,6 +61,7 @@ public final class Atomics {
    * @param length the length of the array
    * @return a new {@code AtomicReferenceArray} with the given length
    */
+  @Impure
   public static <E> AtomicReferenceArray<E> newReferenceArray(int length) {
     return new AtomicReferenceArray<E>(length);
   }
@@ -67,6 +73,7 @@ public final class Atomics {
    * @param array the array to copy elements from
    * @return a new {@code AtomicReferenceArray} copied from the given array
    */
+  @Impure
   public static <E> AtomicReferenceArray<E> newReferenceArray(E[] array) {
     return new AtomicReferenceArray<E>(array);
   }

@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.VisibleForTesting;
@@ -37,6 +40,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible
 public final class Suppliers {
+  @SideEffectFree
   private Suppliers() {}
 
   /**
@@ -46,6 +50,7 @@ public final class Suppliers {
    * {@code function} to that value. Note that the resulting supplier will not
    * call {@code supplier} or invoke {@code function} until it is called.
    */
+  @Impure
   public static <F, T> Supplier<T> compose(
       Function<? super F, T> function, Supplier<F> supplier) {
     Preconditions.checkNotNull(function);
@@ -58,15 +63,18 @@ public final class Suppliers {
     final Function<? super F, T> function;
     final Supplier<F> supplier;
 
+    @SideEffectFree
     SupplierComposition(Function<? super F, T> function, Supplier<F> supplier) {
       this.function = function;
       this.supplier = supplier;
     }
 
+    @Impure
     @Override public T get() {
       return function.apply(supplier.get());
     }
 
+    @Pure
     @Override public boolean equals(@Nullable Object obj) {
       if (obj instanceof SupplierComposition) {
         SupplierComposition<?, ?> that = (SupplierComposition<?, ?>) obj;
@@ -75,10 +83,12 @@ public final class Suppliers {
       return false;
     }
 
+    @Impure
     @Override public int hashCode() {
       return Objects.hashCode(function, supplier);
     }
 
+    @Pure
     @Override public String toString() {
       return "Suppliers.compose(" + function + ", " + supplier + ")";
     }
@@ -99,6 +109,7 @@ public final class Suppliers {
    * <p>If {@code delegate} is an instance created by an earlier call to {@code
    * memoize}, it is returned directly.
    */
+  @Impure
   public static <T> Supplier<T> memoize(Supplier<T> delegate) {
     return (delegate instanceof MemoizingSupplier)
         ? delegate
@@ -113,10 +124,12 @@ public final class Suppliers {
     // on volatile read of "initialized".
     transient T value;
 
+    @SideEffectFree
     MemoizingSupplier(Supplier<T> delegate) {
       this.delegate = delegate;
     }
 
+    @Impure
     @Override public T get() {
       // A 2-field variant of Double Checked Locking.
       if (!initialized) {
@@ -132,6 +145,7 @@ public final class Suppliers {
       return value;
     }
 
+    @Pure
     @Override public String toString() {
       return "Suppliers.memoize(" + delegate + ")";
     }
@@ -157,6 +171,7 @@ public final class Suppliers {
    * @throws IllegalArgumentException if {@code duration} is not positive
    * @since 2.0
    */
+  @Impure
   public static <T> Supplier<T> memoizeWithExpiration(
       Supplier<T> delegate, long duration, TimeUnit unit) {
     return new ExpiringMemoizingSupplier<T>(delegate, duration, unit);
@@ -170,6 +185,7 @@ public final class Suppliers {
     // The special value 0 means "not yet initialized".
     transient volatile long expirationNanos;
 
+    @Impure
     ExpiringMemoizingSupplier(
         Supplier<T> delegate, long duration, TimeUnit unit) {
       this.delegate = Preconditions.checkNotNull(delegate);
@@ -177,6 +193,7 @@ public final class Suppliers {
       Preconditions.checkArgument(duration > 0);
     }
 
+    @Impure
     @Override public T get() {
       // Another variant of Double Checked Locking.
       //
@@ -202,6 +219,7 @@ public final class Suppliers {
       return value;
     }
 
+    @Pure
     @Override public String toString() {
       // This is a little strange if the unit the user provided was not NANOS,
       // but we don't want to store the unit just for toString
@@ -215,6 +233,7 @@ public final class Suppliers {
   /**
    * Returns a supplier that always supplies {@code instance}.
    */
+  @Impure
   public static <T> Supplier<T> ofInstance(@Nullable T instance) {
     return new SupplierOfInstance<T>(instance);
   }
@@ -223,14 +242,17 @@ public final class Suppliers {
       implements Supplier<T>, Serializable {
     final T instance;
 
+    @SideEffectFree
     SupplierOfInstance(@Nullable T instance) {
       this.instance = instance;
     }
 
+    @Pure
     @Override public T get() {
       return instance;
     }
 
+    @Impure
     @Override public boolean equals(@Nullable Object obj) {
       if (obj instanceof SupplierOfInstance) {
         SupplierOfInstance<?> that = (SupplierOfInstance<?>) obj;
@@ -239,10 +261,12 @@ public final class Suppliers {
       return false;
     }
 
+    @Impure
     @Override public int hashCode() {
       return Objects.hashCode(instance);
     }
 
+    @Pure
     @Override public String toString() {
       return "Suppliers.ofInstance(" + instance + ")";
     }
@@ -254,6 +278,7 @@ public final class Suppliers {
    * Returns a supplier whose {@code get()} method synchronizes on
    * {@code delegate} before calling it, making it thread-safe.
    */
+  @Impure
   public static <T> Supplier<T> synchronizedSupplier(Supplier<T> delegate) {
     return new ThreadSafeSupplier<T>(Preconditions.checkNotNull(delegate));
   }
@@ -262,16 +287,19 @@ public final class Suppliers {
       implements Supplier<T>, Serializable {
     final Supplier<T> delegate;
 
+    @SideEffectFree
     ThreadSafeSupplier(Supplier<T> delegate) {
       this.delegate = delegate;
     }
 
+    @Impure
     @Override public T get() {
       synchronized (delegate) {
         return delegate.get();
       }
     }
 
+    @Pure
     @Override public String toString() {
       return "Suppliers.synchronizedSupplier(" + delegate + ")";
     }
@@ -285,6 +313,7 @@ public final class Suppliers {
    *
    * @since 8.0
    */
+  @Pure
   @Beta
   public static <T> Function<Supplier<T>, T> supplierFunction() {
     @SuppressWarnings("unchecked") // implementation is "fully variant"
@@ -298,10 +327,12 @@ public final class Suppliers {
     INSTANCE;
 
     // Note: This makes T a "pass-through type"
+    @Impure
     @Override public Object apply(Supplier<Object> input) {
       return input.get();
     }
 
+    @Pure
     @Override public String toString() {
       return "Suppliers.supplierFunction()";
     }

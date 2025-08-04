@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Deterministic;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.annotations.GwtCompatible;
@@ -65,6 +68,8 @@ public abstract class AbstractIterator<T> extends UnmodifiableIterator<T> {
   private State state = State.NOT_READY;
 
   /** Constructor for use by subclasses. */
+  @SideEffectFree
+  @Impure
   protected AbstractIterator() {}
 
   private enum State {
@@ -111,6 +116,7 @@ public abstract class AbstractIterator<T> extends UnmodifiableIterator<T> {
    *     attempts to use the iterator will result in an
    *     {@link IllegalStateException}.
    */
+  @Impure
   protected abstract T computeNext();
 
   /**
@@ -120,11 +126,13 @@ public abstract class AbstractIterator<T> extends UnmodifiableIterator<T> {
    * @return {@code null}; a convenience so your {@code computeNext}
    *     implementation can use the simple statement {@code return endOfData();}
    */
+  @Impure
   protected final T endOfData() {
     state = State.DONE;
     return null;
   }
 
+  @Impure
   @Override
   public final boolean hasNext() {
     checkState(state != State.FAILED);
@@ -138,6 +146,7 @@ public abstract class AbstractIterator<T> extends UnmodifiableIterator<T> {
     return tryToComputeNext();
   }
 
+  @Impure
   private boolean tryToComputeNext() {
     state = State.FAILED; // temporary pessimism
     next = computeNext();
@@ -148,6 +157,7 @@ public abstract class AbstractIterator<T> extends UnmodifiableIterator<T> {
     return false;
   }
 
+  @Impure
   @Override
   public final T next() {
     if (!hasNext()) {
@@ -166,6 +176,7 @@ public abstract class AbstractIterator<T> extends UnmodifiableIterator<T> {
    * <p>Implementations of {@code AbstractIterator} that wish to expose this
    * functionality should implement {@code PeekingIterator}.
    */
+  @Deterministic
   public final T peek() {
     if (!hasNext()) {
       throw new NoSuchElementException();

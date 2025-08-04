@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 /**
@@ -51,12 +52,14 @@ interface Constraint<E> {
    * @param element the element to check
    * @return the provided element
    */
+  @Pure
   E checkElement(E element);
 
   /**
    * Returns a brief human readable description of this constraint, such as
    * "Not null" or "Positive number".
    */
+  @Pure
   @Override
   String toString();
 }

@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -40,6 +43,7 @@ import javax.annotation.Nullable;
  * @since 1.0
  */
 public final class Throwables {
+  @SideEffectFree
   private Throwables() {}
 
   /**
@@ -57,6 +61,7 @@ public final class Throwables {
    *   }
    * </pre>
    */
+  @Impure
   public static <X extends Throwable> void propagateIfInstanceOf(
       @Nullable Throwable throwable, Class<X> declaredType) throws X {
     // Check for null is needed to avoid frequent JNI calls to isInstance().
@@ -79,6 +84,7 @@ public final class Throwables {
    *   }
    * </pre>
    */
+  @Impure
   public static void propagateIfPossible(@Nullable Throwable throwable) {
     propagateIfInstanceOf(throwable, Error.class);
     propagateIfInstanceOf(throwable, RuntimeException.class);
@@ -103,6 +109,7 @@ public final class Throwables {
    * @param declaredType the single checked exception type declared by the
    *     calling method
    */
+  @Impure
   public static <X extends Throwable> void propagateIfPossible(
       @Nullable Throwable throwable, Class<X> declaredType) throws X {
     propagateIfInstanceOf(throwable, declaredType);
@@ -123,6 +130,7 @@ public final class Throwables {
    * @param declaredType2 any other checked exception type declared by the
    *     calling method
    */
+  @Impure
   public static <X1 extends Throwable, X2 extends Throwable>
       void propagateIfPossible(@Nullable Throwable throwable,
           Class<X1> declaredType1, Class<X2> declaredType2) throws X1, X2 {
@@ -155,6 +163,7 @@ public final class Throwables {
    * @return nothing will ever be returned; this return type is only for your
    *     convenience, as illustrated in the example above
    */
+  @Impure
   public static RuntimeException propagate(Throwable throwable) {
     propagateIfPossible(checkNotNull(throwable));
     throw new RuntimeException(throwable);
@@ -169,6 +178,7 @@ public final class Throwables {
    *       Throwables.getRootCause(e).getMessage());
    * </pre>
    */
+  @Pure
   public static Throwable getRootCause(Throwable throwable) {
     Throwable cause;
     while ((cause = throwable.getCause()) != null) {
@@ -194,6 +204,7 @@ public final class Throwables {
    * @return an unmodifiable list containing the cause chain starting with
    *     {@code throwable}
    */
+  @Impure
   @Beta // TODO(kevinb): decide best return type
   public static List<Throwable> getCausalChain(Throwable throwable) {
     checkNotNull(throwable);
@@ -212,6 +223,7 @@ public final class Throwables {
    * parsing the resulting string; if you need programmatic access to the stack
    * frames, you can call {@link Throwable#getStackTrace()}.
    */
+  @Impure
   public static String getStackTraceAsString(Throwable throwable) {
     StringWriter stringWriter = new StringWriter();
     throwable.printStackTrace(new PrintWriter(stringWriter));

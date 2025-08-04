@@ -16,6 +16,9 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -100,6 +103,8 @@ public final class Closer implements Closeable {
   /**
    * Creates a new {@link Closer}.
    */
+  @SideEffectFree
+  @Impure
   public static Closer create() {
     return new Closer(SUPPRESSOR);
   }
@@ -110,6 +115,8 @@ public final class Closer implements Closeable {
   private final Deque<Closeable> stack = new ArrayDeque<Closeable>(4);
   private Throwable thrown;
 
+  @SideEffectFree
+  @Impure
   @VisibleForTesting Closer(Suppressor suppressor) {
     this.suppressor = checkNotNull(suppressor); // checkNotNull to satisfy null tests
   }
@@ -121,6 +128,7 @@ public final class Closer implements Closeable {
    * @return the given {@code closeable}
    */
   // close. this word no longer has any meaning to me.
+  @Impure
   public <C extends Closeable> C register(@Nullable C closeable) {
     if (closeable != null) {
       stack.push(closeable);
@@ -142,6 +150,7 @@ public final class Closer implements Closeable {
    * @return this method does not return; it always throws
    * @throws IOException when the given throwable is an IOException
    */
+  @Impure
   public RuntimeException rethrow(Throwable e) throws IOException {
     checkNotNull(e);
     thrown = e;
@@ -163,6 +172,7 @@ public final class Closer implements Closeable {
    * @throws IOException when the given throwable is an IOException
    * @throws X when the given throwable is of the declared type X
    */
+  @Impure
   public <X extends Exception> RuntimeException rethrow(Throwable e,
       Class<X> declaredType) throws IOException, X {
     checkNotNull(e);
@@ -187,6 +197,7 @@ public final class Closer implements Closeable {
    * @throws X1 when the given throwable is of the declared type X1
    * @throws X2 when the given throwable is of the declared type X2
    */
+  @Impure
   public <X1 extends Exception, X2 extends Exception> RuntimeException rethrow(
       Throwable e, Class<X1> declaredType1, Class<X2> declaredType2) throws IOException, X1, X2 {
     checkNotNull(e);
@@ -203,6 +214,7 @@ public final class Closer implements Closeable {
    * <i>first</i> exception to be thrown from an attempt to close a closeable will be thrown and any
    * additional exceptions that are thrown after that will be suppressed.
    */
+  @Impure
   @Override
   public void close() throws IOException {
     Throwable throwable = thrown;
@@ -236,6 +248,7 @@ public final class Closer implements Closeable {
      * the given closeable. {@code thrown} is the exception that is actually being thrown from the
      * method. Implementations of this method should not throw under any circumstances.
      */
+    @Impure
     void suppress(Closeable closeable, Throwable thrown, Throwable suppressed);
   }
 
@@ -246,6 +259,7 @@ public final class Closer implements Closeable {
 
     static final LoggingSuppressor INSTANCE = new LoggingSuppressor();
 
+    @SideEffectFree
     @Override
     public void suppress(Closeable closeable, Throwable thrown, Throwable suppressed) {
       // log to the same place as Closeables
@@ -262,12 +276,14 @@ public final class Closer implements Closeable {
 
     static final SuppressingSuppressor INSTANCE = new SuppressingSuppressor();
 
+    @Pure
     static boolean isAvailable() {
       return addSuppressed != null;
     }
 
     static final Method addSuppressed = getAddSuppressed();
 
+    @SideEffectFree
     private static Method getAddSuppressed() {
       try {
         return Throwable.class.getMethod("addSuppressed", Throwable.class);
@@ -276,6 +292,7 @@ public final class Closer implements Closeable {
       }
     }
 
+    @Impure
     @Override
     public void suppress(Closeable closeable, Throwable thrown, Throwable suppressed) {
       // ensure no exceptions from addSuppressed

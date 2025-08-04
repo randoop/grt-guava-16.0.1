@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import java.util.Deque;
 import java.util.Iterator;
 
@@ -38,90 +40,109 @@ public abstract class ForwardingDeque<E> extends ForwardingQueue<E>
     implements Deque<E> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingDeque() {}
 
+  @Pure
   @Override protected abstract Deque<E> delegate();
 
+  @Impure
   @Override
   public void addFirst(E e) {
     delegate().addFirst(e);
   }
 
+  @Impure
   @Override
   public void addLast(E e) {
     delegate().addLast(e);
   }
 
+  @Impure
   @Override
   public Iterator<E> descendingIterator() {
     return delegate().descendingIterator();
   }
 
+  @Impure
   @Override
   public E getFirst() {
     return delegate().getFirst();
   }
 
+  @Impure
   @Override
   public E getLast() {
     return delegate().getLast();
   }
 
+  @Impure
   @Override
   public boolean offerFirst(E e) {
     return delegate().offerFirst(e);
   }
 
+  @Impure
   @Override
   public boolean offerLast(E e) {
     return delegate().offerLast(e);
   }
 
+  @Impure
   @Override
   public E peekFirst() {
     return delegate().peekFirst();
   }
 
+  @Impure
   @Override
   public E peekLast() {
     return delegate().peekLast();
   }
 
+  @Impure
   @Override
   public E pollFirst() {
     return delegate().pollFirst();
   }
 
+  @Impure
   @Override
   public E pollLast() {
     return delegate().pollLast();
   }
 
+  @Impure
   @Override
   public E pop() {
     return delegate().pop();
   }
 
+  @Impure
   @Override
   public void push(E e) {
     delegate().push(e);
   }
 
+  @Impure
   @Override
   public E removeFirst() {
     return delegate().removeFirst();
   }
 
+  @Impure
   @Override
   public E removeLast() {
     return delegate().removeLast();
   }
 
+  @Impure
   @Override
   public boolean removeFirstOccurrence(Object o) {
     return delegate().removeFirstOccurrence(o);
   }
 
+  @Impure
   @Override
   public boolean removeLastOccurrence(Object o) {
     return delegate().removeLastOccurrence(o);

@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Map;
@@ -35,43 +38,51 @@ class RegularImmutableMultiset<E> extends ImmutableMultiset<E> {
   private final transient ImmutableMap<E, Integer> map;
   private final transient int size;
 
+  @SideEffectFree
   RegularImmutableMultiset(ImmutableMap<E, Integer> map, int size) {
     this.map = map;
     this.size = size;
   }
 
+  @Pure
   @Override
   boolean isPartialView() {
     return map.isPartialView();
   }
 
+  @Pure
   @Override
   public int count(@Nullable Object element) {
     Integer value = map.get(element);
     return (value == null) ? 0 : value;
   }
 
+  @Pure
   @Override
   public int size() {
     return size;
   }
 
+  @Pure
   @Override
   public boolean contains(@Nullable Object element) {
     return map.containsKey(element);
   }
 
+  @SideEffectFree
   @Override
   public ImmutableSet<E> elementSet() {
     return map.keySet();
   }
 
+  @Impure
   @Override
   Entry<E> getEntry(int index) {
     Map.Entry<E, Integer> mapEntry = map.entrySet().asList().get(index);
     return Multisets.immutableEntry(mapEntry.getKey(), mapEntry.getValue());
   }
 
+  @Pure
   @Override
   public int hashCode() {
     return map.hashCode();

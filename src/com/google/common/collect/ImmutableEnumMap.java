@@ -15,6 +15,9 @@
  */
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.annotations.GwtCompatible;
@@ -34,6 +37,7 @@ import javax.annotation.Nullable;
 @GwtCompatible(serializable = true, emulated = true)
 @SuppressWarnings("serial") // we're overriding default serialization
 final class ImmutableEnumMap<K extends Enum<K>, V> extends ImmutableMap<K, V> {
+  @Impure
   static <K extends Enum<K>, V> ImmutableMap<K, V> asImmutable(EnumMap<K, V> map) {
     switch (map.size()) {
       case 0:
@@ -49,30 +53,36 @@ final class ImmutableEnumMap<K extends Enum<K>, V> extends ImmutableMap<K, V> {
 
   private transient final EnumMap<K, V> delegate;
 
+  @Impure
   private ImmutableEnumMap(EnumMap<K, V> delegate) {
     this.delegate = delegate;
     checkArgument(!delegate.isEmpty());
   }
 
+  @Impure
   @Override
   ImmutableSet<K> createKeySet() {
     return new ImmutableSet<K>() {
 
+      @Pure
       @Override
       public boolean contains(Object object) {
         return delegate.containsKey(object);
       }
 
+      @Pure
       @Override
       public int size() {
         return ImmutableEnumMap.this.size();
       }
 
+      @Impure
       @Override
       public UnmodifiableIterator<K> iterator() {
         return Iterators.unmodifiableIterator(delegate.keySet().iterator());
       }
 
+      @Pure
       @Override
       boolean isPartialView() {
         return true;
@@ -80,40 +90,48 @@ final class ImmutableEnumMap<K extends Enum<K>, V> extends ImmutableMap<K, V> {
     };
   }
 
+  @Pure
   @Override
   public int size() {
     return delegate.size();
   }
 
+  @Pure
   @Override
   public boolean containsKey(@Nullable Object key) {
     return delegate.containsKey(key);
   }
 
+  @Pure
   @Override
   public V get(Object key) {
     return delegate.get(key);
   }
 
+  @Impure
   @Override
   ImmutableSet<Entry<K, V>> createEntrySet() {
     return new ImmutableMapEntrySet<K, V>() {
 
+      @Pure
       @Override
       ImmutableMap<K, V> map() {
         return ImmutableEnumMap.this;
       }
 
+      @Impure
       @Override
       public UnmodifiableIterator<Entry<K, V>> iterator() {
         return new UnmodifiableIterator<Entry<K, V>>() {
           private final Iterator<Entry<K, V>> backingIterator = delegate.entrySet().iterator();
 
+          @Pure
           @Override
           public boolean hasNext() {
             return backingIterator.hasNext();
           }
 
+          @Impure
           @Override
           public Entry<K, V> next() {
             Entry<K, V> entry = backingIterator.next();
@@ -124,12 +142,15 @@ final class ImmutableEnumMap<K extends Enum<K>, V> extends ImmutableMap<K, V> {
     };
   }
 
+  @Pure
   @Override
   boolean isPartialView() {
     return false;
   }
 
   // All callers of the constructor are restricted to <K extends Enum<K>>.
+  @SideEffectFree
+  @Impure
   @Override Object writeReplace() {
     return new EnumSerializedForm<K, V>(delegate);
   }
@@ -140,9 +161,11 @@ final class ImmutableEnumMap<K extends Enum<K>, V> extends ImmutableMap<K, V> {
   private static class EnumSerializedForm<K extends Enum<K>, V>
       implements Serializable {
     final EnumMap<K, V> delegate;
+    @SideEffectFree
     EnumSerializedForm(EnumMap<K, V> delegate) {
       this.delegate = delegate;
     }
+    @Impure
     Object readResolve() {
       return new ImmutableEnumMap<K, V>(delegate);
     }

@@ -16,6 +16,9 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkPositionIndexes;
 
@@ -59,6 +62,7 @@ import java.util.List;
 public final class CharStreams {
   private static final int BUF_SIZE = 0x800; // 2K chars (4K bytes)
 
+  @SideEffectFree
   private CharStreams() {}
 
   /**
@@ -70,6 +74,7 @@ public final class CharStreams {
    * @deprecated Use {@link CharSource#wrap(CharSequence}} instead. This method
    *     is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static InputSupplier<StringReader> newReaderSupplier(
       final String value) {
@@ -87,6 +92,7 @@ public final class CharStreams {
    * @deprecated Use {@link ByteSource#asCharSource(Charset)} instead. This
    *     method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static InputSupplier<InputStreamReader> newReaderSupplier(
       final InputSupplier<? extends InputStream> in, final Charset charset) {
@@ -105,6 +111,7 @@ public final class CharStreams {
    * @deprecated Use {@link ByteSink#asCharSink(Charset)} instead. This method
    *     is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static OutputSupplier<OutputStreamWriter> newWriterSupplier(
       final OutputSupplier<? extends OutputStream> out, final Charset charset) {
@@ -122,6 +129,7 @@ public final class CharStreams {
    * @deprecated Use {@link CharSink#write(CharSequence)} instead. This method
    *     is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <W extends Appendable & Closeable> void write(CharSequence from,
       OutputSupplier<W> to) throws IOException {
@@ -140,6 +148,7 @@ public final class CharStreams {
    * @deprecated Use {@link CharSource#copyTo(CharSink) instead. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <R extends Readable & Closeable,
       W extends Appendable & Closeable> long copy(InputSupplier<R> from,
@@ -159,6 +168,7 @@ public final class CharStreams {
    * @deprecated Use {@link CharSource#copyTo(Appendable)} instead. This method
    *     is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <R extends Readable & Closeable> long copy(
       InputSupplier<R> from, Appendable to) throws IOException {
@@ -174,6 +184,7 @@ public final class CharStreams {
    * @return the number of characters copied
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static long copy(Readable from, Appendable to) throws IOException {
     checkNotNull(from);
     checkNotNull(to);
@@ -196,6 +207,7 @@ public final class CharStreams {
    * @return a string containing all the characters
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static String toString(Readable r) throws IOException {
     return toStringBuilder(r).toString();
   }
@@ -210,6 +222,7 @@ public final class CharStreams {
    * @deprecated Use {@link CharSource#read()} instead. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <R extends Readable & Closeable> String toString(
       InputSupplier<R> supplier) throws IOException {
@@ -224,6 +237,7 @@ public final class CharStreams {
    * @return a {@link StringBuilder} containing all the characters
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   private static StringBuilder toStringBuilder(Readable r) throws IOException {
     StringBuilder sb = new StringBuilder();
     copy(r, sb);
@@ -241,6 +255,7 @@ public final class CharStreams {
    * @deprecated Use {@link CharSource#readFirstLine()} instead. This method is
    *     scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <R extends Readable & Closeable> String readFirstLine(
       InputSupplier<R> supplier) throws IOException {
@@ -259,6 +274,7 @@ public final class CharStreams {
    *     returns an {@code ImmutableList}. This method is scheduled for removal
    *     in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <R extends Readable & Closeable> List<String> readLines(
       InputSupplier<R> supplier) throws IOException {
@@ -286,6 +302,7 @@ public final class CharStreams {
    * @return a mutable {@link List} containing all the lines
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static List<String> readLines(Readable r) throws IOException {
     List<String> result = new ArrayList<String>();
     LineReader lineReader = new LineReader(r);
@@ -306,6 +323,7 @@ public final class CharStreams {
    * @throws IOException if an I/O error occurs
    * @since 14.0
    */
+  @Impure
   public static <T> T readLines(
       Readable readable, LineProcessor<T> processor) throws IOException {
     checkNotNull(readable);
@@ -333,6 +351,7 @@ public final class CharStreams {
    * @deprecated Use {@link CharSource#readLines(LineProcessor)} instead. This
    *     method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static <R extends Readable & Closeable, T> T readLines(
       InputSupplier<R> supplier, LineProcessor<T> callback) throws IOException {
@@ -367,12 +386,14 @@ public final class CharStreams {
    * @deprecated Use {@link CharSource#concat(Iterable)} instead. This method
    *     is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static InputSupplier<Reader> join(
       final Iterable<? extends InputSupplier<? extends Reader>> suppliers) {
     checkNotNull(suppliers);
     Iterable<CharSource> sources = Iterables.transform(suppliers,
         new Function<InputSupplier<? extends Reader>, CharSource>() {
+          @Impure
           @Override
           public CharSource apply(InputSupplier<? extends Reader> input) {
             return asCharSource(input);
@@ -387,6 +408,7 @@ public final class CharStreams {
    * @deprecated Use {@link CharSource#concat(CharSource[])} instead. This
    *     method is scheduled for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   @SuppressWarnings("unchecked") // suppress "possible heap pollution" warning in JDK7
   public static InputSupplier<Reader> join(
@@ -405,6 +427,7 @@ public final class CharStreams {
    *     the characters
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public static void skipFully(Reader reader, long n) throws IOException {
     checkNotNull(reader);
     while (n > 0) {
@@ -426,6 +449,7 @@ public final class CharStreams {
    *
    * @since 15.0
    */
+  @Pure
   public static Writer nullWriter() {
     return NullWriter.INSTANCE;
   }
@@ -434,55 +458,66 @@ public final class CharStreams {
 
     private static final NullWriter INSTANCE = new NullWriter();
 
+    @SideEffectFree
     @Override
     public void write(int c) {
     }
 
+    @Impure
     @Override
     public void write(char[] cbuf) {
       checkNotNull(cbuf);
     }
 
+    @Impure
     @Override
     public void write(char[] cbuf, int off, int len) {
       checkPositionIndexes(off, off + len, cbuf.length);
     }
 
+    @Impure
     @Override
     public void write(String str) {
       checkNotNull(str);
     }
 
+    @Impure
     @Override
     public void write(String str, int off, int len) {
       checkPositionIndexes(off, off + len, str.length());
     }
 
+    @Impure
     @Override
     public Writer append(CharSequence csq) {
       checkNotNull(csq);
       return this;
     }
 
+    @Impure
     @Override
     public Writer append(CharSequence csq, int start, int end) {
       checkPositionIndexes(start, end, csq.length());
       return this;
     }
 
+    @Pure
     @Override
     public Writer append(char c) {
       return this;
     }
 
+    @SideEffectFree
     @Override
     public void flush() {
     }
 
+    @SideEffectFree
     @Override
     public void close() {
     }
 
+    @Pure
     @Override
     public String toString() {
       return "CharStreams.nullWriter()";
@@ -499,6 +534,7 @@ public final class CharStreams {
    * @return a new Writer object, unless target is a Writer, in which case the
    *     target is returned
    */
+  @Impure
   public static Writer asWriter(Appendable target) {
     if (target instanceof Writer) {
       return (Writer) target;
@@ -508,22 +544,26 @@ public final class CharStreams {
 
   // TODO(user): Remove these once Input/OutputSupplier methods are removed
 
+  @Impure
   static Reader asReader(final Readable readable) {
     checkNotNull(readable);
     if (readable instanceof Reader) {
       return (Reader) readable;
     }
     return new Reader() {
+      @Impure
       @Override
       public int read(char[] cbuf, int off, int len) throws IOException {
         return read(CharBuffer.wrap(cbuf, off, len));
       }
 
+      @Impure
       @Override
       public int read(CharBuffer target) throws IOException {
         return readable.read(target);
       }
 
+      @Impure
       @Override
       public void close() throws IOException {
         if (readable instanceof Closeable) {
@@ -546,16 +586,19 @@ public final class CharStreams {
    *     viewing the object as a {@code CharSource}. This method is scheduled
    *     for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static CharSource asCharSource(
       final InputSupplier<? extends Readable> supplier) {
     checkNotNull(supplier);
     return new CharSource() {
+      @Impure
       @Override
       public Reader openStream() throws IOException {
         return asReader(supplier.getInput());
       }
 
+      @Pure
       @Override
       public String toString() {
         return "CharStreams.asCharSource(" + supplier + ")";
@@ -576,16 +619,19 @@ public final class CharStreams {
    *     viewing the object as a {@code CharSink}. This method is scheduled
    *     for removal in Guava 18.0.
    */
+  @Impure
   @Deprecated
   public static CharSink asCharSink(
       final OutputSupplier<? extends Appendable> supplier) {
     checkNotNull(supplier);
     return new CharSink() {
+      @Impure
       @Override
       public Writer openStream() throws IOException {
         return asWriter(supplier.getOutput());
       }
 
+      @Pure
       @Override
       public String toString() {
         return "CharStreams.asCharSink(" + supplier + ")";
@@ -593,12 +639,14 @@ public final class CharStreams {
     };
   }
 
+  @Impure
   @SuppressWarnings("unchecked") // used internally where known to be safe
   static <R extends Reader> InputSupplier<R> asInputSupplier(
       CharSource source) {
     return (InputSupplier) checkNotNull(source);
   }
 
+  @Impure
   @SuppressWarnings("unchecked") // used internally where known to be safe
   static <W extends Writer> OutputSupplier<W> asOutputSupplier(
       CharSink sink) {

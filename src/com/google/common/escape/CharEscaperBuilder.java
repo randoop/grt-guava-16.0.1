@@ -16,6 +16,8 @@
 
 package com.google.common.escape;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -44,6 +46,7 @@ public final class CharEscaperBuilder {
     private final char[][] replacements;
     private final int replaceLength;
 
+    @Impure
     CharArrayDecorator(char[][] replacements) {
       this.replacements = replacements;
       this.replaceLength = replacements.length;
@@ -53,6 +56,7 @@ public final class CharEscaperBuilder {
      * Overriding escape method to be slightly faster for this decorator. We test the replacements
      * array directly, saving a method call.
      */
+    @Impure
     @Override public String escape(String s) {
       int slen = s.length();
       for (int index = 0; index < slen; index++) {
@@ -64,6 +68,7 @@ public final class CharEscaperBuilder {
       return s;
     }
 
+    @Pure
     @Override protected char[] escape(char c) {
       return c < replaceLength ? replacements[c] : null;
     }
@@ -78,6 +83,7 @@ public final class CharEscaperBuilder {
   /**
    * Construct a new sparse array builder.
    */
+  @Impure
   public CharEscaperBuilder() {
     this.map = new HashMap<Character, String>();
   }
@@ -85,6 +91,7 @@ public final class CharEscaperBuilder {
   /**
    * Add a new mapping from an index to an object to the escaping.
    */
+  @Impure
   public CharEscaperBuilder addEscape(char c, String r) {
     map.put(c, checkNotNull(r));
     if (c > max) {
@@ -96,6 +103,7 @@ public final class CharEscaperBuilder {
   /**
    * Add multiple mappings at once for a particular index.
    */
+  @Impure
   public CharEscaperBuilder addEscapes(char[] cs, String r) {
     checkNotNull(r);
     for (char c : cs) {
@@ -111,6 +119,7 @@ public final class CharEscaperBuilder {
    *
    * @return a "sparse" array that holds the replacement mappings.
    */
+  @Impure
   public char[][] toArray() {
     char[][] result = new char[max + 1][];
     for (Map.Entry<Character, String> entry : map.entrySet()) {
@@ -125,6 +134,7 @@ public final class CharEscaperBuilder {
    *
    * @return an escaper that escapes based on the underlying array.
    */
+  @Impure
   public Escaper toEscaper() {
     return new CharArrayDecorator(toArray());
   }

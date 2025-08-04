@@ -14,6 +14,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -38,6 +41,7 @@ public final class HashingInputStream extends FilterInputStream {
    *
    * <p>The {@link InputStream} should not be read from before or after the hand-off.
    */
+  @Impure
   public HashingInputStream(HashFunction hashFunction, InputStream in) {
     super(checkNotNull(in));
     this.hasher = checkNotNull(hashFunction.newHasher());
@@ -47,6 +51,7 @@ public final class HashingInputStream extends FilterInputStream {
    * Reads the next byte of data from the underlying input stream and updates the hasher with
    * the byte read.
    */
+  @Impure
   @Override
   public int read() throws IOException {
     int b = in.read();
@@ -60,6 +65,7 @@ public final class HashingInputStream extends FilterInputStream {
    * Reads the specified bytes of data from the underlying input stream and updates the hasher with
    * the bytes read.
    */
+  @Impure
   @Override
   public int read(byte[] bytes, int off, int len) throws IOException {
     int numOfBytesRead = in.read(bytes, off, len);
@@ -73,6 +79,7 @@ public final class HashingInputStream extends FilterInputStream {
    * mark() is not supported for HashingInputStream
    * @return {@code false} always
    */
+  @Pure
   @Override
   public boolean markSupported() {
     return false;
@@ -81,6 +88,7 @@ public final class HashingInputStream extends FilterInputStream {
   /**
    * mark() is not supported for HashingInputStream
    */
+  @SideEffectFree
   @Override
   public void mark(int readlimit) {}
 
@@ -88,6 +96,7 @@ public final class HashingInputStream extends FilterInputStream {
    * reset() is not supported for HashingInputStream.
    * @throws IOException this operation is not supported
    */
+  @Impure
   @Override
   public void reset() throws IOException {
     throw new IOException("reset not supported");
@@ -97,6 +106,7 @@ public final class HashingInputStream extends FilterInputStream {
    * Returns the {@link HashCode} based on the data read from this stream. The result is
    * unspecified if this method is called more than once on the same instance.
    */
+  @Pure
   public HashCode hash() {
     return hasher.hash();
   }

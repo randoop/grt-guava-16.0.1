@@ -9,11 +9,6 @@
   <name>Guava: Google Core Libraries for Java</name>
   <packaging>bundle</packaging>
   <description> Guava is a suite of core and expanded libraries that include utility classes, google's collections, io classes, and much much more. Guava has only one code dependency - javax.annotation, per the JSR-305 spec. </description>
-  <properties>
-    <grt-testing.basedir>${grt-testing.basedir}</grt-testing.basedir>
-    <grt-testing.major.jar>build/major/lib/major.jar</grt-testing.major.jar>
-    <grt-testing.plugin>${grt-testing.plugin}</grt-testing.plugin>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -21,14 +16,13 @@
       <optional>true</optional>
       <!--  needed only for annotations  -->
     </dependency>
-    <dependency>
-      <groupId>major</groupId>
-      <artifactId>major</artifactId>
-      <version>2.2.0</version>
-      <scope>system</scope>
-      <systemPath>${grt-testing.basedir}/${grt-testing.major.jar}</systemPath>
-    </dependency>
     <!--  TODO(cpovirk): want this only for dependency plugin but seems not to work there? Maven runs without failure, but the resulting Javadoc is missing the hoped-for inherited text  -->
+    <dependency>
+      <groupId>org.checkerframework</groupId>
+      <artifactId>checker-qual</artifactId>
+      <version>3.49.5</version>
+      <scope>provided</scope>
+    </dependency>
   </dependencies>
   <build>
     <plugins>
@@ -49,17 +43,17 @@
         <configuration>
           <instructions>
             <Export-Package>!com.google.common.base.internal,com.google.common.*</Export-Package>
-            <Import-Package> javax.annotation;resolution:=optional, javax.inject;resolution:=optional, sun.misc.*;resolution:=optional </Import-Package>
+            <Import-Package> javax.annotation;resolution:=optional, javax.inject;resolution:=optional, sun.misc.*;resolution:=optional, org.checkerframework.dataflow.qual;resolution:=optional, </Import-Package>
           </instructions>
         </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
         <configuration>
-          <testExcludes>
-            <exclude>**/*</exclude>
-          </testExcludes>
-          <compilerArgument>${grt-testing.plugin}</compilerArgument>
+          <!-- Need 1.8 for type annotations -->
+          <source>1.8</source>
+          <target>1.8</target>
         </configuration>
       </plugin>
       <plugin>

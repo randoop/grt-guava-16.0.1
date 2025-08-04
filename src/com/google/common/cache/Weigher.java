@@ -14,6 +14,7 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 
@@ -33,5 +34,6 @@ public interface Weigher<K, V> {
    *
    * @return the weight of the entry; must be non-negative
    */
+  @Pure
   int weigh(K key, V value);
 }

@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.concurrent.CancellationException;
@@ -73,6 +75,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
   /**
    * Constructor for use by subclasses.
    */
+  @SideEffectFree
   protected AbstractFuture() {}
 
   /*
@@ -90,6 +93,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
    *     or during the call (optional but recommended).
    * @throws CancellationException {@inheritDoc}
    */
+  @Impure
   @Override
   public V get(long timeout, TimeUnit unit) throws InterruptedException,
       TimeoutException, ExecutionException {
@@ -111,21 +115,25 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
    *     or during the call (optional but recommended).
    * @throws CancellationException {@inheritDoc}
    */
+  @Impure
   @Override
   public V get() throws InterruptedException, ExecutionException {
     return sync.get();
   }
 
+  @Impure
   @Override
   public boolean isDone() {
     return sync.isDone();
   }
 
+  @Impure
   @Override
   public boolean isCancelled() {
     return sync.isCancelled();
   }
 
+  @Impure
   @Override
   public boolean cancel(boolean mayInterruptIfRunning) {
     if (!sync.cancel(mayInterruptIfRunning)) {
@@ -147,6 +155,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
    *
    * @since 10.0
    */
+  @SideEffectFree
   protected void interruptTask() {
   }
 
@@ -156,6 +165,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
    *
    * @since 14.0
    */
+  @Impure
   protected final boolean wasInterrupted() {
     return sync.wasInterrupted();
   }
@@ -165,6 +175,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
    *
    * @since 10.0
    */
+  @Impure
   @Override
   public void addListener(Runnable listener, Executor exec) {
     executionList.add(listener, exec);
@@ -179,6 +190,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
    * @param value the value that was the result of the task.
    * @return true if the state was successfully changed.
    */
+  @Impure
   protected boolean set(@Nullable V value) {
     boolean result = sync.set(value);
     if (result) {
@@ -196,6 +208,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
    * @param throwable the exception that the task failed with.
    * @return true if the state was successfully changed.
    */
+  @Impure
   protected boolean setException(Throwable throwable) {
     boolean result = sync.setException(checkNotNull(throwable));
     if (result) {
@@ -238,6 +251,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
     /*
      * Acquisition succeeds if the future is done, otherwise it fails.
      */
+    @Impure
     @Override
     protected int tryAcquireShared(int ignored) {
       if (isDone()) {
@@ -250,6 +264,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
      * We always allow a release to go through, this means the state has been
      * successfully changed and the result is available.
      */
+    @Impure
     @Override
     protected boolean tryReleaseShared(int finalState) {
       setState(finalState);
@@ -261,6 +276,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
      * {@link TimeoutException} if the timer expires, otherwise behaves like
      * {@link #get()}.
      */
+    @Impure
     V get(long nanos) throws TimeoutException, CancellationException,
         ExecutionException, InterruptedException {
 
@@ -278,6 +294,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
      * was cancelled, or a {@link ExecutionException} if the task completed with
      * an error.
      */
+    @Impure
     V get() throws CancellationException, ExecutionException,
         InterruptedException {
 
@@ -291,6 +308,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
      * on success, an exception on failure, a cancellation on cancellation, or
      * an illegal state if the synchronizer is in an invalid state.
      */
+    @Impure
     private V getValue() throws CancellationException, ExecutionException {
       int state = getState();
       switch (state) {
@@ -316,6 +334,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
      * Checks if the state is {@link #COMPLETED}, {@link #CANCELLED}, or {@link
      * INTERRUPTED}.
      */
+    @Impure
     boolean isDone() {
       return (getState() & (COMPLETED | CANCELLED | INTERRUPTED)) != 0;
     }
@@ -323,6 +342,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
     /**
      * Checks if the state is {@link #CANCELLED} or {@link #INTERRUPTED}.
      */
+    @Impure
     boolean isCancelled() {
       return (getState() & (CANCELLED | INTERRUPTED)) != 0;
     }
@@ -330,6 +350,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
     /**
      * Checks if the state is {@link #INTERRUPTED}.
      */
+    @Impure
     boolean wasInterrupted() {
       return getState() == INTERRUPTED;
     }
@@ -337,6 +358,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
     /**
      * Transition to the COMPLETED state and set the value.
      */
+    @Impure
     boolean set(@Nullable V v) {
       return complete(v, null, COMPLETED);
     }
@@ -344,6 +366,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
     /**
      * Transition to the COMPLETED state and set the exception.
      */
+    @Impure
     boolean setException(Throwable t) {
       return complete(null, t, COMPLETED);
     }
@@ -351,6 +374,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
     /**
      * Transition to the CANCELLED or INTERRUPTED state.
      */
+    @Impure
     boolean cancel(boolean interrupt) {
       return complete(null, null, interrupt ? INTERRUPTED : CANCELLED);
     }
@@ -367,6 +391,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
      * @param t the exception to set as the result of the computation.
      * @param finalState the state to transition to.
      */
+    @Impure
     private boolean complete(@Nullable V v, @Nullable Throwable t,
         int finalState) {
       boolean doCompletion = compareAndSetState(RUNNING, COMPLETING);
@@ -387,6 +412,7 @@ public abstract class AbstractFuture<V> implements ListenableFuture<V> {
     }
   }
 
+  @Impure
   static final CancellationException cancellationExceptionWithCause(
       @Nullable String message, @Nullable Throwable cause) {
     CancellationException exception = new CancellationException(message);

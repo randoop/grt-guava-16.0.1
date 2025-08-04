@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkPositionIndexes;
@@ -40,24 +42,30 @@ final class CharSequenceReader extends Reader {
   /**
    * Creates a new reader wrapping the given character sequence.
    */
+  @Impure
   public CharSequenceReader(CharSequence seq) {
     this.seq = checkNotNull(seq);
   }
 
+  @Impure
   private void checkOpen() throws IOException {
     if (seq == null) {
       throw new IOException("reader closed");
     }
   }
 
+  @Pure
+  @Impure
   private boolean hasRemaining() {
     return remaining() > 0;
   }
 
+  @Pure
   private int remaining() {
     return seq.length() - pos;
   }
 
+  @Impure
   @Override
   public synchronized int read(CharBuffer target) throws IOException {
     checkNotNull(target);
@@ -72,12 +80,14 @@ final class CharSequenceReader extends Reader {
     return charsToRead;
   }
 
+  @Impure
   @Override
   public synchronized int read() throws IOException {
     checkOpen();
     return hasRemaining() ? seq.charAt(pos++) : -1;
   }
 
+  @Impure
   @Override
   public synchronized int read(char[] cbuf, int off, int len) throws IOException {
     checkPositionIndexes(off, off + len, cbuf.length);
@@ -92,6 +102,7 @@ final class CharSequenceReader extends Reader {
     return charsToRead;
   }
 
+  @Impure
   @Override
   public synchronized long skip(long n) throws IOException {
     checkArgument(n >= 0, "n (%s) may not be negative", n);
@@ -101,17 +112,20 @@ final class CharSequenceReader extends Reader {
     return charsToSkip;
   }
 
+  @Impure
   @Override
   public synchronized boolean ready() throws IOException {
     checkOpen();
     return true;
   }
 
+  @Pure
   @Override
   public boolean markSupported() {
     return true;
   }
 
+  @Impure
   @Override
   public synchronized void mark(int readAheadLimit) throws IOException {
     checkArgument(readAheadLimit >= 0, "readAheadLimit (%s) may not be negative", readAheadLimit);
@@ -119,12 +133,14 @@ final class CharSequenceReader extends Reader {
     mark = pos;
   }
 
+  @Impure
   @Override
   public synchronized void reset() throws IOException {
     checkOpen();
     pos = mark;
   }
 
+  @Impure
   @Override
   public synchronized void close() throws IOException {
     seq = null;

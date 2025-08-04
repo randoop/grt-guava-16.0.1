@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -36,6 +39,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible
 public final class Objects {
+  @SideEffectFree
   private Objects() {}
 
   /**
@@ -51,6 +55,7 @@ public final class Objects {
    * <p>This assumes that any non-null objects passed to this function conform
    * to the {@code equals()} contract.
    */
+  @Pure
   public static boolean equal(@Nullable Object a, @Nullable Object b) {
     return a == b || (a != null && a.equals(b));
   }
@@ -72,6 +77,7 @@ public final class Objects {
    * <p><b>Warning</b>: When a single object is supplied, the returned hash code
    * does not equal the hash code of that object.
    */
+  @Pure
   public static int hashCode(@Nullable Object... objects) {
     return Arrays.hashCode(objects);
   }
@@ -115,6 +121,7 @@ public final class Objects {
    *        used only for its class name
    * @since 2.0
    */
+  @Impure
   public static ToStringHelper toStringHelper(Object self) {
     return new ToStringHelper(simpleName(self.getClass()));
   }
@@ -129,6 +136,7 @@ public final class Objects {
    * @param clazz the {@link Class} of the instance
    * @since 7.0 (source-compatible since 2.0)
    */
+  @Impure
   public static ToStringHelper toStringHelper(Class<?> clazz) {
     return new ToStringHelper(simpleName(clazz));
   }
@@ -141,6 +149,7 @@ public final class Objects {
    * @param className the name of the instance type
    * @since 7.0 (source-compatible since 2.0)
    */
+  @Impure
   public static ToStringHelper toStringHelper(String className) {
     return new ToStringHelper(className);
   }
@@ -149,6 +158,7 @@ public final class Objects {
    * {@link Class#getSimpleName()} is not GWT compatible yet, so we
    * provide our own implementation.
    */
+  @SideEffectFree
   private static String simpleName(Class<?> clazz) {
     String name = clazz.getName();
 
@@ -184,6 +194,7 @@ public final class Objects {
    *     {@code null}
    * @since 3.0
    */
+  @Pure
   public static <T> T firstNonNull(@Nullable T first, @Nullable T second) {
     return first != null ? first : checkNotNull(second);
   }
@@ -203,6 +214,7 @@ public final class Objects {
     /**
      * Use {@link Objects#toStringHelper(Object)} to create an instance.
      */
+    @SideEffectFree
     private ToStringHelper(String className) {
       this.className = checkNotNull(className);
     }
@@ -214,6 +226,7 @@ public final class Objects {
      *
      * @since 12.0
      */
+    @Impure
     public ToStringHelper omitNullValues() {
       omitNullValues = true;
       return this;
@@ -225,6 +238,7 @@ public final class Objects {
      * is used, unless {@link #omitNullValues()} is called, in which case this
      * name/value pair will not be added.
      */
+    @Impure
     public ToStringHelper add(String name, @Nullable Object value) {
       return addHolder(name, value);
     }
@@ -235,6 +249,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper add(String name, boolean value) {
       return addHolder(name, String.valueOf(value));
     }
@@ -245,6 +260,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper add(String name, char value) {
       return addHolder(name, String.valueOf(value));
     }
@@ -255,6 +271,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper add(String name, double value) {
       return addHolder(name, String.valueOf(value));
     }
@@ -265,6 +282,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper add(String name, float value) {
       return addHolder(name, String.valueOf(value));
     }
@@ -275,6 +293,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper add(String name, int value) {
       return addHolder(name, String.valueOf(value));
     }
@@ -285,6 +304,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper add(String name, long value) {
       return addHolder(name, String.valueOf(value));
     }
@@ -295,6 +315,7 @@ public final class Objects {
      * <p>It is strongly encouraged to use {@link #add(String, Object)} instead
      * and give value a readable name.
      */
+    @Impure
     public ToStringHelper addValue(@Nullable Object value) {
       return addHolder(value);
     }
@@ -307,6 +328,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper addValue(boolean value) {
       return addHolder(String.valueOf(value));
     }
@@ -319,6 +341,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper addValue(char value) {
       return addHolder(String.valueOf(value));
     }
@@ -331,6 +354,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper addValue(double value) {
       return addHolder(String.valueOf(value));
     }
@@ -343,6 +367,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper addValue(float value) {
       return addHolder(String.valueOf(value));
     }
@@ -355,6 +380,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper addValue(int value) {
       return addHolder(String.valueOf(value));
     }
@@ -367,6 +393,7 @@ public final class Objects {
      *
      * @since 11.0 (source-compatible since 2.0)
      */
+    @Impure
     public ToStringHelper addValue(long value) {
       return addHolder(String.valueOf(value));
     }
@@ -381,6 +408,7 @@ public final class Objects {
      * limited reuse of the helper instance. The helper allows duplication of
      * properties (multiple name/value pairs with the same name can be added).
      */
+    @Impure
     @Override public String toString() {
       // create a copy to keep it consistent in case value changes
       boolean omitNullValuesSnapshot = omitNullValues;
@@ -402,18 +430,21 @@ public final class Objects {
       return builder.append('}').toString();
     }
 
+    @Impure
     private ValueHolder addHolder() {
       ValueHolder valueHolder = new ValueHolder();
       holderTail = holderTail.next = valueHolder;
       return valueHolder;
     }
 
+    @Impure
     private ToStringHelper addHolder(@Nullable Object value) {
       ValueHolder valueHolder = addHolder();
       valueHolder.value = value;
       return this;
     }
 
+    @Impure
     private ToStringHelper addHolder(String name, @Nullable Object value) {
       ValueHolder valueHolder = addHolder();
       valueHolder.value = value;

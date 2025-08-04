@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Objects;
 
@@ -67,6 +69,7 @@ public interface Table<R, C, V> {
    * @param rowKey key of row to search for
    * @param columnKey key of column to search for
    */
+  @Impure
   boolean contains(@Nullable Object rowKey, @Nullable Object columnKey);
 
   /**
@@ -75,6 +78,7 @@ public interface Table<R, C, V> {
    *
    * @param rowKey key of row to search for
    */
+  @Impure
   boolean containsRow(@Nullable Object rowKey);
 
   /**
@@ -83,6 +87,7 @@ public interface Table<R, C, V> {
    *
    * @param columnKey key of column to search for
    */
+  @Impure
   boolean containsColumn(@Nullable Object columnKey);
 
   /**
@@ -91,6 +96,7 @@ public interface Table<R, C, V> {
    *
    * @param value value to search for
    */
+  @Impure
   boolean containsValue(@Nullable Object value);
 
   /**
@@ -100,20 +106,24 @@ public interface Table<R, C, V> {
    * @param rowKey key of row to search for
    * @param columnKey key of column to search for
    */
+  @Impure
   V get(@Nullable Object rowKey, @Nullable Object columnKey);
 
   /** Returns {@code true} if the table contains no mappings. */
+  @Pure
   boolean isEmpty();
 
   /**
    * Returns the number of row key / column key / value mappings in the table.
    */
+  @Impure
   int size();
 
   /**
    * Compares the specified object with this table for equality. Two tables are
    * equal when their cell views, as returned by {@link #cellSet}, are equal.
    */
+  @Pure
   @Override
   boolean equals(@Nullable Object obj);
 
@@ -121,12 +131,14 @@ public interface Table<R, C, V> {
    * Returns the hash code for this table. The hash code of a table is defined
    * as the hash code of its cell view, as returned by {@link #cellSet}.
    */
+  @Pure
   @Override
   int hashCode();
 
   // Mutators
 
   /** Removes all mappings from the table. */
+  @Impure
   void clear();
 
   /**
@@ -140,6 +152,7 @@ public interface Table<R, C, V> {
    * @return the value previously associated with the keys, or {@code null} if
    *     no mapping existed for the keys
    */
+  @Impure
   V put(R rowKey, C columnKey, V value);
 
   /**
@@ -149,6 +162,7 @@ public interface Table<R, C, V> {
    *
    * @param table the table to add to this table
    */
+  @Impure
   void putAll(Table<? extends R, ? extends C, ? extends V> table);
 
   /**
@@ -159,6 +173,7 @@ public interface Table<R, C, V> {
    * @return the value previously associated with the keys, or {@code null} if
    *     no such value existed
    */
+  @Impure
   V remove(@Nullable Object rowKey, @Nullable Object columnKey);
 
   // Views
@@ -175,6 +190,7 @@ public interface Table<R, C, V> {
    * @param rowKey key of row to search for in the table
    * @return the corresponding map from column keys to values
    */
+  @Impure
   Map<C, V> row(R rowKey);
 
   /**
@@ -189,6 +205,7 @@ public interface Table<R, C, V> {
    * @param columnKey key of column to search for in the table
    * @return the corresponding map from row keys to values
    */
+  @Impure
   Map<R, V> column(C columnKey);
 
   /**
@@ -199,6 +216,7 @@ public interface Table<R, C, V> {
    * @return set of table cells consisting of row key / column key / value
    *     triplets
    */
+  @Impure
   Set<Cell<R, C, V>> cellSet();
 
   /**
@@ -207,6 +225,7 @@ public interface Table<R, C, V> {
    *
    * @return set of row keys
    */
+  @Impure
   Set<R> rowKeySet();
 
   /**
@@ -215,6 +234,7 @@ public interface Table<R, C, V> {
    *
    * @return set of column keys
    */
+  @Impure
   Set<C> columnKeySet();
 
   /**
@@ -224,6 +244,7 @@ public interface Table<R, C, V> {
    *
    * @return collection of values
    */
+  @Impure
   Collection<V> values();
 
   /**
@@ -239,6 +260,7 @@ public interface Table<R, C, V> {
    * @return a map view from each row key to a secondary map from column keys to
    *     values
    */
+  @Impure
   Map<R, Map<C, V>> rowMap();
 
   /**
@@ -254,6 +276,7 @@ public interface Table<R, C, V> {
    * @return a map view from each column key to a secondary map from row keys to
    *     values
    */
+  @Impure
   Map<C, Map<R, V>> columnMap();
 
   /**
@@ -265,22 +288,26 @@ public interface Table<R, C, V> {
     /**
      * Returns the row key of this cell.
      */
+    @Pure
     R getRowKey();
 
     /**
      * Returns the column key of this cell.
      */
+    @Pure
     C getColumnKey();
 
     /**
      * Returns the value of this cell.
      */
+    @Pure
     V getValue();
 
     /**
      * Compares the specified object with this cell for equality. Two cells are
      * equal when they have equal row keys, column keys, and values.
      */
+    @Impure
     @Override
     boolean equals(@Nullable Object obj);
 
@@ -290,6 +317,7 @@ public interface Table<R, C, V> {
      * <p>The hash code of a table cell is equal to {@link
      * Objects#hashCode}{@code (e.getRowKey(), e.getColumnKey(), e.getValue())}.
      */
+    @Impure
     @Override
     int hashCode();
   }

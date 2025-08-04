@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.VisibleForTesting;
 
@@ -34,6 +37,7 @@ final class RegularImmutableSet<E> extends ImmutableSet<E> {
   private final transient int mask;
   private final transient int hashCode;
 
+  @SideEffectFree
   RegularImmutableSet(
       Object[] elements, int hashCode, Object[] table, int mask) {
     this.elements = elements;
@@ -42,6 +46,7 @@ final class RegularImmutableSet<E> extends ImmutableSet<E> {
     this.hashCode = hashCode;
   }
 
+  @Impure
   @Override public boolean contains(Object target) {
     if (target == null) {
       return false;
@@ -57,37 +62,44 @@ final class RegularImmutableSet<E> extends ImmutableSet<E> {
     }
   }
 
+  @Pure
   @Override
   public int size() {
     return elements.length;
   }
 
+  @Impure
   @SuppressWarnings("unchecked") // all elements are E's
   @Override
   public UnmodifiableIterator<E> iterator() {
     return (UnmodifiableIterator<E>) Iterators.forArray(elements);
   }
 
+  @SideEffectFree
   @Override
   int copyIntoArray(Object[] dst, int offset) {
     System.arraycopy(elements, 0, dst, offset, elements.length);
     return offset + elements.length;
   }
 
+  @Impure
   @Override
   ImmutableList<E> createAsList() {
     return new RegularImmutableAsList<E>(this, elements);
   }
 
+  @Pure
   @Override
   boolean isPartialView() {
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     return hashCode;
   }
 
+  @Pure
   @Override boolean isHashCodeFast() {
     return true;
   }

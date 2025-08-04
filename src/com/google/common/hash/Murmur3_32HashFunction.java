@@ -25,6 +25,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.primitives.UnsignedBytes.toInt;
 
 import com.google.common.primitives.Chars;
@@ -50,23 +53,28 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
 
   private final int seed;
 
+  @Impure
   Murmur3_32HashFunction(int seed) {
     this.seed = seed;
   }
 
+  @Pure
   @Override public int bits() {
     return 32;
   }
 
+  @Impure
   @Override public Hasher newHasher() {
     return new Murmur3_32Hasher(seed);
   }
 
+  @Pure
   @Override
   public String toString() {
     return "Hashing.murmur3_32(" + seed + ")";
   }
 
+  @Pure
   @Override
   public boolean equals(@Nullable Object object) {
     if (object instanceof Murmur3_32HashFunction) {
@@ -76,11 +84,14 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     return false;
   }
 
+  @Pure
   @Override
   public int hashCode() {
     return getClass().hashCode() ^ seed;
   }
 
+  @SideEffectFree
+  @Impure
   @Override public HashCode hashInt(int input) {
     int k1 = mixK1(input);
     int h1 = mixH1(seed, k1);
@@ -88,6 +99,8 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     return fmix(h1, Ints.BYTES);
   }
 
+  @SideEffectFree
+  @Impure
   @Override public HashCode hashLong(long input) {
     int low = (int) input;
     int high = (int) (input >>> 32);
@@ -102,6 +115,8 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
   }
 
   // TODO(user): Maybe implement #hashBytes instead?
+  @SideEffectFree
+  @Impure
   @Override public HashCode hashUnencodedChars(CharSequence input) {
     int h1 = seed;
 
@@ -122,6 +137,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     return fmix(h1, Chars.BYTES * input.length());
   }
 
+  @Pure
   private static int mixK1(int k1) {
     k1 *= C1;
     k1 = Integer.rotateLeft(k1, 15);
@@ -129,6 +145,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     return k1;
   }
 
+  @Pure
   private static int mixH1(int h1, int k1) {
     h1 ^= k1;
     h1 = Integer.rotateLeft(h1, 13);
@@ -137,6 +154,7 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
   }
 
   // Finalization mix - force all bits of a hash block to avalanche
+  @SideEffectFree
   private static HashCode fmix(int h1, int length) {
     h1 ^= length;
     h1 ^= h1 >>> 16;
@@ -152,18 +170,21 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
     private int h1;
     private int length;
 
+    @Impure
     Murmur3_32Hasher(int seed) {
       super(CHUNK_SIZE);
       this.h1 = seed;
       this.length = 0;
     }
 
+    @Impure
     @Override protected void process(ByteBuffer bb) {
       int k1 = Murmur3_32HashFunction.mixK1(bb.getInt());
       h1 = Murmur3_32HashFunction.mixH1(h1, k1);
       length += CHUNK_SIZE;
     }
 
+    @Impure
     @Override protected void processRemaining(ByteBuffer bb) {
       length += bb.remaining();
       int k1 = 0;
@@ -173,6 +194,8 @@ final class Murmur3_32HashFunction extends AbstractStreamingHashFunction impleme
       h1 ^= Murmur3_32HashFunction.mixK1(k1);
     }
 
+    @SideEffectFree
+    @Impure
     @Override public HashCode makeHash() {
       return Murmur3_32HashFunction.fmix(h1, length);
     }

@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 
 import javax.annotation.Nullable;
@@ -37,11 +38,13 @@ public class ExecutionError extends Error {
   /**
    * Creates a new instance with {@code null} as its detail message.
    */
+  @SideEffectFree
   protected ExecutionError() {}
 
   /**
    * Creates a new instance with the given detail message.
    */
+  @SideEffectFree
   protected ExecutionError(@Nullable String message) {
     super(message);
   }
@@ -49,6 +52,7 @@ public class ExecutionError extends Error {
   /**
    * Creates a new instance with the given detail message and cause.
    */
+  @SideEffectFree
   public ExecutionError(@Nullable String message, @Nullable Error cause) {
     super(message, cause);
   }
@@ -56,6 +60,7 @@ public class ExecutionError extends Error {
   /**
    * Creates a new instance with the given cause.
    */
+  @SideEffectFree
   public ExecutionError(@Nullable Error cause) {
     super(cause);
   }

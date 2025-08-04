@@ -16,6 +16,10 @@
 
 package com.google.common.net;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Deterministic;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
@@ -117,6 +121,7 @@ public final class InetAddresses {
   private static final Inet4Address LOOPBACK4 = (Inet4Address) forString("127.0.0.1");
   private static final Inet4Address ANY4 = (Inet4Address) forString("0.0.0.0");
 
+  @SideEffectFree
   private InetAddresses() {}
 
   /**
@@ -126,6 +131,7 @@ public final class InetAddresses {
    * @return {@link Inet4Address} corresponding to the supplied byte array
    * @throws IllegalArgumentException if a valid {@link Inet4Address} can not be created
    */
+  @Impure
   private static Inet4Address getInet4Address(byte[] bytes) {
     Preconditions.checkArgument(bytes.length == 4,
         "Byte array has invalid length for an IPv4 address: %s != 4.",
@@ -145,6 +151,7 @@ public final class InetAddresses {
    * @return {@link InetAddress} representing the argument
    * @throws IllegalArgumentException if the argument is not a valid IP string literal
    */
+  @Impure
   public static InetAddress forString(String ipString) {
     byte[] addr = ipStringToBytes(ipString);
 
@@ -164,10 +171,12 @@ public final class InetAddresses {
    * @param ipString {@code String} to evaluated as an IP string literal
    * @return {@code true} if the argument is a valid IP string literal
    */
+  @Impure
   public static boolean isInetAddress(String ipString) {
     return ipStringToBytes(ipString) != null;
   }
 
+  @Impure
   private static byte[] ipStringToBytes(String ipString) {
     // Make a first pass to categorize the characters in this string.
     boolean hasColon = false;
@@ -201,6 +210,7 @@ public final class InetAddresses {
     return null;
   }
 
+  @Impure
   private static byte[] textToNumericFormatV4(String ipString) {
     String[] address = ipString.split("\\.", IPV4_PART_COUNT + 1);
     if (address.length != IPV4_PART_COUNT) {
@@ -219,6 +229,7 @@ public final class InetAddresses {
     return bytes;
   }
 
+  @Impure
   private static byte[] textToNumericFormatV6(String ipString) {
     // An address can have [2..8] colons, and N colons make N+1 parts.
     String[] parts = ipString.split(":", IPV6_PART_COUNT + 2);
@@ -282,6 +293,7 @@ public final class InetAddresses {
     return rawBytes.array();
   }
 
+  @Impure
   private static String convertDottedQuadToHex(String ipString) {
     int lastColon = ipString.lastIndexOf(':');
     String initialPart = ipString.substring(0, lastColon + 1);
@@ -295,6 +307,7 @@ public final class InetAddresses {
     return initialPart + penultimate + ":" + ultimate;
   }
 
+  @Deterministic
   private static byte parseOctet(String ipPart) {
     // Note: we already verified that this string contains only hex digits.
     int octet = Integer.parseInt(ipPart);
@@ -306,6 +319,7 @@ public final class InetAddresses {
     return (byte) octet;
   }
 
+  @Deterministic
   private static short parseHextet(String ipPart) {
     // Note: we already verified that this string contains only hex digits.
     int hextet = Integer.parseInt(ipPart, 16);
@@ -326,6 +340,7 @@ public final class InetAddresses {
    * @param addr the raw 4-byte or 16-byte IP address in big-endian order
    * @return an InetAddress object created from the raw IP address
    */
+  @Impure
   private static InetAddress bytesToInetAddress(byte[] addr) {
     try {
       return InetAddress.getByAddress(addr);
@@ -351,6 +366,7 @@ public final class InetAddresses {
    * @return {@code String} containing the text-formatted IP address
    * @since 10.0
    */
+  @Impure
   public static String toAddrString(InetAddress ip) {
     Preconditions.checkNotNull(ip);
     if (ip instanceof Inet4Address) {
@@ -377,6 +393,7 @@ public final class InetAddresses {
    *
    * @param hextets {@code int[]} mutable array of eight 16-bit hextets
    */
+  @Impure
   private static void compressLongestRunOfZeroes(int[] hextets) {
     int bestRunStart = -1;
     int bestRunLength = -1;
@@ -408,6 +425,7 @@ public final class InetAddresses {
    *
    * @param hextets {@code int[]} array of eight 16-bit hextets, or -1s
    */
+  @Impure
   private static String hextetsToIPv6String(int[] hextets) {
     /*
      * While scanning the array, handle these state transitions:
@@ -459,6 +477,7 @@ public final class InetAddresses {
    * @param ip {@link InetAddress} to be converted to URI string literal
    * @return {@code String} containing URI-safe string literal
    */
+  @Impure
   public static String toUriString(InetAddress ip) {
     if (ip instanceof Inet6Address) {
       return "[" + toAddrString(ip) + "]";
@@ -481,6 +500,7 @@ public final class InetAddresses {
    * @throws IllegalArgumentException if {@code hostAddr} is not a valid
    *     IPv4 address, or IPv6 address surrounded by square brackets
    */
+  @Impure
   public static InetAddress forUriString(String hostAddr) {
     Preconditions.checkNotNull(hostAddr);
 
@@ -512,6 +532,7 @@ public final class InetAddresses {
    * @param ipString {@code String} to evaluated as an IP URI host string literal
    * @return {@code true} if the argument is a valid IP URI host
    */
+  @Impure
   public static boolean isUriInetAddress(String ipString) {
     try {
       forUriString(ipString);
@@ -545,6 +566,7 @@ public final class InetAddresses {
    * @param ip {@link Inet6Address} to be examined for embedded IPv4 compatible address format
    * @return {@code true} if the argument is a valid "compat" address
    */
+  @Impure
   public static boolean isCompatIPv4Address(Inet6Address ip) {
     if (!ip.isIPv4CompatibleAddress()) {
       return false;
@@ -566,6 +588,7 @@ public final class InetAddresses {
    * @return {@link Inet4Address} of the embedded IPv4 address
    * @throws IllegalArgumentException if the argument is not a valid IPv4 compatible address
    */
+  @Impure
   public static Inet4Address getCompatIPv4Address(Inet6Address ip) {
     Preconditions.checkArgument(isCompatIPv4Address(ip),
         "Address '%s' is not IPv4-compatible.", toAddrString(ip));
@@ -587,6 +610,7 @@ public final class InetAddresses {
    * @param ip {@link Inet6Address} to be examined for 6to4 address format
    * @return {@code true} if the argument is a 6to4 address
    */
+  @Impure
   public static boolean is6to4Address(Inet6Address ip) {
     byte[] bytes = ip.getAddress();
     return (bytes[0] == (byte) 0x20) && (bytes[1] == (byte) 0x02);
@@ -599,6 +623,7 @@ public final class InetAddresses {
    * @return {@link Inet4Address} of embedded IPv4 in 6to4 address
    * @throws IllegalArgumentException if the argument is not a valid IPv6 6to4 address
    */
+  @Impure
   public static Inet4Address get6to4IPv4Address(Inet6Address ip) {
     Preconditions.checkArgument(is6to4Address(ip),
         "Address '%s' is not a 6to4 address.", toAddrString(ip));
@@ -639,6 +664,7 @@ public final class InetAddresses {
      *     arguments are out of range of an unsigned short
      */
     // TODO: why is this public?
+    @Impure
     public TeredoInfo(
         @Nullable Inet4Address server, @Nullable Inet4Address client, int port, int flags) {
       Preconditions.checkArgument((port >= 0) && (port <= 0xffff),
@@ -652,18 +678,22 @@ public final class InetAddresses {
       this.flags = flags;
     }
 
+    @Pure
     public Inet4Address getServer() {
       return server;
     }
 
+    @Pure
     public Inet4Address getClient() {
       return client;
     }
 
+    @Pure
     public int getPort() {
       return port;
     }
 
+    @Pure
     public int getFlags() {
       return flags;
     }
@@ -677,6 +707,7 @@ public final class InetAddresses {
    * @param ip {@link Inet6Address} to be examined for Teredo address format
    * @return {@code true} if the argument is a Teredo address
    */
+  @Impure
   public static boolean isTeredoAddress(Inet6Address ip) {
     byte[] bytes = ip.getAddress();
     return (bytes[0] == (byte) 0x20) && (bytes[1] == (byte) 0x01)
@@ -690,6 +721,7 @@ public final class InetAddresses {
    * @return extracted {@code TeredoInfo}
    * @throws IllegalArgumentException if the argument is not a valid IPv6 Teredo address
    */
+  @Impure
   public static TeredoInfo getTeredoInfo(Inet6Address ip) {
     Preconditions.checkArgument(isTeredoAddress(ip),
         "Address '%s' is not a Teredo address.", toAddrString(ip));
@@ -727,6 +759,7 @@ public final class InetAddresses {
    * @param ip {@link Inet6Address} to be examined for ISATAP address format
    * @return {@code true} if the argument is an ISATAP address
    */
+  @Impure
   public static boolean isIsatapAddress(Inet6Address ip) {
 
     // If it's a Teredo address with the right port (41217, or 0xa101)
@@ -755,6 +788,7 @@ public final class InetAddresses {
    * @return {@link Inet4Address} of embedded IPv4 in an ISATAP address
    * @throws IllegalArgumentException if the argument is not a valid IPv6 ISATAP address
    */
+  @Impure
   public static Inet4Address getIsatapIPv4Address(Inet6Address ip) {
     Preconditions.checkArgument(isIsatapAddress(ip),
         "Address '%s' is not an ISATAP address.", toAddrString(ip));
@@ -774,6 +808,7 @@ public final class InetAddresses {
    * @return {@code true} if there is an embedded IPv4 client address
    * @since 7.0
    */
+  @Impure
   public static boolean hasEmbeddedIPv4ClientAddress(Inet6Address ip) {
     return isCompatIPv4Address(ip) || is6to4Address(ip) || isTeredoAddress(ip);
   }
@@ -791,6 +826,7 @@ public final class InetAddresses {
    * @return {@link Inet4Address} of embedded IPv4 client address
    * @throws IllegalArgumentException if the argument does not have a valid embedded IPv4 address
    */
+  @Impure
   public static Inet4Address getEmbeddedIPv4ClientAddress(Inet6Address ip) {
     if (isCompatIPv4Address(ip)) {
       return getCompatIPv4Address(ip);
@@ -830,6 +866,7 @@ public final class InetAddresses {
    * @return {@code true} if the argument is a valid "mapped" address
    * @since 10.0
    */
+  @Impure
   public static boolean isMappedIPv4Address(String ipString) {
     byte[] bytes = ipStringToBytes(ipString);
     if (bytes != null && bytes.length == 16) {
@@ -868,6 +905,7 @@ public final class InetAddresses {
    * @return {@link Inet4Address} represented "coerced" address
    * @since 7.0
    */
+  @Impure
   public static Inet4Address getCoercedIPv4Address(InetAddress ip) {
     if (ip instanceof Inet4Address) {
       return (Inet4Address) ip;
@@ -934,6 +972,7 @@ public final class InetAddresses {
    * @return {@code int}, "coerced" if ip is not an IPv4 address
    * @since 7.0
    */
+  @Impure
   public static int coerceToInteger(InetAddress ip) {
     return ByteStreams.newDataInput(getCoercedIPv4Address(ip).getAddress()).readInt();
   }
@@ -945,6 +984,7 @@ public final class InetAddresses {
    * @param address {@code int}, the 32bit integer address to be converted
    * @return {@link Inet4Address} equivalent of the argument
    */
+  @Impure
   public static Inet4Address fromInteger(int address) {
     return getInet4Address(Ints.toByteArray(address));
   }
@@ -960,6 +1000,7 @@ public final class InetAddresses {
    * @return an InetAddress object created from the raw IP address
    * @throws UnknownHostException if IP address is of illegal length
    */
+  @Impure
   public static InetAddress fromLittleEndianByteArray(byte[] addr) throws UnknownHostException {
     byte[] reversed = new byte[addr.length];
     for (int i = 0; i < addr.length; i++) {
@@ -977,6 +1018,7 @@ public final class InetAddresses {
    * @throws IllegalArgumentException if InetAddress is at the end of its range
    * @since 10.0
    */
+  @Impure
   public static InetAddress increment(InetAddress address) {
     byte[] addr = address.getAddress();
     int i = addr.length - 1;
@@ -999,6 +1041,7 @@ public final class InetAddresses {
    *     ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff for IPv6
    * @since 10.0
    */
+  @Impure
   public static boolean isMaximum(InetAddress address) {
     byte[] addr = address.getAddress();
     for (int i = 0; i < addr.length; i++) {

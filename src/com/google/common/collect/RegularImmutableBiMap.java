@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.collect.CollectPreconditions.checkEntryNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -42,6 +45,7 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
   private final transient int mask;
   private final transient int hashCode;
   
+  @Impure
   RegularImmutableBiMap(TerminalEntry<?, ?>... entriesToAdd) {
     this(entriesToAdd.length, entriesToAdd);
   }
@@ -52,6 +56,7 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
    * 
    * <p>This allows reuse of the entry objects from the array in the actual implementation.
    */
+  @Impure
   RegularImmutableBiMap(int n, TerminalEntry<?, ?>[] entriesToAdd) {
     int tableSize = Hashing.closedTableSize(n, MAX_LOAD_FACTOR);
     this.mask = tableSize - 1;
@@ -100,6 +105,7 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
   /**
    * Constructor for RegularImmutableBiMap that makes no assumptions about the input entries.
    */
+  @Impure
   RegularImmutableBiMap(Entry<?, ?>[] entriesToAdd) {
     int n = entriesToAdd.length;
     int tableSize = Hashing.closedTableSize(n, MAX_LOAD_FACTOR);
@@ -150,6 +156,7 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
     @Nullable private final ImmutableMapEntry<K, V> nextInKeyBucket;
     @Nullable private final ImmutableMapEntry<K, V> nextInValueBucket;
     
+    @Impure
     NonTerminalBiMapEntry(K key, V value, @Nullable ImmutableMapEntry<K, V> nextInKeyBucket,
         @Nullable ImmutableMapEntry<K, V> nextInValueBucket) {
       super(key, value);
@@ -157,6 +164,7 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
       this.nextInValueBucket = nextInValueBucket;
     }
 
+    @Impure
     NonTerminalBiMapEntry(ImmutableMapEntry<K, V> contents,
         @Nullable ImmutableMapEntry<K, V> nextInKeyBucket,
         @Nullable ImmutableMapEntry<K, V> nextInValueBucket) {
@@ -165,12 +173,14 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
       this.nextInValueBucket = nextInValueBucket;
     }
 
+    @Pure
     @Override
     @Nullable
     ImmutableMapEntry<K, V> getNextInKeyBucket() {
       return nextInKeyBucket;
     }
 
+    @Pure
     @Override
     @Nullable
     ImmutableMapEntry<K, V> getNextInValueBucket() {
@@ -178,11 +188,14 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
     }
   }
   
+  @Pure
   @SuppressWarnings("unchecked")
   private static <K, V> ImmutableMapEntry<K, V>[] createEntryArray(int length) {
     return new ImmutableMapEntry[length];
   }
 
+  @Pure
+  @Impure
   @Override
   @Nullable
   public V get(@Nullable Object key) {
@@ -199,29 +212,35 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
     return null;
   }
 
+  @Impure
   @Override
   ImmutableSet<Entry<K, V>> createEntrySet() {
     return new ImmutableMapEntrySet<K, V>() {
+      @Pure
       @Override
       ImmutableMap<K, V> map() {
         return RegularImmutableBiMap.this;
       }
 
+      @Impure
       @Override
       public UnmodifiableIterator<Entry<K, V>> iterator() {
         return asList().iterator();
       }
 
+      @Impure
       @Override
       ImmutableList<Entry<K, V>> createAsList() {
         return new RegularImmutableAsList<Entry<K, V>>(this, entries);
       }
 
+      @Pure
       @Override
       boolean isHashCodeFast() {
         return true;
       }
 
+      @Pure
       @Override
       public int hashCode() {
         return hashCode;
@@ -229,11 +248,13 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
     };
   }
 
+  @Pure
   @Override
   boolean isPartialView() {
     return false;
   }
 
+  @Pure
   @Override
   public int size() {
     return entries.length;
@@ -241,6 +262,7 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
   
   private transient ImmutableBiMap<V, K> inverse;
 
+  @Impure
   @Override
   public ImmutableBiMap<V, K> inverse() {
     ImmutableBiMap<V, K> result = inverse;
@@ -249,16 +271,21 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
   
   private final class Inverse extends ImmutableBiMap<V, K> {
 
+    @Pure
+    @Impure
     @Override
     public int size() {
       return inverse().size();
     }
 
+    @Pure
     @Override
     public ImmutableBiMap<K, V> inverse() {
       return RegularImmutableBiMap.this;
     }
 
+    @Pure
+    @Impure
     @Override
     public K get(@Nullable Object value) {
       if (value == null) {
@@ -274,41 +301,49 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
       return null;
     }
 
+    @Impure
     @Override
     ImmutableSet<Entry<V, K>> createEntrySet() {
       return new InverseEntrySet();
     }
     
     final class InverseEntrySet extends ImmutableMapEntrySet<V, K> {
+      @Pure
       @Override
       ImmutableMap<V, K> map() {
         return Inverse.this;
       }
 
+      @Pure
       @Override
       boolean isHashCodeFast() {
         return true;
       }
 
+      @Pure
       @Override
       public int hashCode() {
         return hashCode;
       }
 
+      @Impure
       @Override
       public UnmodifiableIterator<Entry<V, K>> iterator() {
         return asList().iterator();
       }
 
+      @Impure
       @Override
       ImmutableList<Entry<V, K>> createAsList() {
         return new ImmutableAsList<Entry<V, K>>() {
+          @Impure
           @Override
           public Entry<V, K> get(int index) {
             Entry<K, V> entry = entries[index];
             return Maps.immutableEntry(entry.getValue(), entry.getKey());
           }
 
+          @Pure
           @Override
           ImmutableCollection<Entry<V, K>> delegateCollection() {
             return InverseEntrySet.this;
@@ -317,11 +352,14 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
       }
     }
 
+    @Pure
     @Override
     boolean isPartialView() {
       return false;
     }
     
+    @SideEffectFree
+    @Impure
     @Override
     Object writeReplace() {
       return new InverseSerializedForm<K, V>(RegularImmutableBiMap.this);
@@ -331,10 +369,12 @@ class RegularImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
   private static class InverseSerializedForm<K, V> implements Serializable {
     private final ImmutableBiMap<K, V> forward;
     
+    @SideEffectFree
     InverseSerializedForm(ImmutableBiMap<K, V> forward) {
       this.forward = forward;
     }
     
+    @Impure
     Object readResolve() {
       return forward.inverse();
     }

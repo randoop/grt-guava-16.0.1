@@ -14,6 +14,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 /**
@@ -29,6 +30,7 @@ public enum BoundType {
    * The endpoint value <i>is not</i> considered part of the set ("exclusive").
    */
   OPEN {
+    @Pure
     @Override
     BoundType flip() {
       return CLOSED;
@@ -38,6 +40,7 @@ public enum BoundType {
    * The endpoint value <i>is</i> considered part of the set ("inclusive").
    */
   CLOSED {
+    @Pure
     @Override
     BoundType flip() {
       return OPEN;
@@ -47,9 +50,11 @@ public enum BoundType {
   /**
    * Returns the bound type corresponding to a boolean value for inclusivity.
    */
+  @Pure
   static BoundType forBoolean(boolean inclusive) {
     return inclusive ? CLOSED : OPEN;
   }
 
+  @Pure
   abstract BoundType flip();
 }

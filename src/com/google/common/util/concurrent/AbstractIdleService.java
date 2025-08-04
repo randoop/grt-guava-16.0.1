@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Supplier;
 import com.google.common.base.Throwables;
@@ -39,6 +41,7 @@ public abstract class AbstractIdleService implements Service {
 
   /* Thread names will look like {@code "MyService STARTING"}. */
   private final Supplier<String> threadNameSupplier = new Supplier<String>() {
+    @Impure
     @Override public String get() {
       return serviceName() + " " + state();
     }
@@ -46,9 +49,11 @@ public abstract class AbstractIdleService implements Service {
 
   /* use AbstractService for state management */
   private final Service delegate = new AbstractService() {
+    @Impure
     @Override protected final void doStart() {
       MoreExecutors.renamingDecorator(executor(), threadNameSupplier)
           .execute(new Runnable() {
+            @Impure
             @Override public void run() {
               try {
                 startUp();
@@ -61,9 +66,11 @@ public abstract class AbstractIdleService implements Service {
           });
     }
 
+    @Impure
     @Override protected final void doStop() {
       MoreExecutors.renamingDecorator(executor(), threadNameSupplier)
           .execute(new Runnable() {
+            @Impure
             @Override public void run() {
               try {
                 shutDown();
@@ -81,9 +88,11 @@ public abstract class AbstractIdleService implements Service {
   protected AbstractIdleService() {}
 
   /** Start the service. */
+  @SideEffectFree
   protected abstract void startUp() throws Exception;
 
   /** Stop the service. */
+  @SideEffectFree
   protected abstract void shutDown() throws Exception;
 
   /**
@@ -94,46 +103,55 @@ public abstract class AbstractIdleService implements Service {
    * execute()} method is called when this service is started and stopped,
    * and should return promptly.
    */
+  @Impure
   protected Executor executor() {
     return new Executor() {
+      @Impure
       @Override public void execute(Runnable command) {
         MoreExecutors.newThread(threadNameSupplier.get(), command).start();
       }
     };
   }
 
+  @Impure
   @Override public String toString() {
     return serviceName() + " [" + state() + "]";
   }
 
   // We override instead of using ForwardingService so that these can be final.
 
+  @Impure
   @Deprecated
   @Override 
    public final ListenableFuture<State> start() {
     return delegate.start();
   }
 
+  @Impure
   @Deprecated
   @Override 
    public final State startAndWait() {
     return delegate.startAndWait();
   }
 
+  @Impure
   @Override public final boolean isRunning() {
     return delegate.isRunning();
   }
 
+  @Impure
   @Override public final State state() {
     return delegate.state();
   }
 
+  @Impure
   @Deprecated
   @Override 
   public final ListenableFuture<State> stop() {
     return delegate.stop();
   }
 
+  @Impure
   @Deprecated
   @Override 
   public final State stopAndWait() {
@@ -143,6 +161,7 @@ public abstract class AbstractIdleService implements Service {
   /**
    * @since 13.0
    */
+  @Impure
   @Override public final void addListener(Listener listener, Executor executor) {
     delegate.addListener(listener, executor);
   }
@@ -150,6 +169,7 @@ public abstract class AbstractIdleService implements Service {
   /**
    * @since 14.0
    */
+  @Impure
   @Override public final Throwable failureCause() {
     return delegate.failureCause();
   }
@@ -157,6 +177,7 @@ public abstract class AbstractIdleService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final Service startAsync() {
     delegate.startAsync();
     return this;
@@ -165,6 +186,7 @@ public abstract class AbstractIdleService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final Service stopAsync() {
     delegate.stopAsync();
     return this;
@@ -173,6 +195,7 @@ public abstract class AbstractIdleService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final void awaitRunning() {
     delegate.awaitRunning();
   }
@@ -180,6 +203,7 @@ public abstract class AbstractIdleService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final void awaitRunning(long timeout, TimeUnit unit) throws TimeoutException {
     delegate.awaitRunning(timeout, unit);
   }
@@ -187,6 +211,7 @@ public abstract class AbstractIdleService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final void awaitTerminated() {
     delegate.awaitTerminated();
   }
@@ -194,6 +219,7 @@ public abstract class AbstractIdleService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final void awaitTerminated(long timeout, TimeUnit unit) throws TimeoutException {
     delegate.awaitTerminated(timeout, unit);
   }
@@ -204,6 +230,7 @@ public abstract class AbstractIdleService implements Service {
    *
    * @since 14.0
    */
+  @Impure
   protected String serviceName() {
     return getClass().getSimpleName();
   }

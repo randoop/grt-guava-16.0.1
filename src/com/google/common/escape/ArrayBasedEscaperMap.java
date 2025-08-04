@@ -16,6 +16,9 @@
 
 package com.google.common.escape;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -51,6 +54,7 @@ public final class ArrayBasedEscaperMap {
    *
    * @param replacements a map of characters to their escaped representations
    */
+  @Impure
   public static ArrayBasedEscaperMap create(
       Map<Character, String> replacements) {
     return new ArrayBasedEscaperMap(createReplacementArray(replacements));
@@ -60,11 +64,13 @@ public final class ArrayBasedEscaperMap {
   // instances.
   private final char[][] replacementArray;
 
+  @SideEffectFree
   private ArrayBasedEscaperMap(char[][] replacementArray) {
     this.replacementArray = replacementArray;
   }
 
   // Returns the non-null array of replacements for fast lookup.
+  @Pure
   char[][] getReplacementArray() {
     return replacementArray;
   }
@@ -72,6 +78,7 @@ public final class ArrayBasedEscaperMap {
   // Creates a replacement array from the given map. The returned array is a
   // linear lookup table of replacement character sequences indexed by the
   // original character value.
+  @Impure
   @VisibleForTesting
   static char[][] createReplacementArray(Map<Character, String> map) {
     checkNotNull(map);  // GWT specific check (do not optimize)

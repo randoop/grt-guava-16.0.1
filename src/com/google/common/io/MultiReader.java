@@ -16,6 +16,7 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.base.Preconditions;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ class MultiReader extends Reader {
   private final Iterator<? extends CharSource> it;
   private Reader current;
 
+  @Impure
   MultiReader(Iterator<? extends CharSource> readers) throws IOException {
     this.it = readers;
     advance();
@@ -42,6 +44,7 @@ class MultiReader extends Reader {
   /**
    * Closes the current reader and opens the next one, if any.
    */
+  @Impure
   private void advance() throws IOException {
     close();
     if (it.hasNext()) {
@@ -49,6 +52,7 @@ class MultiReader extends Reader {
     }
   }
 
+  @Impure
   @Override public int read(@Nullable char cbuf[], int off, int len) throws IOException {
     if (current == null) {
       return -1;
@@ -61,6 +65,7 @@ class MultiReader extends Reader {
     return result;
   }
 
+  @Impure
   @Override public long skip(long n) throws IOException {
     Preconditions.checkArgument(n >= 0, "n is negative");
     if (n > 0) {
@@ -75,10 +80,12 @@ class MultiReader extends Reader {
     return 0;
   }
 
+  @Impure
   @Override public boolean ready() throws IOException {
     return (current != null) && current.ready();
   }
 
+  @Impure
   @Override public void close() throws IOException {
     if (current != null) {
       try {

@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.CharMatcher.FastMatcher;
@@ -35,6 +38,7 @@ final class SmallCharMatcher extends FastMatcher {
   private final boolean containsZero;
   private final long filter;
 
+  @SideEffectFree
   private SmallCharMatcher(char[] table, long filter, boolean containsZero,
       String description) {
     super(description);
@@ -54,10 +58,12 @@ final class SmallCharMatcher extends FastMatcher {
    * MurmurHash3 was written by Austin Appleby, and is placed in the public domain. The author
    * hereby disclaims copyright to this source code.
    */
+  @Pure
   static int smear(int hashCode) {
     return C2 * Integer.rotateLeft(hashCode * C1, 15);
   }
 
+  @Pure
   private boolean checkFilter(int c) {
     return 1 == (1 & (filter >> c));
   }
@@ -74,6 +80,7 @@ final class SmallCharMatcher extends FastMatcher {
   * returned size is the smallest power of two that can hold setSize elements
   * with the desired load factor.
   */
+  @Pure
   @VisibleForTesting static int chooseTableSize(int setSize) {
     if (setSize == 1) {
       return 2;
@@ -87,6 +94,7 @@ final class SmallCharMatcher extends FastMatcher {
     return tableSize;
   }
 
+  @Impure
   @GwtIncompatible("java.util.BitSet")
   static CharMatcher from(BitSet chars, String description) {
     // Compute the filter.
@@ -113,6 +121,7 @@ final class SmallCharMatcher extends FastMatcher {
     return new SmallCharMatcher(table, filter, containsZero, description);
   }
 
+  @Impure
   @Override
   public boolean matches(char c) {
     if (c == 0) {
@@ -140,6 +149,7 @@ final class SmallCharMatcher extends FastMatcher {
     return false;
   }
 
+  @Impure
   @GwtIncompatible("java.util.BitSet")
   @Override
   void setBits(BitSet table) {

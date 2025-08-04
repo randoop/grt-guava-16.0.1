@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.ListIterator;
@@ -31,6 +33,8 @@ import java.util.ListIterator;
 public abstract class UnmodifiableListIterator<E>
     extends UnmodifiableIterator<E> implements ListIterator<E> {
   /** Constructor for use by subclasses. */
+  @SideEffectFree
+  @Impure
   protected UnmodifiableListIterator() {}
 
   /**
@@ -39,6 +43,7 @@ public abstract class UnmodifiableListIterator<E>
    * @throws UnsupportedOperationException always
    * @deprecated Unsupported operation.
    */
+  @SideEffectFree
   @Deprecated @Override public final void add(E e) {
     throw new UnsupportedOperationException();
   }
@@ -49,6 +54,7 @@ public abstract class UnmodifiableListIterator<E>
    * @throws UnsupportedOperationException always
    * @deprecated Unsupported operation.
    */
+  @SideEffectFree
   @Deprecated @Override public final void set(E e) {
     throw new UnsupportedOperationException();
   }

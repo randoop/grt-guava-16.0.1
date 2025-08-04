@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.collect.ForwardingQueue;
 
 import java.util.Collection;
@@ -37,37 +39,46 @@ public abstract class ForwardingBlockingQueue<E> extends ForwardingQueue<E>
     implements BlockingQueue<E> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingBlockingQueue() {}
 
+  @Pure
   @Override protected abstract BlockingQueue<E> delegate();
 
+  @Impure
   @Override public int drainTo(
       Collection<? super E> c, int maxElements) {
     return delegate().drainTo(c, maxElements);
   }
 
+  @Impure
   @Override public int drainTo(Collection<? super E> c) {
     return delegate().drainTo(c);
   }
 
+  @Impure
   @Override public boolean offer(E e, long timeout, TimeUnit unit)
       throws InterruptedException {
     return delegate().offer(e, timeout, unit);
   }
 
+  @Impure
   @Override public E poll(long timeout, TimeUnit unit)
       throws InterruptedException {
     return delegate().poll(timeout, unit);
   }
 
+  @Impure
   @Override public void put(E e) throws InterruptedException {
     delegate().put(e);
   }
 
+  @Impure
   @Override public int remainingCapacity() {
     return delegate().remainingCapacity();
   }
 
+  @Impure
   @Override public E take() throws InterruptedException {
     return delegate().take();
   }

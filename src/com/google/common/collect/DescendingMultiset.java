@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Comparator;
@@ -32,10 +34,12 @@ import java.util.Set;
 @GwtCompatible(emulated = true)
 abstract class DescendingMultiset<E> extends ForwardingMultiset<E>
     implements SortedMultiset<E> {
+  @Pure
   abstract SortedMultiset<E> forwardMultiset();
 
   private transient Comparator<? super E> comparator;
 
+  @Impure
   @Override public Comparator<? super E> comparator() {
     Comparator<? super E> result = comparator;
     if (result == null) {
@@ -47,6 +51,7 @@ abstract class DescendingMultiset<E> extends ForwardingMultiset<E>
 
   private transient NavigableSet<E> elementSet;
 
+  @Impure
   @Override public NavigableSet<E> elementSet() {
     NavigableSet<E> result = elementSet;
     if (result == null) {
@@ -55,85 +60,107 @@ abstract class DescendingMultiset<E> extends ForwardingMultiset<E>
     return result;
   }
 
+  @Impure
   @Override public Entry<E> pollFirstEntry() {
     return forwardMultiset().pollLastEntry();
   }
 
+  @Impure
   @Override public Entry<E> pollLastEntry() {
     return forwardMultiset().pollFirstEntry();
   }
 
+  @Impure
   @Override public SortedMultiset<E> headMultiset(E toElement,
       BoundType boundType) {
     return forwardMultiset().tailMultiset(toElement, boundType)
         .descendingMultiset();
   }
 
+  @Impure
   @Override public SortedMultiset<E> subMultiset(E fromElement,
       BoundType fromBoundType, E toElement, BoundType toBoundType) {
     return forwardMultiset().subMultiset(toElement, toBoundType, fromElement,
         fromBoundType).descendingMultiset();
   }
 
+  @Impure
   @Override public SortedMultiset<E> tailMultiset(E fromElement,
       BoundType boundType) {
     return forwardMultiset().headMultiset(fromElement, boundType)
         .descendingMultiset();
   }
 
+  @Pure
+  @Impure
   @Override protected Multiset<E> delegate() {
     return forwardMultiset();
   }
 
+  @Pure
+  @Impure
   @Override public SortedMultiset<E> descendingMultiset() {
     return forwardMultiset();
   }
 
+  @Impure
   @Override public Entry<E> firstEntry() {
     return forwardMultiset().lastEntry();
   }
 
+  @Impure
   @Override public Entry<E> lastEntry() {
     return forwardMultiset().firstEntry();
   }
 
+  @Pure
   abstract Iterator<Entry<E>> entryIterator();
 
   private transient Set<Entry<E>> entrySet;
 
+  @Impure
   @Override public Set<Entry<E>> entrySet() {
     Set<Entry<E>> result = entrySet;
     return (result == null) ? entrySet = createEntrySet() : result;
   }
 
+  @Impure
   Set<Entry<E>> createEntrySet() {
     return new Multisets.EntrySet<E>() {
+      @Pure
       @Override Multiset<E> multiset() {
         return DescendingMultiset.this;
       }
 
+      @Pure
+      @Impure
       @Override public Iterator<Entry<E>> iterator() {
         return entryIterator();
       }
 
+      @Impure
       @Override public int size() {
         return forwardMultiset().entrySet().size();
       }
     };
   }
 
+  @Impure
   @Override public Iterator<E> iterator() {
     return Multisets.iteratorImpl(this);
   }
 
+  @Impure
   @Override public Object[] toArray() {
     return standardToArray();
   }
 
+  @Impure
   @Override public <T> T[] toArray(T[] array) {
     return standardToArray(array);
   }
 
+  @Impure
   @Override public String toString() {
     return entrySet().toString();
   }

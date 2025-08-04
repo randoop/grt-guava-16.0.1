@@ -16,6 +16,9 @@
 
 package com.google.common.math;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Double.MAX_EXPONENT;
 import static java.lang.Double.MIN_EXPONENT;
@@ -33,9 +36,11 @@ import java.math.BigInteger;
  * @author Louis Wasserman
  */
 final class DoubleUtils {
+  @SideEffectFree
   private DoubleUtils() {
   }
 
+  @Pure
   static double nextDown(double d) {
     return -Math.nextUp(-d);
   }
@@ -61,6 +66,7 @@ final class DoubleUtils {
    */
   static final long IMPLICIT_BIT = SIGNIFICAND_MASK + 1;
 
+  @Impure
   static long getSignificand(double d) {
     checkArgument(isFinite(d), "not a normal value");
     int exponent = getExponent(d);
@@ -71,10 +77,12 @@ final class DoubleUtils {
         : bits | IMPLICIT_BIT;
   }
 
+  @Pure
   static boolean isFinite(double d) {
     return getExponent(d) <= MAX_EXPONENT;
   }
 
+  @Pure
   static boolean isNormal(double d) {
     return getExponent(d) >= MIN_EXPONENT;
   }
@@ -83,11 +91,13 @@ final class DoubleUtils {
    * Returns x scaled by a power of 2 such that it is in the range [1, 2). Assumes x is positive,
    * normal, and finite.
    */
+  @Pure
   static double scaleNormalize(double x) {
     long significand = doubleToRawLongBits(x) & SIGNIFICAND_MASK;
     return longBitsToDouble(significand | ONE_BITS);
   }
 
+  @Impure
   static double bigToDouble(BigInteger x) {
     // This is an extremely fast implementation of BigInteger.doubleValue().  JDK patch pending.
     BigInteger absX = x.abs();
@@ -135,6 +145,7 @@ final class DoubleUtils {
   /**
    * Returns its argument if it is non-negative, zero if it is negative.
    */
+  @Impure
   static double ensureNonNegative(double value) {
     checkArgument(!isNaN(value));
     if (value > 0.0) {

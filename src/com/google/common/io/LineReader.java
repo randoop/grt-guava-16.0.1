@@ -16,6 +16,8 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -43,6 +45,7 @@ public final class LineReader {
 
   private final Queue<String> lines = new LinkedList<String>();
   private final LineBuffer lineBuf = new LineBuffer() {
+    @Impure
     @Override protected void handleLine(String line, String end) {
       lines.add(line);
     }
@@ -52,6 +55,8 @@ public final class LineReader {
    * Creates a new instance that will read lines from the given
    * {@code Readable} object.
    */
+  @SideEffectFree
+  @Impure
   public LineReader(Readable readable) {
     this.readable = checkNotNull(readable);
     this.reader = (readable instanceof Reader) ? (Reader) readable : null;
@@ -68,6 +73,7 @@ public final class LineReader {
    *     end of the stream has been reached.
    * @throws IOException if an I/O error occurs
    */
+  @Impure
   public String readLine() throws IOException {
     while (lines.peek() == null) {
       cbuf.clear();

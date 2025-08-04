@@ -14,6 +14,8 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.math.LongMath;
@@ -40,6 +42,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
    * performance of a Bloom filter (yet only needs two 32bit hash functions).
    */
   MURMUR128_MITZ_32() {
+    @Impure
     @Override public <T> boolean put(T object, Funnel<? super T> funnel,
         int numHashFunctions, BitArray bits) {
       long hash64 = Hashing.murmur3_128().hashObject(object, funnel).asLong();
@@ -56,6 +59,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
       return bitsChanged;
     }
 
+    @Impure
     @Override public <T> boolean mightContain(T object, Funnel<? super T> funnel,
         int numHashFunctions, BitArray bits) {
       long hash64 = Hashing.murmur3_128().hashObject(object, funnel).asLong();
@@ -79,11 +83,13 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
     final long[] data;
     int bitCount;
 
+    @Impure
     BitArray(long bits) {
       this(new long[Ints.checkedCast(LongMath.divide(bits, 64, RoundingMode.CEILING))]);
     }
 
     // Used by serialization
+    @Impure
     BitArray(long[] data) {
       checkArgument(data.length > 0, "data length is zero!");
       this.data = data;
@@ -95,6 +101,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
     }
 
     /** Returns true if the bit changed value. */
+    @Impure
     boolean set(int index) {
       if (!get(index)) {
         data[index >> 6] |= (1L << index);
@@ -104,25 +111,30 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
       return false;
     }
 
+    @Pure
     boolean get(int index) {
       return (data[index >> 6] & (1L << index)) != 0;
     }
 
     /** Number of bits */
+    @Pure
     int bitSize() {
       return data.length * Long.SIZE;
     }
 
     /** Number of set bits (1s) */
+    @Pure
     int bitCount() {
       return bitCount;
     }
 
+    @Impure
     BitArray copy() {
       return new BitArray(data.clone());
     }
 
     /** Combines the two BitArrays using bitwise OR. */
+    @Impure
     void putAll(BitArray array) {
       checkArgument(data.length == array.data.length,
           "BitArrays must be of equal length (%s != %s)", data.length, array.data.length);
@@ -133,6 +145,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
       }
     }
 
+    @Pure
     @Override public boolean equals(Object o) {
       if (o instanceof BitArray) {
         BitArray bitArray = (BitArray) o;
@@ -141,6 +154,7 @@ enum BloomFilterStrategies implements BloomFilter.Strategy {
       return false;
     }
 
+    @Pure
     @Override public int hashCode() {
       return Arrays.hashCode(data);
     }

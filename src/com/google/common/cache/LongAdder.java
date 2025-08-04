@@ -11,6 +11,9 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.io.IOException;
@@ -53,11 +56,13 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
     /**
      * Version of plus for use in retryUpdate
      */
+    @Pure
     final long fn(long v, long x) { return v + x; }
 
     /**
      * Creates a new adder with initial sum of zero.
      */
+    @Impure
     public LongAdder() {
     }
 
@@ -66,6 +71,7 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
      *
      * @param x the value to add
      */
+    @Impure
     public void add(long x) {
         Cell[] as; long b, v; HashCode hc; Cell a; int n;
         if ((as = cells) != null || !casBase(b = base, b + x)) {
@@ -81,6 +87,7 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
     /**
      * Equivalent to {@code add(1)}.
      */
+    @Impure
     public void increment() {
         add(1L);
     }
@@ -88,6 +95,7 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
     /**
      * Equivalent to {@code add(-1)}.
      */
+    @Impure
     public void decrement() {
         add(-1L);
     }
@@ -101,6 +109,7 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
      *
      * @return the sum
      */
+    @Pure
     public long sum() {
         long sum = base;
         Cell[] as = cells;
@@ -122,6 +131,7 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
      * method is intrinsically racy, it should only be used when it is
      * known that no threads are concurrently updating.
      */
+    @Impure
     public void reset() {
         internalReset(0L);
     }
@@ -136,6 +146,7 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
      *
      * @return the sum
      */
+    @Impure
     public long sumThenReset() {
         long sum = base;
         Cell[] as = cells;
@@ -157,6 +168,8 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
      * Returns the String representation of the {@link #sum}.
      * @return the String representation of the {@link #sum}
      */
+    @SideEffectFree
+    @Impure
     public String toString() {
         return Long.toString(sum());
     }
@@ -166,6 +179,8 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
      *
      * @return the sum
      */
+    @Pure
+    @Impure
     public long longValue() {
         return sum();
     }
@@ -174,6 +189,8 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
      * Returns the {@link #sum} as an {@code int} after a narrowing
      * primitive conversion.
      */
+    @Pure
+    @Impure
     public int intValue() {
         return (int)sum();
     }
@@ -182,6 +199,8 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
      * Returns the {@link #sum} as a {@code float}
      * after a widening primitive conversion.
      */
+    @Pure
+    @Impure
     public float floatValue() {
         return (float)sum();
     }
@@ -190,16 +209,20 @@ final class LongAdder extends Striped64 implements Serializable, LongAddable {
      * Returns the {@link #sum} as a {@code double} after a widening
      * primitive conversion.
      */
+    @Pure
+    @Impure
     public double doubleValue() {
         return (double)sum();
     }
 
+    @Impure
     private void writeObject(ObjectOutputStream s)
         throws java.io.IOException {
         s.defaultWriteObject();
         s.writeLong(sum());
     }
 
+    @Impure
     private void readObject(ObjectInputStream s)
         throws IOException, ClassNotFoundException {
         s.defaultReadObject();

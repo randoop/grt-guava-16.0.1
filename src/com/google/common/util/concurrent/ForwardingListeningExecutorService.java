@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import java.util.concurrent.Callable;
 
 /**
@@ -30,21 +32,26 @@ import java.util.concurrent.Callable;
 public abstract class ForwardingListeningExecutorService
     extends ForwardingExecutorService implements ListeningExecutorService {
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingListeningExecutorService() {}
 
+  @Pure
   @Override
   protected abstract ListeningExecutorService delegate();
 
+  @Impure
   @Override
   public <T> ListenableFuture<T> submit(Callable<T> task) {
     return delegate().submit(task);
   }
 
+  @Impure
   @Override
   public ListenableFuture<?> submit(Runnable task) {
     return delegate().submit(task);
   }
 
+  @Impure
   @Override
   public <T> ListenableFuture<T> submit(Runnable task, T result) {
     return delegate().submit(task, result);

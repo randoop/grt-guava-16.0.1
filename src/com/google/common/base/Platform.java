@@ -16,6 +16,8 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 /**
@@ -28,11 +30,13 @@ final class Platform {
   private Platform() {}
 
   /** Returns a thread-local 1024-char array. */
+  @Impure
   static char[] charBufferFromThreadLocal() {
     return DEST_TL.get();
   }
   
   /** Calls {@link System#nanoTime()}. */
+  @Impure
   static long systemNanoTime() {
     return System.nanoTime();
   }
@@ -43,12 +47,14 @@ final class Platform {
    * put it back in the threadlocal, we just keep going and grow as needed.
    */
   private static final ThreadLocal<char[]> DEST_TL = new ThreadLocal<char[]>() {
+    @Pure
     @Override
     protected char[] initialValue() {
       return new char[1024];
     }
   };
 
+  @Impure
   static CharMatcher precomputeCharMatcher(CharMatcher matcher) {
     return matcher.precomputedInternal();
   }

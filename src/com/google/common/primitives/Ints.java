@@ -16,6 +16,9 @@
 
 package com.google.common.primitives;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -50,6 +53,7 @@ import javax.annotation.CheckForNull;
  */
 @GwtCompatible(emulated = true)
 public final class Ints {
+  @SideEffectFree
   private Ints() {}
 
   /**
@@ -72,6 +76,7 @@ public final class Ints {
    * @param value a primitive {@code int} value
    * @return a hash code for the value
    */
+  @Pure
   public static int hashCode(int value) {
     return value;
   }
@@ -84,6 +89,7 @@ public final class Ints {
    * @throws IllegalArgumentException if {@code value} is greater than {@link
    *     Integer#MAX_VALUE} or less than {@link Integer#MIN_VALUE}
    */
+  @Pure
   public static int checkedCast(long value) {
     int result = (int) value;
     if (result != value) {
@@ -101,6 +107,7 @@ public final class Ints {
    *     {@code int} type, {@link Integer#MAX_VALUE} if it is too large,
    *     or {@link Integer#MIN_VALUE} if it is too small
    */
+  @Pure
   public static int saturatedCast(long value) {
     if (value > Integer.MAX_VALUE) {
       return Integer.MAX_VALUE;
@@ -124,6 +131,7 @@ public final class Ints {
    *     value if {@code a} is greater than {@code b}; or zero if they are equal
    */
   // TODO(kevinb): if JDK 6 ever becomes a non-concern, remove this
+  @Pure
   public static int compare(int a, int b) {
     return (a < b) ? -1 : ((a > b) ? 1 : 0);
   }
@@ -137,6 +145,7 @@ public final class Ints {
    * @return {@code true} if {@code array[i] == target} for some value of {@code
    *     i}
    */
+  @Pure
   public static boolean contains(int[] array, int target) {
     for (int value : array) {
       if (value == target) {
@@ -155,11 +164,14 @@ public final class Ints {
    * @return the least index {@code i} for which {@code array[i] == target}, or
    *     {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int indexOf(int[] array, int target) {
     return indexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int indexOf(
       int[] array, int target, int start, int end) {
     for (int i = start; i < end; i++) {
@@ -181,6 +193,8 @@ public final class Ints {
    * @param array the array to search for the sequence {@code target}
    * @param target the array to search for as a sub-sequence of {@code array}
    */
+  @Impure
+  @SideEffectFree
   public static int indexOf(int[] array, int[] target) {
     checkNotNull(array, "array");
     checkNotNull(target, "target");
@@ -209,11 +223,14 @@ public final class Ints {
    * @return the greatest index {@code i} for which {@code array[i] == target},
    *     or {@code -1} if no such index exists.
    */
+  @Pure
+  @Impure
   public static int lastIndexOf(int[] array, int target) {
     return lastIndexOf(array, target, 0, array.length);
   }
 
   // TODO(kevinb): consider making this public
+  @Pure
   private static int lastIndexOf(
       int[] array, int target, int start, int end) {
     for (int i = end - 1; i >= start; i--) {
@@ -232,6 +249,8 @@ public final class Ints {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
+  @SideEffectFree
   public static int min(int... array) {
     checkArgument(array.length > 0);
     int min = array[0];
@@ -251,6 +270,8 @@ public final class Ints {
    *     every other value in the array
    * @throws IllegalArgumentException if {@code array} is empty
    */
+  @Impure
+  @SideEffectFree
   public static int max(int... array) {
     checkArgument(array.length > 0);
     int max = array[0];
@@ -271,6 +292,7 @@ public final class Ints {
    * @return a single array containing all the values from the source arrays, in
    *     order
    */
+  @SideEffectFree
   public static int[] concat(int[]... arrays) {
     int length = 0;
     for (int[] array : arrays) {
@@ -296,6 +318,7 @@ public final class Ints {
    * {@link com.google.common.io.ByteStreams#newDataOutput()} to get a growable
    * buffer.
    */
+  @Pure
   @GwtIncompatible("doesn't work")
   public static byte[] toByteArray(int value) {
     return new byte[] {
@@ -317,6 +340,7 @@ public final class Ints {
    *
    * @throws IllegalArgumentException if {@code bytes} has fewer than 4 elements
    */
+  @Impure
   @GwtIncompatible("doesn't work")
   public static int fromByteArray(byte[] bytes) {
     checkArgument(bytes.length >= BYTES,
@@ -331,6 +355,7 @@ public final class Ints {
    *
    * @since 7.0
    */
+  @Pure
   @GwtIncompatible("doesn't work")
   public static int fromBytes(byte b1, byte b2, byte b3, byte b4) {
     return b1 << 24 | (b2 & 0xFF) << 16 | (b3 & 0xFF) << 8 | (b4 & 0xFF);
@@ -340,21 +365,25 @@ public final class Ints {
       extends Converter<String, Integer> implements Serializable {
     static final IntConverter INSTANCE = new IntConverter();
 
+    @SideEffectFree
     @Override
     protected Integer doForward(String value) {
       return Integer.decode(value);
     }
 
+    @SideEffectFree
     @Override
     protected String doBackward(Integer value) {
       return value.toString();
     }
 
+    @Pure
     @Override
     public String toString() {
       return "Ints.stringConverter()";
     }
 
+    @Pure
     private Object readResolve() {
       return INSTANCE;
     }
@@ -367,6 +396,7 @@ public final class Ints {
    *
    * @since 16.0
    */
+  @Pure
   @Beta
   public static Converter<String, Integer> stringConverter() {
     return IntConverter.INSTANCE;
@@ -388,6 +418,7 @@ public final class Ints {
    * @return an array containing the values of {@code array}, with guaranteed
    *     minimum length {@code minLength}
    */
+  @Impure
   public static int[] ensureCapacity(
       int[] array, int minLength, int padding) {
     checkArgument(minLength >= 0, "Invalid minLength: %s", minLength);
@@ -398,6 +429,7 @@ public final class Ints {
   }
 
   // Arrays.copyOf() requires Java 6
+  @SideEffectFree
   private static int[] copyOf(int[] original, int length) {
     int[] copy = new int[length];
     System.arraycopy(original, 0, copy, 0, Math.min(original.length, length));
@@ -413,6 +445,7 @@ public final class Ints {
    *     the resulting string (but not at the start or end)
    * @param array an array of {@code int} values, possibly empty
    */
+  @Impure
   public static String join(String separator, int... array) {
     checkNotNull(separator);
     if (array.length == 0) {
@@ -443,6 +476,7 @@ public final class Ints {
    *     Lexicographical order article at Wikipedia</a>
    * @since 2.0
    */
+  @Pure
   public static Comparator<int[]> lexicographicalComparator() {
     return LexicographicalComparator.INSTANCE;
   }
@@ -450,6 +484,8 @@ public final class Ints {
   private enum LexicographicalComparator implements Comparator<int[]> {
     INSTANCE;
 
+    @Pure
+    @Impure
     @Override
     public int compare(int[] left, int[] right) {
       int minLength = Math.min(left.length, right.length);
@@ -478,6 +514,7 @@ public final class Ints {
    *     is null
    * @since 1.0 (parameter was {@code Collection<Integer>} before 12.0)
    */
+  @Impure
   public static int[] toArray(Collection<? extends Number> collection) {
     if (collection instanceof IntArrayAsList) {
       return ((IntArrayAsList) collection).toIntArray();
@@ -507,6 +544,7 @@ public final class Ints {
    * @param backingArray the array to back the list
    * @return a list view of the array
    */
+  @Impure
   public static List<Integer> asList(int... backingArray) {
     if (backingArray.length == 0) {
       return Collections.emptyList();
@@ -521,35 +559,45 @@ public final class Ints {
     final int start;
     final int end;
 
+    @SideEffectFree
+    @Impure
     IntArrayAsList(int[] array) {
       this(array, 0, array.length);
     }
 
+    @SideEffectFree
     IntArrayAsList(int[] array, int start, int end) {
       this.array = array;
       this.start = start;
       this.end = end;
     }
 
+    @Pure
     @Override public int size() {
       return end - start;
     }
 
+    @Pure
     @Override public boolean isEmpty() {
       return false;
     }
 
+    @Impure
     @Override public Integer get(int index) {
       checkElementIndex(index, size());
       return array[start + index];
     }
 
+    @Pure
+    @Impure
     @Override public boolean contains(Object target) {
       // Overridden to prevent a ton of boxing
       return (target instanceof Integer)
           && Ints.indexOf(array, (Integer) target, start, end) != -1;
     }
 
+    @Pure
+    @Impure
     @Override public int indexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Integer) {
@@ -561,6 +609,8 @@ public final class Ints {
       return -1;
     }
 
+    @Pure
+    @Impure
     @Override public int lastIndexOf(Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Integer) {
@@ -572,6 +622,7 @@ public final class Ints {
       return -1;
     }
 
+    @Impure
     @Override public Integer set(int index, Integer element) {
       checkElementIndex(index, size());
       int oldValue = array[start + index];
@@ -580,6 +631,7 @@ public final class Ints {
       return oldValue;
     }
 
+    @Impure
     @Override public List<Integer> subList(int fromIndex, int toIndex) {
       int size = size();
       checkPositionIndexes(fromIndex, toIndex, size);
@@ -589,6 +641,7 @@ public final class Ints {
       return new IntArrayAsList(array, start + fromIndex, start + toIndex);
     }
 
+    @Pure
     @Override public boolean equals(Object object) {
       if (object == this) {
         return true;
@@ -609,6 +662,8 @@ public final class Ints {
       return super.equals(object);
     }
 
+    @Pure
+    @Impure
     @Override public int hashCode() {
       int result = 1;
       for (int i = start; i < end; i++) {
@@ -617,6 +672,7 @@ public final class Ints {
       return result;
     }
 
+    @Impure
     @Override public String toString() {
       StringBuilder builder = new StringBuilder(size() * 5);
       builder.append('[').append(array[start]);
@@ -626,6 +682,7 @@ public final class Ints {
       return builder.append(']').toString();
     }
 
+    @SideEffectFree
     int[] toIntArray() {
       // Arrays.copyOfRange() is not available under GWT
       int size = size();
@@ -655,6 +712,7 @@ public final class Ints {
    *     value
    * @since 11.0
    */
+  @Impure
   @Beta
   @CheckForNull
   @GwtIncompatible("TODO")

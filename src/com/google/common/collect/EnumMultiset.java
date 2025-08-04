@@ -14,6 +14,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.annotations.GwtCompatible;
@@ -38,6 +39,7 @@ import java.util.Iterator;
 @GwtCompatible(emulated = true)
 public final class EnumMultiset<E extends Enum<E>> extends AbstractMapBasedMultiset<E> {
   /** Creates an empty {@code EnumMultiset}. */
+  @Impure
   public static <E extends Enum<E>> EnumMultiset<E> create(Class<E> type) {
     return new EnumMultiset<E>(type);
   }
@@ -51,6 +53,7 @@ public final class EnumMultiset<E extends Enum<E>> extends AbstractMapBasedMulti
    * @param elements the elements that the multiset should contain
    * @throws IllegalArgumentException if {@code elements} is empty
    */
+  @Impure
   public static <E extends Enum<E>> EnumMultiset<E> create(Iterable<E> elements) {
     Iterator<E> iterator = elements.iterator();
     checkArgument(iterator.hasNext(), "EnumMultiset constructor passed empty Iterable");
@@ -66,6 +69,7 @@ public final class EnumMultiset<E extends Enum<E>> extends AbstractMapBasedMulti
    * 
    * @since 14.0
    */
+  @Impure
   public static <E extends Enum<E>> EnumMultiset<E> create(Iterable<E> elements, Class<E> type) {
     EnumMultiset<E> result = create(type);
     Iterables.addAll(result, elements);
@@ -75,11 +79,13 @@ public final class EnumMultiset<E extends Enum<E>> extends AbstractMapBasedMulti
   private transient Class<E> type;
 
   /** Creates an empty {@code EnumMultiset}. */
+  @Impure
   private EnumMultiset(Class<E> type) {
     super(WellBehavedMap.wrap(new EnumMap<E, Count>(type)));
     this.type = type;
   }
 
+  @Impure
   @GwtIncompatible("java.io.ObjectOutputStream")
   private void writeObject(ObjectOutputStream stream) throws IOException {
     stream.defaultWriteObject();
@@ -92,6 +98,7 @@ public final class EnumMultiset<E extends Enum<E>> extends AbstractMapBasedMulti
    *             elements, the first element, its count, the second element, its
    *             count, and so on
    */
+  @Impure
   @GwtIncompatible("java.io.ObjectInputStream")
   private void readObject(ObjectInputStream stream) throws IOException, ClassNotFoundException {
     stream.defaultReadObject();

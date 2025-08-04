@@ -16,6 +16,9 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Supplier;
@@ -116,9 +119,11 @@ public abstract class AbstractScheduledService implements Service {
      *        next
      * @param unit the time unit of the initialDelay and delay parameters
      */
+    @Impure
     public static Scheduler newFixedDelaySchedule(final long initialDelay, final long delay, 
         final TimeUnit unit) {
       return new Scheduler() {
+        @Impure
         @Override
         public Future<?> schedule(AbstractService service, ScheduledExecutorService executor,
             Runnable task) {
@@ -135,9 +140,11 @@ public abstract class AbstractScheduledService implements Service {
      * @param period the period between successive executions of the task
      * @param unit the time unit of the initialDelay and period parameters
      */
+    @Impure
     public static Scheduler newFixedRateSchedule(final long initialDelay, final long period, 
         final TimeUnit unit) {
       return new Scheduler() {
+        @Impure
         @Override
         public Future<?> schedule(AbstractService service, ScheduledExecutorService executor,
             Runnable task) {
@@ -147,9 +154,11 @@ public abstract class AbstractScheduledService implements Service {
     }
     
     /** Schedules the task to run on the provided executor on behalf of the service.  */
+    @Impure
     abstract Future<?> schedule(AbstractService service, ScheduledExecutorService executor, 
         Runnable runnable);
     
+    @SideEffectFree
     private Scheduler() {}
   }
   
@@ -244,6 +253,7 @@ public abstract class AbstractScheduledService implements Service {
    * the service will transition to the {@link Service.State#FAILED} state and this method will no 
    * longer be called.
    */
+  @SideEffectFree
   protected abstract void runOneIteration() throws Exception;
 
   /** 
@@ -251,6 +261,7 @@ public abstract class AbstractScheduledService implements Service {
    * 
    * <p>By default this method does nothing.
    */
+  @SideEffectFree
   protected void startUp() throws Exception {}
 
   /**
@@ -258,12 +269,14 @@ public abstract class AbstractScheduledService implements Service {
    * 
    * <p>By default this method does nothing. 
    */
+  @SideEffectFree
   protected void shutDown() throws Exception {}
 
   /**
    * Returns the {@link Scheduler} object used to configure this service.  This method will only be
    * called once. 
    */
+  @Pure
   protected abstract Scheduler scheduler();
   
   /**
@@ -281,6 +294,7 @@ public abstract class AbstractScheduledService implements Service {
    * service {@linkplain Service.State#TERMINATED terminates} or 
    * {@linkplain Service.State#TERMINATED fails}.
    */
+  @Impure
   protected ScheduledExecutorService executor() {
     final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(
         new ThreadFactory() {
@@ -309,42 +323,50 @@ public abstract class AbstractScheduledService implements Service {
    *
    * @since 14.0
    */
+  @Impure
   protected String serviceName() {
     return getClass().getSimpleName();
   }
   
+  @Impure
   @Override public String toString() {
     return serviceName() + " [" + state() + "]";
   }
 
   // We override instead of using ForwardingService so that these can be final.
 
+  @Impure
   @Deprecated
   @Override 
    public final ListenableFuture<State> start() {
     return delegate.start();
   }
 
+  @Impure
   @Deprecated
   @Override 
    public final State startAndWait() {
     return delegate.startAndWait();
   }
 
+  @Impure
   @Override public final boolean isRunning() {
     return delegate.isRunning();
   }
 
+  @Impure
   @Override public final State state() {
     return delegate.state();
   }
 
+  @Impure
   @Deprecated
   @Override 
    public final ListenableFuture<State> stop() {
     return delegate.stop();
   }
 
+  @Impure
   @Deprecated
   @Override 
    public final State stopAndWait() {
@@ -354,6 +376,7 @@ public abstract class AbstractScheduledService implements Service {
   /**
    * @since 13.0
    */
+  @Impure
   @Override public final void addListener(Listener listener, Executor executor) {
     delegate.addListener(listener, executor);
   }
@@ -361,6 +384,7 @@ public abstract class AbstractScheduledService implements Service {
   /**
    * @since 14.0
    */
+  @Impure
   @Override public final Throwable failureCause() {
     return delegate.failureCause();
   }
@@ -368,6 +392,7 @@ public abstract class AbstractScheduledService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final Service startAsync() {
     delegate.startAsync();
     return this;
@@ -376,6 +401,7 @@ public abstract class AbstractScheduledService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final Service stopAsync() {
     delegate.stopAsync();
     return this;
@@ -384,6 +410,7 @@ public abstract class AbstractScheduledService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final void awaitRunning() {
     delegate.awaitRunning();
   }
@@ -391,6 +418,7 @@ public abstract class AbstractScheduledService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final void awaitRunning(long timeout, TimeUnit unit) throws TimeoutException {
     delegate.awaitRunning(timeout, unit);
   }
@@ -398,6 +426,7 @@ public abstract class AbstractScheduledService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final void awaitTerminated() {
     delegate.awaitTerminated();
   }
@@ -405,6 +434,7 @@ public abstract class AbstractScheduledService implements Service {
   /**
    * @since 15.0
    */
+  @Impure
   @Override public final void awaitTerminated(long timeout, TimeUnit unit) throws TimeoutException {
     delegate.awaitTerminated(timeout, unit);
   }
@@ -448,6 +478,7 @@ public abstract class AbstractScheduledService implements Service {
       @GuardedBy("lock")
       private Future<Void> currentFuture;
       
+      @Impure
       ReschedulableCallable(AbstractService service, ScheduledExecutorService executor, 
           Runnable runnable) {
         this.wrappedRunnable = runnable;
@@ -455,6 +486,7 @@ public abstract class AbstractScheduledService implements Service {
         this.service = service;
       }
       
+      @Impure
       @Override
       public Void call() throws Exception {
         wrappedRunnable.run();
@@ -465,6 +497,7 @@ public abstract class AbstractScheduledService implements Service {
       /**
        * Atomically reschedules this task and assigns the new future to {@link #currentFuture}.
        */
+      @Impure
       public void reschedule() {
         // We reschedule ourselves with a lock held for two reasons. 1. we want to make sure that
         // cancel calls cancel on the correct future. 2. we want to make sure that the assignment
@@ -490,6 +523,7 @@ public abstract class AbstractScheduledService implements Service {
       
       // N.B. Only protect cancel and isCancelled because those are the only methods that are 
       // invoked by the AbstractScheduledService.
+      @Impure
       @Override
       public boolean cancel(boolean mayInterruptIfRunning) {
         // Ensure that a task cannot be rescheduled while a cancel is ongoing.
@@ -501,12 +535,14 @@ public abstract class AbstractScheduledService implements Service {
         }
       }
 
+      @Pure
       @Override
       protected Future<Void> delegate() {
         throw new UnsupportedOperationException("Only cancel is supported by this future");
       }
     }
     
+    @Impure
     @Override
     final Future<?> schedule(AbstractService service, ScheduledExecutorService executor, 
         Runnable runnable) {
@@ -531,6 +567,7 @@ public abstract class AbstractScheduledService implements Service {
        * @param delay the time from now to delay execution
        * @param unit the time unit of the delay parameter
        */
+      @Impure
       public Schedule(long delay, TimeUnit unit) {
         this.delay = delay;
         this.unit = Preconditions.checkNotNull(unit);
@@ -546,6 +583,7 @@ public abstract class AbstractScheduledService implements Service {
      * 
      * @return a schedule that defines the delay before the next execution.
      */
+    @Pure
     protected abstract Schedule getNextSchedule() throws Exception;
   }
 }

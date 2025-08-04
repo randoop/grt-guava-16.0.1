@@ -16,6 +16,9 @@
 
 package com.google.common.math;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.math.MathPreconditions.checkNoOverflow;
@@ -58,6 +61,7 @@ public final class LongMath {
    * <p>This differs from {@code Long.bitCount(x) == 1}, because
    * {@code Long.bitCount(Long.MIN_VALUE) == 1}, but {@link Long#MIN_VALUE} is not a power of two.
    */
+  @Pure
   public static boolean isPowerOfTwo(long x) {
     return x > 0 & (x & (x - 1)) == 0;
   }
@@ -67,6 +71,7 @@ public final class LongMath {
    * signed long.  The implementation is branch-free, and benchmarks suggest it is measurably
    * faster than the straightforward ternary expression.
    */
+  @Pure
   @VisibleForTesting
   static int lessThanBranchFree(long x, long y) {
     // Returns the sign bit of x - y.
@@ -80,6 +85,7 @@ public final class LongMath {
    * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
    *         is not a power of two
    */
+  @Impure
   @SuppressWarnings("fallthrough")
   // TODO(kevinb): remove after this warning is disabled globally
   public static int log2(long x, RoundingMode mode) {
@@ -121,6 +127,7 @@ public final class LongMath {
    * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and {@code x}
    *         is not a power of ten
    */
+  @Impure
   @GwtIncompatible("TODO")
   @SuppressWarnings("fallthrough")
   // TODO(kevinb): remove after this warning is disabled globally
@@ -148,6 +155,7 @@ public final class LongMath {
     }
   }
 
+  @Impure
   @GwtIncompatible("TODO")
   static int log10Floor(long x) {
     /*
@@ -227,6 +235,7 @@ public final class LongMath {
    *
    * @throws IllegalArgumentException if {@code k < 0}
    */
+  @Impure
   @GwtIncompatible("TODO")
   public static long pow(long b, int k) {
     checkNonNegative("exponent", k);
@@ -270,6 +279,7 @@ public final class LongMath {
    * @throws ArithmeticException if {@code mode} is {@link RoundingMode#UNNECESSARY} and
    *         {@code sqrt(x)} is not an integer
    */
+  @Impure
   @GwtIncompatible("TODO")
   @SuppressWarnings("fallthrough")
   public static long sqrt(long x, RoundingMode mode) {
@@ -342,6 +352,7 @@ public final class LongMath {
    * @throws ArithmeticException if {@code q == 0}, or if {@code mode == UNNECESSARY} and {@code a}
    *         is not an integer multiple of {@code b}
    */
+  @Impure
   @GwtIncompatible("TODO")
   @SuppressWarnings("fallthrough")
   public static long divide(long p, long q, RoundingMode mode) {
@@ -415,6 +426,7 @@ public final class LongMath {
    * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
    *      Remainder Operator</a>
    */
+  @Impure
   @GwtIncompatible("TODO")
   public static int mod(long x, int m) {
     // Cast is safe because the result is guaranteed in the range [0, m)
@@ -439,6 +451,7 @@ public final class LongMath {
    * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.17.3">
    *      Remainder Operator</a>
    */
+  @Pure
   @GwtIncompatible("TODO")
   public static long mod(long x, long m) {
     if (m <= 0) {
@@ -454,6 +467,7 @@ public final class LongMath {
    *
    * @throws IllegalArgumentException if {@code a < 0} or {@code b < 0}
    */
+  @Impure
   public static long gcd(long a, long b) {
     /*
      * The reason we require both arguments to be >= 0 is because otherwise, what do you return on
@@ -504,6 +518,7 @@ public final class LongMath {
    *
    * @throws ArithmeticException if {@code a + b} overflows in signed {@code long} arithmetic
    */
+  @Impure
   @GwtIncompatible("TODO")
   public static long checkedAdd(long a, long b) {
     long result = a + b;
@@ -516,6 +531,7 @@ public final class LongMath {
    *
    * @throws ArithmeticException if {@code a - b} overflows in signed {@code long} arithmetic
    */
+  @Impure
   @GwtIncompatible("TODO")
   public static long checkedSubtract(long a, long b) {
     long result = a - b;
@@ -528,6 +544,7 @@ public final class LongMath {
    *
    * @throws ArithmeticException if {@code a * b} overflows in signed {@code long} arithmetic
    */
+  @Impure
   @GwtIncompatible("TODO")
   public static long checkedMultiply(long a, long b) {
     // Hacker's Delight, Section 2-12
@@ -559,6 +576,7 @@ public final class LongMath {
    * @throws ArithmeticException if {@code b} to the {@code k}th power overflows in signed
    *         {@code long} arithmetic
    */
+  @Impure
   @GwtIncompatible("TODO")
   public static long checkedPow(long b, int k) {
     checkNonNegative("exponent", k);
@@ -609,6 +627,7 @@ public final class LongMath {
    *
    * @throws IllegalArgumentException if {@code n < 0}
    */
+  @Impure
   @GwtIncompatible("TODO")
   public static long factorial(int n) {
     checkNonNegative("n", n);
@@ -645,6 +664,7 @@ public final class LongMath {
    *
    * @throws IllegalArgumentException if {@code n < 0}, {@code k < 0}, or {@code k > n}
    */
+  @Impure
   public static long binomial(int n, int k) {
     checkNonNegative("n", n);
     checkNonNegative("k", k);
@@ -708,6 +728,7 @@ public final class LongMath {
   /**
    * Returns (x * numerator / denominator), which is assumed to come out to an integral value.
    */
+  @Impure
   static long multiplyFraction(long x, long numerator, long denominator) {
     if (x == 1) {
       return numerator / denominator;
@@ -740,6 +761,7 @@ public final class LongMath {
   // These values were generated by using checkedMultiply to see when the simple multiply/divide
   // algorithm would lead to an overflow.
 
+  @Pure
   static boolean fitsInInt(long x) {
     return (int) x == x;
   }
@@ -750,6 +772,7 @@ public final class LongMath {
    *
    * @since 14.0
    */
+  @Pure
   public static long mean(long x, long y) {
     // Efficient method for computing the arithmetic mean.
     // The alternative (x + y) / 2 fails for large values.
@@ -757,5 +780,6 @@ public final class LongMath {
     return (x & y) + ((x ^ y) >> 1);
   }
 
+  @SideEffectFree
   private LongMath() {}
 }

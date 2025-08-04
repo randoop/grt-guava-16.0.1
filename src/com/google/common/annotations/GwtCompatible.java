@@ -16,6 +16,7 @@
 
 package com.google.common.annotations;
 
+import org.checkerframework.dataflow.qual.Pure;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -74,6 +75,7 @@ public @interface GwtCompatible {
    * @see <a href="http://code.google.com/webtoolkit/doc/latest/DevGuideServerCommunication.html#DevGuideSerializableTypes">
    *     Documentation about GWT serialization</a>
    */
+  @Pure
   boolean serializable() default false;
 
   /**
@@ -84,5 +86,6 @@ public @interface GwtCompatible {
    * @see <a href="http://code.google.com/webtoolkit/doc/latest/DevGuideOrganizingProjects.html#DevGuideModules">
    *     Documentation about GWT emulated source</a>
    */
+  @Pure
   boolean emulated() default false;
 }

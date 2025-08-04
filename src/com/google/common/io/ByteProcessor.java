@@ -16,6 +16,7 @@
 
 package com.google.common.io;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 
 import java.io.IOException;
@@ -42,8 +43,10 @@ public interface ByteProcessor<T> {
    * @param len the length of data to be processed
    * @return true to continue processing, false to stop
    */
+  @Pure
   boolean processBytes(byte[] buf, int off, int len) throws IOException;
 
   /** Return the result of processing all the bytes. */
+  @Pure
   T getResult();
 }

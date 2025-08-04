@@ -16,6 +16,8 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtIncompatible;
 
@@ -115,6 +117,7 @@ public enum StandardSystemProperty {
 
   private final String key;
 
+  @Impure
   private StandardSystemProperty(String key) {
     this.key = key;
   }
@@ -122,6 +125,7 @@ public enum StandardSystemProperty {
   /**
    * Returns the key used to lookup this system property.
    */
+  @Pure
   public String key() {
     return key;
   }
@@ -130,6 +134,7 @@ public enum StandardSystemProperty {
    * Returns the current value for this system property by delegating to
    * {@link System#getProperty(String)}.
    */
+  @Pure
   public String value() {
     return System.getProperty(key);
   }
@@ -137,6 +142,7 @@ public enum StandardSystemProperty {
   /**
    * Returns a string representation of this system property.
    */
+  @Impure
   @Override public String toString() {
     return key() + "=" + value();
   }

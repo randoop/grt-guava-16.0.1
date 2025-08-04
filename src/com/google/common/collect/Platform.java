@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -44,6 +46,7 @@ final class Platform {
    * @param reference any array of the desired type
    * @param length the length of the new array
    */
+  @SideEffectFree
   static <T> T[] newArray(T[] reference, int length) {
     Class<?> type = reference.getClass().getComponentType();
 
@@ -54,6 +57,7 @@ final class Platform {
     return result;
   }
   
+  @SideEffectFree
   static <E> Set<E> newSetFromMap(Map<E, Boolean> map) {
     return Collections.newSetFromMap(map);
   }
@@ -64,10 +68,12 @@ final class Platform {
    * server-side code could generate enough volume that reclamation becomes
    * important.
    */
+  @Impure
   static MapMaker tryWeakKeys(MapMaker mapMaker) {
     return mapMaker.weakKeys();
   }
 
+  @Impure
   static <K, V1, V2> SortedMap<K, V2> mapsTransformEntriesSortedMap(
       SortedMap<K, V1> fromMap,
       EntryTransformer<? super K, ? super V1, V2> transformer) {
@@ -76,6 +82,7 @@ final class Platform {
         : Maps.transformEntriesIgnoreNavigable(fromMap, transformer);
   }
 
+  @Impure
   static <K, V> SortedMap<K, V> mapsAsMapSortedSet(SortedSet<K> set,
       Function<? super K, V> function) {
     return (set instanceof NavigableSet)
@@ -83,6 +90,7 @@ final class Platform {
         : Maps.asMapSortedIgnoreNavigable(set, function);
   }
 
+  @Impure
   static <E> SortedSet<E> setsFilterSortedSet(SortedSet<E> set,
       Predicate<? super E> predicate) {
     return (set instanceof NavigableSet)
@@ -90,6 +98,7 @@ final class Platform {
         : Sets.filterSortedIgnoreNavigable(set, predicate);
   }
   
+  @Impure
   static <K, V> SortedMap<K, V> mapsFilterSortedMap(SortedMap<K, V> map,
       Predicate<? super Map.Entry<K, V>> predicate) {
     return (map instanceof NavigableMap)
@@ -97,5 +106,6 @@ final class Platform {
         : Maps.filterSortedIgnoreNavigable(map, predicate);
   }
 
+  @SideEffectFree
   private Platform() {}
 }

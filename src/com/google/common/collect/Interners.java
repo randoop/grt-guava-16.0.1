@@ -14,6 +14,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -32,6 +35,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 @Beta
 public final class Interners {
+  @SideEffectFree
   private Interners() {}
 
   /**
@@ -41,6 +45,7 @@ public final class Interners {
    * unlike {@link String#intern}, using this interner does not consume memory in the permanent
    * generation.
    */
+  @Impure
   public static <E> Interner<E> newStrongInterner() {
     final ConcurrentMap<E, E> map = new MapMaker().makeMap();
     return new Interner<E>() {
@@ -58,6 +63,7 @@ public final class Interners {
    * when the memory usage of that implementation is unacceptable. Note that unlike {@link
    * String#intern}, using this interner does not consume memory in the permanent generation.
    */
+  @Impure
   @GwtIncompatible("java.lang.ref.WeakReference")
   public static <E> Interner<E> newWeakInterner() {
     return new WeakInterner<E>();
@@ -70,6 +76,7 @@ public final class Interners {
           .keyEquivalence(Equivalence.equals())
           .makeCustomMap();
 
+    @Impure
     @Override public E intern(E sample) {
       while (true) {
         // trying to read the canonical...
@@ -104,6 +111,7 @@ public final class Interners {
    *
    * @since 8.0
    */
+  @Impure
   public static <E> Function<E, E> asFunction(Interner<E> interner) {
     return new InternerFunction<E>(checkNotNull(interner));
   }
@@ -112,18 +120,22 @@ public final class Interners {
 
     private final Interner<E> interner;
 
+    @SideEffectFree
     public InternerFunction(Interner<E> interner) {
       this.interner = interner;
     }
 
+    @Impure
     @Override public E apply(E input) {
       return interner.intern(input);
     }
 
+    @Pure
     @Override public int hashCode() {
       return interner.hashCode();
     }
 
+    @Pure
     @Override public boolean equals(Object other) {
       if (other instanceof InternerFunction) {
         InternerFunction<?> that = (InternerFunction<?>) other;

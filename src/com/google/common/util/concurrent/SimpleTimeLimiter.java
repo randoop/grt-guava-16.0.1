@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -63,6 +64,7 @@ public final class SimpleTimeLimiter implements TimeLimiter {
    *     the target objects; for example, a {@link
    *     Executors#newCachedThreadPool()}.
    */
+  @Impure
   public SimpleTimeLimiter(ExecutorService executor) {
     this.executor = checkNotNull(executor);
   }
@@ -76,10 +78,12 @@ public final class SimpleTimeLimiter implements TimeLimiter {
    * count toward their time limit, and in this case the call may even time out
    * before the target method is ever invoked.
    */
+  @Impure
   public SimpleTimeLimiter() {
     this(Executors.newCachedThreadPool());
   }
 
+  @Impure
   @Override
   public <T> T newProxy(final T target, Class<T> interfaceType,
       final long timeoutDuration, final TimeUnit timeoutUnit) {
@@ -94,10 +98,12 @@ public final class SimpleTimeLimiter implements TimeLimiter {
         = findInterruptibleMethods(interfaceType);
 
     InvocationHandler handler = new InvocationHandler() {
+      @Impure
       @Override
       public Object invoke(Object obj, final Method method, final Object[] args)
           throws Throwable {
         Callable<Object> callable = new Callable<Object>() {
+          @Impure
           @Override
           public Object call() throws Exception {
             try {
@@ -116,6 +122,7 @@ public final class SimpleTimeLimiter implements TimeLimiter {
   }
 
   // TODO: should this actually throw only ExecutionException?
+  @Impure
   @Override
   public <T> T callWithTimeout(Callable<T> callable, long timeoutDuration,
       TimeUnit timeoutUnit, boolean amInterruptible) throws Exception {
@@ -144,6 +151,7 @@ public final class SimpleTimeLimiter implements TimeLimiter {
     }
   }
 
+  @Impure
   private static Exception throwCause(Exception e, boolean combineStackTraces)
       throws Exception {
     Throwable cause = e.getCause();
@@ -165,6 +173,7 @@ public final class SimpleTimeLimiter implements TimeLimiter {
     throw e;
   }
 
+  @Impure
   private static Set<Method> findInterruptibleMethods(Class<?> interfaceType) {
     Set<Method> set = Sets.newHashSet();
     for (Method m : interfaceType.getMethods()) {
@@ -175,6 +184,7 @@ public final class SimpleTimeLimiter implements TimeLimiter {
     return set;
   }
 
+  @Impure
   private static boolean declaresInterruptedEx(Method method) {
     for (Class<?> exType : method.getExceptionTypes()) {
       // debate: == or isAssignableFrom?
@@ -186,6 +196,7 @@ public final class SimpleTimeLimiter implements TimeLimiter {
   }
 
   // TODO: replace with version in common.reflect if and when it's open-sourced
+  @Impure
   private static <T> T newProxy(
       Class<T> interfaceType, InvocationHandler handler) {
     Object object = Proxy.newProxyInstance(interfaceType.getClassLoader(),

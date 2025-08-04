@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 
@@ -34,39 +37,47 @@ import javax.annotation.Nullable;
 final class ImmutableMapValues<K, V> extends ImmutableCollection<V> {
   private final ImmutableMap<K, V> map;
   
+  @SideEffectFree
   ImmutableMapValues(ImmutableMap<K, V> map) {
     this.map = map;
   }
 
+  @Pure
   @Override
   public int size() {
     return map.size();
   }
 
+  @Impure
   @Override
   public UnmodifiableIterator<V> iterator() {
     return Maps.valueIterator(map.entrySet().iterator());
   }
 
+  @Impure
   @Override
   public boolean contains(@Nullable Object object) {
     return object != null && Iterators.contains(iterator(), object);
   }
 
+  @Pure
   @Override
   boolean isPartialView() {
     return true;
   }
 
+  @Impure
   @Override
   ImmutableList<V> createAsList() {
     final ImmutableList<Entry<K, V>> entryList = map.entrySet().asList();
     return new ImmutableAsList<V>() {
+      @Pure
       @Override
       public V get(int index) {
         return entryList.get(index).getValue();
       }
 
+      @Pure
       @Override
       ImmutableCollection<V> delegateCollection() {
         return ImmutableMapValues.this;
@@ -74,6 +85,8 @@ final class ImmutableMapValues<K, V> extends ImmutableCollection<V> {
     };
   }
 
+  @SideEffectFree
+  @Impure
   @GwtIncompatible("serialization")
   @Override Object writeReplace() {
     return new SerializedForm<V>(map);
@@ -82,9 +95,11 @@ final class ImmutableMapValues<K, V> extends ImmutableCollection<V> {
   @GwtIncompatible("serialization")
   private static class SerializedForm<V> implements Serializable {
     final ImmutableMap<?, V> map;
+    @SideEffectFree
     SerializedForm(ImmutableMap<?, V> map) {
       this.map = map;
     }
+    @SideEffectFree
     Object readResolve() {
       return map.values();
     }

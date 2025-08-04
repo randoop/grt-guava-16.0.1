@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.collect.CollectPreconditions.checkEntryNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -35,12 +37,14 @@ final class SingletonImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
   final transient K singleKey;
   final transient V singleValue;
 
+  @Impure
   SingletonImmutableBiMap(K singleKey, V singleValue) {
     checkEntryNotNull(singleKey, singleValue);
     this.singleKey = singleKey;
     this.singleValue = singleValue;
   }
 
+  @Impure
   private SingletonImmutableBiMap(K singleKey, V singleValue,
       ImmutableBiMap<V, K> inverse) {
     this.singleKey = singleKey;
@@ -48,36 +52,44 @@ final class SingletonImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
     this.inverse = inverse;
   }
 
+  @Impure
   SingletonImmutableBiMap(Entry<? extends K, ? extends V> entry) {
     this(entry.getKey(), entry.getValue());
   }
 
+  @Pure
   @Override public V get(@Nullable Object key) {
     return singleKey.equals(key) ? singleValue : null;
   }
 
+  @Pure
   @Override
   public int size() {
     return 1;
   }
 
+  @Pure
   @Override public boolean containsKey(@Nullable Object key) {
     return singleKey.equals(key);
   }
 
+  @Pure
   @Override public boolean containsValue(@Nullable Object value) {
     return singleValue.equals(value);
   }
 
+  @Pure
   @Override boolean isPartialView() {
     return false;
   }
 
+  @Impure
   @Override
   ImmutableSet<Entry<K, V>> createEntrySet() {
     return ImmutableSet.of(Maps.immutableEntry(singleKey, singleValue));
   }
 
+  @Impure
   @Override
   ImmutableSet<K> createKeySet() {
     return ImmutableSet.of(singleKey);
@@ -85,6 +97,7 @@ final class SingletonImmutableBiMap<K, V> extends ImmutableBiMap<K, V> {
 
   transient ImmutableBiMap<V, K> inverse;
 
+  @Impure
   @Override
   public ImmutableBiMap<V, K> inverse() {
     // racy single-check idiom

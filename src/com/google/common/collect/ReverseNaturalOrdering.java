@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -30,6 +33,7 @@ final class ReverseNaturalOrdering
     extends Ordering<Comparable> implements Serializable {
   static final ReverseNaturalOrdering INSTANCE = new ReverseNaturalOrdering();
 
+  @Impure
   @Override public int compare(Comparable left, Comparable right) {
     checkNotNull(left); // right null is caught later
     if (left == right) {
@@ -39,53 +43,67 @@ final class ReverseNaturalOrdering
     return right.compareTo(left);
   }
 
+  @Pure
+  @Impure
   @Override public <S extends Comparable> Ordering<S> reverse() {
     return Ordering.natural();
   }
 
   // Override the min/max methods to "hoist" delegation outside loops
 
+  @Impure
   @Override public <E extends Comparable> E min(E a, E b) {
     return NaturalOrdering.INSTANCE.max(a, b);
   }
 
+  @Impure
   @Override public <E extends Comparable> E min(E a, E b, E c, E... rest) {
     return NaturalOrdering.INSTANCE.max(a, b, c, rest);
   }
 
+  @Impure
   @Override public <E extends Comparable> E min(Iterator<E> iterator) {
     return NaturalOrdering.INSTANCE.max(iterator);
   }
 
+  @Impure
   @Override public <E extends Comparable> E min(Iterable<E> iterable) {
     return NaturalOrdering.INSTANCE.max(iterable);
   }
 
+  @Impure
   @Override public <E extends Comparable> E max(E a, E b) {
     return NaturalOrdering.INSTANCE.min(a, b);
   }
 
+  @Impure
   @Override public <E extends Comparable> E max(E a, E b, E c, E... rest) {
     return NaturalOrdering.INSTANCE.min(a, b, c, rest);
   }
 
+  @Impure
   @Override public <E extends Comparable> E max(Iterator<E> iterator) {
     return NaturalOrdering.INSTANCE.min(iterator);
   }
 
+  @Impure
   @Override public <E extends Comparable> E max(Iterable<E> iterable) {
     return NaturalOrdering.INSTANCE.min(iterable);
   }
 
   // preserving singleton-ness gives equals()/hashCode() for free
+  @Pure
   private Object readResolve() {
     return INSTANCE;
   }
 
+  @Pure
   @Override public String toString() {
     return "Ordering.natural().reverse()";
   }
 
+  @SideEffectFree
+  @Impure
   private ReverseNaturalOrdering() {}
 
   private static final long serialVersionUID = 0;

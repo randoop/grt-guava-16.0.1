@@ -14,6 +14,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.annotations.Beta;
@@ -57,6 +60,7 @@ public final class Hashing {
    * @return a hash function, described above, that produces hash codes of length {@code
    *     minimumBits} or greater
    */
+  @Impure
   public static HashFunction goodFastHash(int minimumBits) {
     int bits = checkPositiveAndMakeMultipleOf32(minimumBits);
 
@@ -93,6 +97,7 @@ public final class Hashing {
    *
    * <p>The exact C++ equivalent is the MurmurHash3_x86_32 function (Murmur3A).
    */
+  @Impure
   public static HashFunction murmur3_32(int seed) {
     return new Murmur3_32HashFunction(seed);
   }
@@ -105,6 +110,7 @@ public final class Hashing {
    *
    * <p>The exact C++ equivalent is the MurmurHash3_x86_32 function (Murmur3A).
    */
+  @Pure
   public static HashFunction murmur3_32() {
     return Murmur3_32Holder.MURMUR3_32;
   }
@@ -124,6 +130,7 @@ public final class Hashing {
    *
    * <p>The exact C++ equivalent is the MurmurHash3_x64_128 function (Murmur3F).
    */
+  @Impure
   public static HashFunction murmur3_128(int seed) {
     return new Murmur3_128HashFunction(seed);
   }
@@ -136,6 +143,7 @@ public final class Hashing {
    *
    * <p>The exact C++ equivalent is the MurmurHash3_x64_128 function (Murmur3F).
    */
+  @Pure
   public static HashFunction murmur3_128() {
     return Murmur3_128Holder.MURMUR3_128;
   }
@@ -154,6 +162,7 @@ public final class Hashing {
    *
    * @since 15.0
    */
+  @Pure
   public static HashFunction sipHash24() {
     return SipHash24Holder.SIP_HASH_24;
   }
@@ -170,6 +179,7 @@ public final class Hashing {
    *
    * @since 15.0
    */
+  @Impure
   public static HashFunction sipHash24(long k0, long k1) {
     return new SipHashFunction(2, 4, k0, k1);
   }
@@ -178,6 +188,7 @@ public final class Hashing {
    * Returns a hash function implementing the MD5 hash algorithm (128 hash bits) by delegating to
    * the MD5 {@link MessageDigest}.
    */
+  @Pure
   public static HashFunction md5() {
     return Md5Holder.MD5;
   }
@@ -190,6 +201,7 @@ public final class Hashing {
    * Returns a hash function implementing the SHA-1 algorithm (160 hash bits) by delegating to the
    * SHA-1 {@link MessageDigest}.
    */
+  @Pure
   public static HashFunction sha1() {
     return Sha1Holder.SHA_1;
   }
@@ -203,6 +215,7 @@ public final class Hashing {
    * Returns a hash function implementing the SHA-256 algorithm (256 hash bits) by delegating to
    * the SHA-256 {@link MessageDigest}.
    */
+  @Pure
   public static HashFunction sha256() {
     return Sha256Holder.SHA_256;
   }
@@ -216,6 +229,7 @@ public final class Hashing {
    * Returns a hash function implementing the SHA-512 algorithm (512 hash bits) by delegating to the
    * SHA-512 {@link MessageDigest}.
    */
+  @Pure
   public static HashFunction sha512() {
     return Sha512Holder.SHA_512;
   }
@@ -234,6 +248,7 @@ public final class Hashing {
    *
    * @since 14.0
    */
+  @Pure
   public static HashFunction crc32() {
     return Crc32Holder.CRC_32;
   }
@@ -252,6 +267,7 @@ public final class Hashing {
    *
    * @since 14.0
    */
+  @Pure
   public static HashFunction adler32() {
     return Adler32Holder.ADLER_32;
   }
@@ -261,18 +277,21 @@ public final class Hashing {
         checksumHashFunction(ChecksumType.ADLER_32, "Hashing.adler32()");
   }
 
+  @Impure
   private static HashFunction checksumHashFunction(ChecksumType type, String toString) {
     return new ChecksumHashFunction(type, type.bits, toString);
   }
 
   enum ChecksumType implements Supplier<Checksum> {
     CRC_32(32) {
+      @Impure
       @Override
       public Checksum get() {
         return new CRC32();
       }
     },
     ADLER_32(32) {
+      @Impure
       @Override
       public Checksum get() {
         return new Adler32();
@@ -281,10 +300,12 @@ public final class Hashing {
 
     private final int bits;
 
+    @Impure
     ChecksumType(int bits) {
       this.bits = bits;
     }
 
+    @Impure
     @Override
     public abstract Checksum get();
   }
@@ -302,6 +323,7 @@ public final class Hashing {
    * <p>See the <a href="http://en.wikipedia.org/wiki/Consistent_hashing">wikipedia
    * article on consistent hashing</a> for more information.
    */
+  @Impure
   public static int consistentHash(HashCode hashCode, int buckets) {
     return consistentHash(hashCode.padToLong(), buckets);
   }
@@ -319,6 +341,7 @@ public final class Hashing {
    * <p>See the <a href="http://en.wikipedia.org/wiki/Consistent_hashing">wikipedia
    * article on consistent hashing</a> for more information.
    */
+  @Impure
   public static int consistentHash(long input, int buckets) {
     checkArgument(buckets > 0, "buckets must be positive: %s", buckets);
     LinearCongruentialGenerator generator = new LinearCongruentialGenerator(input);
@@ -346,6 +369,7 @@ public final class Hashing {
    * @throws IllegalArgumentException if {@code hashCodes} is empty, or the hash codes
    *     do not all have the same bit length
    */
+  @Impure
   public static HashCode combineOrdered(Iterable<HashCode> hashCodes) {
     Iterator<HashCode> iterator = hashCodes.iterator();
     checkArgument(iterator.hasNext(), "Must be at least 1 hash code to combine.");
@@ -372,6 +396,7 @@ public final class Hashing {
    * @throws IllegalArgumentException if {@code hashCodes} is empty, or the hash codes
    *     do not all have the same bit length
    */
+  @Impure
   public static HashCode combineUnordered(Iterable<HashCode> hashCodes) {
     Iterator<HashCode> iterator = hashCodes.iterator();
     checkArgument(iterator.hasNext(), "Must be at least 1 hash code to combine.");
@@ -390,6 +415,7 @@ public final class Hashing {
   /**
    * Checks that the passed argument is positive, and ceils it to a multiple of 32.
    */
+  @Impure
   static int checkPositiveAndMakeMultipleOf32(int bits) {
     checkArgument(bits > 0, "Number of bits must be positive");
     return (bits + 31) & ~31;
@@ -400,6 +426,7 @@ public final class Hashing {
   static final class ConcatenatedHashFunction extends AbstractCompositeHashFunction {
     private final int bits;
 
+    @Impure
     ConcatenatedHashFunction(HashFunction... functions) {
       super(functions);
       int bitSum = 0;
@@ -409,6 +436,7 @@ public final class Hashing {
       this.bits = bitSum;
     }
 
+    @Impure
     @Override
     HashCode makeHash(Hasher[] hashers) {
       byte[] bytes = new byte[bits / 8];
@@ -420,11 +448,13 @@ public final class Hashing {
       return HashCode.fromBytesNoCopy(bytes);
     }
 
+    @Pure
     @Override
     public int bits() {
       return bits;
     }
 
+    @Pure
     @Override
     public boolean equals(@Nullable Object object) {
       if (object instanceof ConcatenatedHashFunction) {
@@ -442,6 +472,7 @@ public final class Hashing {
       return false;
     }
 
+    @Pure
     @Override
     public int hashCode() {
       int hash = bits;
@@ -459,15 +490,18 @@ public final class Hashing {
   private static final class LinearCongruentialGenerator {
     private long state;
 
+    @SideEffectFree
     public LinearCongruentialGenerator(long seed) {
       this.state = seed;
     }
 
+    @Impure
     public double nextDouble() {
       state = 2862933555777941757L * state + 1;
       return ((double) ((int) (state >>> 33) + 1)) / (0x1.0p31);
     }
   }
 
+  @SideEffectFree
   private Hashing() {}
 }

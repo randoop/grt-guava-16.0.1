@@ -16,6 +16,8 @@
 
 package com.google.common.escape;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -77,6 +79,7 @@ public abstract class ArrayBasedUnicodeEscaper extends UnicodeEscaper {
    * @param unsafeReplacement the default replacement for unsafe characters or
    *     null if no default replacement is required
    */
+  @Impure
   protected ArrayBasedUnicodeEscaper(Map<Character, String> replacementMap,
       int safeMin, int safeMax, @Nullable String unsafeReplacement) {
 
@@ -101,6 +104,7 @@ public abstract class ArrayBasedUnicodeEscaper extends UnicodeEscaper {
    * @param unsafeReplacement the default replacement for unsafe characters or
    *     null if no default replacement is required
    */
+  @Impure
   protected ArrayBasedUnicodeEscaper(ArrayBasedEscaperMap escaperMap,
       int safeMin, int safeMax, @Nullable String unsafeReplacement) {
 
@@ -148,6 +152,7 @@ public abstract class ArrayBasedUnicodeEscaper extends UnicodeEscaper {
    * this almost doubles the speed when processing strings that do not require
    * any escaping.
    */
+  @Impure
   @Override
   public final String escape(String s) {
     checkNotNull(s);  // GWT specific check (do not optimize)
@@ -162,6 +167,7 @@ public abstract class ArrayBasedUnicodeEscaper extends UnicodeEscaper {
   }
 
   /* Overridden for performance. */
+  @Pure
   @Override
   protected final int nextEscapeIndex(CharSequence csq, int index, int end) {
     while (index < end) {
@@ -180,6 +186,8 @@ public abstract class ArrayBasedUnicodeEscaper extends UnicodeEscaper {
    * range values. If the given character does not have an explicit replacement
    * and lies outside the safe range then {@link #escapeUnsafe} is called.
    */
+  @Pure
+  @Impure
   @Override
   protected final char[] escape(int cp) {
     if (cp < replacementsLength) {
@@ -207,5 +215,6 @@ public abstract class ArrayBasedUnicodeEscaper extends UnicodeEscaper {
    * @return the replacement characters, or {@code null} if no escaping was
    *         required
    */
+  @Pure
   protected abstract char[] escapeUnsafe(int cp);
 }

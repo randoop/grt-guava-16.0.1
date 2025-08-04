@@ -16,6 +16,8 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.Beta;
@@ -44,6 +46,7 @@ public final class RemovalNotification<K, V> implements Entry<K, V> {
   @Nullable private final V value;
   private final RemovalCause cause;
 
+  @Impure
   RemovalNotification(@Nullable K key, @Nullable V value, RemovalCause cause) {
     this.key = key;
     this.value = value;
@@ -53,6 +56,7 @@ public final class RemovalNotification<K, V> implements Entry<K, V> {
   /**
    * Returns the cause for which the entry was removed.
    */
+  @Pure
   public RemovalCause getCause() {
     return cause;
   }
@@ -61,22 +65,28 @@ public final class RemovalNotification<K, V> implements Entry<K, V> {
    * Returns {@code true} if there was an automatic removal due to eviction (the cause is neither
    * {@link RemovalCause#EXPLICIT} nor {@link RemovalCause#REPLACED}).
    */
+  @Pure
+  @Impure
   public boolean wasEvicted() {
     return cause.wasEvicted();
   }
 
+  @Pure
   @Nullable @Override public K getKey() {
     return key;
   }
 
+  @Pure
   @Nullable @Override public V getValue() {
     return value;
   }
 
+  @Pure
   @Override public final V setValue(V value) {
     throw new UnsupportedOperationException();
   }
 
+  @Impure
   @Override public boolean equals(@Nullable Object object) {
     if (object instanceof Entry) {
       Entry<?, ?> that = (Entry<?, ?>) object;
@@ -86,6 +96,7 @@ public final class RemovalNotification<K, V> implements Entry<K, V> {
     return false;
   }
 
+  @Pure
   @Override public int hashCode() {
     K k = getKey();
     V v = getValue();
@@ -95,6 +106,7 @@ public final class RemovalNotification<K, V> implements Entry<K, V> {
   /**
    * Returns a string representation of the form <code>{key}={value}</code>.
    */
+  @Pure
   @Override public String toString() {
     return getKey() + "=" + getValue();
   }

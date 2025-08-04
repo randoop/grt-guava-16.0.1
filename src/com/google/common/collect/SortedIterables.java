@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -28,12 +30,14 @@ import java.util.SortedSet;
  */
 @GwtCompatible
 final class SortedIterables {
+  @SideEffectFree
   private SortedIterables() {}
 
   /**
    * Returns {@code true} if {@code elements} is a sorted collection using an ordering equivalent
    * to {@code comparator}.
    */
+  @Impure
   public static boolean hasSameComparator(Comparator<?> comparator, Iterable<?> elements) {
     checkNotNull(comparator);
     checkNotNull(elements);
@@ -48,6 +52,7 @@ final class SortedIterables {
     return comparator.equals(comparator2);
   }
 
+  @Impure
   @SuppressWarnings("unchecked")
   // if sortedSet.comparator() is null, the set must be naturally ordered
   public static <E> Comparator<? super E> comparator(SortedSet<E> sortedSet) {

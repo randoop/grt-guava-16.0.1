@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.primitives.Primitives;
@@ -40,6 +42,7 @@ public final class ImmutableClassToInstanceMap<B>
    * Returns a new builder. The generated builder is equivalent to the builder
    * created by the {@link Builder} constructor.
    */
+  @Impure
   public static <B> Builder<B> builder() {
     return new Builder<B>();
   }
@@ -69,6 +72,7 @@ public final class ImmutableClassToInstanceMap<B>
      * Associates {@code key} with {@code value} in the built map. Duplicate
      * keys are not allowed, and will cause {@link #build} to fail.
      */
+    @Impure
     public <T extends B> Builder<B> put(Class<T> key, T value) {
       mapBuilder.put(key, value);
       return this;
@@ -82,6 +86,7 @@ public final class ImmutableClassToInstanceMap<B>
      * @throws ClassCastException if any value is not an instance of the type
      *     specified by its key
      */
+    @Impure
     public <T extends B> Builder<B> putAll(
         Map<? extends Class<? extends T>, ? extends T> map) {
       for (Entry<? extends Class<? extends T>, ? extends T> entry
@@ -93,6 +98,7 @@ public final class ImmutableClassToInstanceMap<B>
       return this;
     }
 
+    @Impure
     private static <B, T extends B> T cast(Class<T> type, B value) {
       return Primitives.wrap(type).cast(value);
     }
@@ -103,6 +109,7 @@ public final class ImmutableClassToInstanceMap<B>
      *
      * @throws IllegalArgumentException if duplicate keys were added
      */
+    @Impure
     public ImmutableClassToInstanceMap<B> build() {
       return new ImmutableClassToInstanceMap<B>(mapBuilder.build());
     }
@@ -121,6 +128,7 @@ public final class ImmutableClassToInstanceMap<B>
    * @throws ClassCastException if any value is not an instance of the type
    *     specified by its key
    */
+  @Impure
   public static <B, S extends B> ImmutableClassToInstanceMap<B> copyOf(
       Map<? extends Class<? extends S>, ? extends S> map) {
     if (map instanceof ImmutableClassToInstanceMap) {
@@ -134,15 +142,18 @@ public final class ImmutableClassToInstanceMap<B>
 
   private final ImmutableMap<Class<? extends B>, B> delegate;
 
+  @Impure
   private ImmutableClassToInstanceMap(
       ImmutableMap<Class<? extends B>, B> delegate) {
     this.delegate = delegate;
   }
 
+  @Pure
   @Override protected Map<Class<? extends B>, B> delegate() {
     return delegate;
   }
 
+  @Impure
   @Override
   @SuppressWarnings("unchecked") // value could not get in if not a T
   @Nullable
@@ -156,6 +167,7 @@ public final class ImmutableClassToInstanceMap<B>
    * @throws UnsupportedOperationException always
    * @deprecated Unsupported operation.
    */
+  @Pure
   @Deprecated
   @Override
   public <T extends B> T putInstance(Class<T> type, T value) {

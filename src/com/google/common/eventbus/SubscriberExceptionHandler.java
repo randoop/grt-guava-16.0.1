@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 package com.google.common.eventbus;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
 
 /**
  * Handler for exceptions thrown by event subscribers.
@@ -24,5 +26,7 @@ public interface SubscriberExceptionHandler {
   /**
    * Handles exceptions thrown by subscribers.
    */
+  @SideEffectFree
+  @Impure
   void handleException(Throwable exception, SubscriberExceptionContext context);
 }

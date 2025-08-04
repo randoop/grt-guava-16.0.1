@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -44,6 +47,7 @@ import javax.annotation.CheckReturnValue;
 @GwtCompatible
 public final class Ascii {
 
+  @SideEffectFree
   private Ascii() {}
 
   /* The ASCII control characters, per RFC 20. */
@@ -434,6 +438,7 @@ public final class Ascii {
    * characters} have been converted to lowercase. All other characters are copied without
    * modification.
    */
+  @Impure
   public static String toLowerCase(String string) {
     int length = string.length();
     for (int i = 0; i < length; i++) {
@@ -458,6 +463,7 @@ public final class Ascii {
    *
    * @since 14.0
    */
+  @Impure
   public static String toLowerCase(CharSequence chars) {
     if (chars instanceof String) {
       return toLowerCase((String) chars);
@@ -474,6 +480,7 @@ public final class Ascii {
    * If the argument is an {@linkplain #isUpperCase(char) uppercase ASCII character} returns the
    * lowercase equivalent. Otherwise returns the argument.
    */
+  @Impure
   public static char toLowerCase(char c) {
     return isUpperCase(c) ? (char) (c ^ 0x20) : c;
   }
@@ -483,6 +490,7 @@ public final class Ascii {
    * characters} have been converted to uppercase. All other characters are copied without
    * modification.
    */
+  @Impure
   public static String toUpperCase(String string) {
     int length = string.length();
     for (int i = 0; i < length; i++) {
@@ -507,6 +515,7 @@ public final class Ascii {
    *
    * @since 14.0
    */
+  @Impure
   public static String toUpperCase(CharSequence chars) {
     if (chars instanceof String) {
       return toUpperCase((String) chars);
@@ -523,6 +532,7 @@ public final class Ascii {
    * If the argument is a {@linkplain #isLowerCase(char) lowercase ASCII character} returns the
    * uppercase equivalent. Otherwise returns the argument.
    */
+  @Impure
   public static char toUpperCase(char c) {
     return isLowerCase(c) ? (char) (c & 0x5f) : c;
   }
@@ -532,6 +542,7 @@ public final class Ascii {
    * between {@code 'a'} and {@code 'z'} inclusive. All others (including non-ASCII characters)
    * return {@code false}.
    */
+  @Pure
   public static boolean isLowerCase(char c) {
     // Note: This was benchmarked against the alternate expression "(char)(c - 'a') < 26" (Nov '13)
     // and found to perform at least as well, or better.
@@ -543,6 +554,7 @@ public final class Ascii {
    * between {@code 'A'} and {@code 'Z'} inclusive. All others (including non-ASCII characters)
    * return {@code false}.
    */
+  @Pure
   public static boolean isUpperCase(char c) {
     return (c >= 'A') && (c <= 'Z');
   }
@@ -579,6 +591,7 @@ public final class Ascii {
    *     {@code truncationIndicator}
    * @since 16.0
    */
+  @Impure
   @Beta
   @CheckReturnValue
   public static String truncate(CharSequence seq, int maxLength, String truncationIndicator) {
@@ -628,6 +641,7 @@ public final class Ascii {
    *
    * @since 16.0
    */
+  @Impure
   @Beta
   public static boolean equalsIgnoreCase(CharSequence s1, CharSequence s2) {
     // Calling length() is the null pointer check (so do it before we can exit early).
@@ -660,6 +674,7 @@ public final class Ascii {
    * Ie, 'a'/'A' returns 0 and 'z'/'Z' returns 25. Non-alpha characters return a value of 26 or
    * greater.
    */
+  @Pure
   private static int getAlphaIndex(char c) {
     // Fold upper-case ASCII to lower-case and make zero-indexed and unsigned (by casting to char).
     return (char) ((c | 0x20) - 'a');

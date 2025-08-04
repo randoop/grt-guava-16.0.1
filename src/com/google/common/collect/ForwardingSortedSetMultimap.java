@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Comparator;
@@ -37,23 +39,29 @@ public abstract class ForwardingSortedSetMultimap<K, V>
     extends ForwardingSetMultimap<K, V> implements SortedSetMultimap<K, V> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingSortedSetMultimap() {}
 
+  @Pure
   @Override protected abstract SortedSetMultimap<K, V> delegate();
 
+  @Impure
   @Override public SortedSet<V> get(@Nullable K key) {
     return delegate().get(key);
   }
 
+  @Impure
   @Override public SortedSet<V> removeAll(@Nullable Object key) {
     return delegate().removeAll(key);
   }
 
+  @Impure
   @Override public SortedSet<V> replaceValues(
       K key, Iterable<? extends V> values) {
     return delegate().replaceValues(key, values);
   }
 
+  @Impure
   @Override public Comparator<? super V> valueComparator() {
     return delegate().valueComparator();
   }

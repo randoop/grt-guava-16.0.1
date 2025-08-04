@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -35,6 +36,7 @@ public interface FutureCallback<V> {
    * Invoked with the result of the {@code Future} computation when it is
    * successful.
    */
+  @Impure
   void onSuccess(@Nullable V result);
 
   /**
@@ -44,5 +46,6 @@ public interface FutureCallback<V> {
    * ExecutionException}, then the cause is passed to this method. Any other
    * thrown object is passed unaltered.
    */
+  @Impure
   void onFailure(Throwable t);
 }

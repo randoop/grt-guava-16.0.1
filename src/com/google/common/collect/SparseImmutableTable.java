@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.LinkedHashMap;
@@ -34,6 +36,7 @@ final class SparseImmutableTable<R, C, V>
   private final int[] iterationOrderRow;
   private final int[] iterationOrderColumn;
 
+  @Impure
   SparseImmutableTable(ImmutableList<Cell<R, C, V>> cellList,
       ImmutableSet<R> rowSpace, ImmutableSet<C> columnSpace) {
     Map<R, Integer> rowIndex = Maps.newHashMap();
@@ -79,19 +82,23 @@ final class SparseImmutableTable<R, C, V>
     this.columnMap = columnBuilder.build();
   }
 
+  @Pure
   @Override public ImmutableMap<C, Map<R, V>> columnMap() {
     return columnMap;
   }
 
+  @Pure
   @Override public ImmutableMap<R, Map<C, V>> rowMap() {
     return rowMap;
   }
 
+  @Pure
   @Override
   public int size() {
     return iterationOrderRow.length;
   }
   
+  @Impure
   @Override
   Cell<R, C, V> getCell(int index) {
     int rowIndex = iterationOrderRow[index];
@@ -102,6 +109,7 @@ final class SparseImmutableTable<R, C, V>
     return cellOf(rowEntry.getKey(), colEntry.getKey(), colEntry.getValue());
   }
 
+  @Impure
   @Override
   V getValue(int index) {
     int rowIndex = iterationOrderRow[index];

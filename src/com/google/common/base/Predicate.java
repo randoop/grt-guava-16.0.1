@@ -16,6 +16,8 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import javax.annotation.Nullable;
@@ -48,6 +50,7 @@ public interface Predicate<T> {
    * @throws NullPointerException if {@code input} is null and this predicate does not accept null
    *     arguments
    */
+  @Impure
   boolean apply(@Nullable T input);
 
   /**
@@ -60,6 +63,8 @@ public interface Predicate<T> {
    * {@code T}). Note that a {@code false} result from this method does not imply that the
    * predicates are known <i>not</i> to be interchangeable.
    */
+  @Impure
+  @Pure
   @Override
   boolean equals(@Nullable Object object);
 }

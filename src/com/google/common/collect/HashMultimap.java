@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.VisibleForTesting;
@@ -57,6 +58,7 @@ public final class HashMultimap<K, V> extends AbstractSetMultimap<K, V> {
    * Creates a new, empty {@code HashMultimap} with the default initial
    * capacities.
    */
+  @Impure
   public static <K, V> HashMultimap<K, V> create() {
     return new HashMultimap<K, V>();
   }
@@ -70,6 +72,7 @@ public final class HashMultimap<K, V> extends AbstractSetMultimap<K, V> {
    * @throws IllegalArgumentException if {@code expectedKeys} or {@code
    *      expectedValuesPerKey} is negative
    */
+  @Impure
   public static <K, V> HashMultimap<K, V> create(
       int expectedKeys, int expectedValuesPerKey) {
     return new HashMultimap<K, V>(expectedKeys, expectedValuesPerKey);
@@ -82,21 +85,25 @@ public final class HashMultimap<K, V> extends AbstractSetMultimap<K, V> {
    *
    * @param multimap the multimap whose contents are copied to this multimap
    */
+  @Impure
   public static <K, V> HashMultimap<K, V> create(
       Multimap<? extends K, ? extends V> multimap) {
     return new HashMultimap<K, V>(multimap);
   }
 
+  @Impure
   private HashMultimap() {
     super(new HashMap<K, Collection<V>>());
   }
 
+  @Impure
   private HashMultimap(int expectedKeys, int expectedValuesPerKey) {
     super(Maps.<K, Collection<V>>newHashMapWithExpectedSize(expectedKeys));
     Preconditions.checkArgument(expectedValuesPerKey >= 0);
     this.expectedValuesPerKey = expectedValuesPerKey;
   }
 
+  @Impure
   private HashMultimap(Multimap<? extends K, ? extends V> multimap) {
     super(Maps.<K, Collection<V>>newHashMapWithExpectedSize(
         multimap.keySet().size()));
@@ -110,6 +117,7 @@ public final class HashMultimap<K, V> extends AbstractSetMultimap<K, V> {
    *
    * @return a new {@code HashSet} containing a collection of values for one key
    */
+  @Impure
   @Override Set<V> createCollection() {
     return Sets.<V>newHashSetWithExpectedSize(expectedValuesPerKey);
   }
@@ -119,6 +127,7 @@ public final class HashMultimap<K, V> extends AbstractSetMultimap<K, V> {
    *     each distinct key: the key, number of values for that key, and the
    *     key's values
    */
+  @Impure
   @GwtIncompatible("java.io.ObjectOutputStream")
   private void writeObject(ObjectOutputStream stream) throws IOException {
     stream.defaultWriteObject();
@@ -126,6 +135,7 @@ public final class HashMultimap<K, V> extends AbstractSetMultimap<K, V> {
     Serialization.writeMultimap(this, stream);
   }
 
+  @Impure
   @GwtIncompatible("java.io.ObjectInputStream")
   private void readObject(ObjectInputStream stream)
       throws IOException, ClassNotFoundException {

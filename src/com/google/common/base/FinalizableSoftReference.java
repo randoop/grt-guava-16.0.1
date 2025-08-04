@@ -16,6 +16,7 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
 
@@ -35,6 +36,7 @@ public abstract class FinalizableSoftReference<T> extends SoftReference<T>
    * @param referent to softly reference
    * @param queue that should finalize the referent
    */
+  @Impure
   protected FinalizableSoftReference(T referent, FinalizableReferenceQueue queue) {
     super(referent, queue.queue);
     queue.cleanUp();

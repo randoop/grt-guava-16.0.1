@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.io.Serializable;
@@ -32,31 +34,37 @@ import javax.annotation.Nullable;
 final class AllEqualOrdering extends Ordering<Object> implements Serializable {
   static final AllEqualOrdering INSTANCE = new AllEqualOrdering();
 
+  @Pure
   @Override
   public int compare(@Nullable Object left, @Nullable Object right) {
     return 0;
   }
 
+  @Impure
   @Override
   public <E> List<E> sortedCopy(Iterable<E> iterable) {
     return Lists.newArrayList(iterable);
   }
 
+  @Impure
   @Override
   public <E> ImmutableList<E> immutableSortedCopy(Iterable<E> iterable) {
     return ImmutableList.copyOf(iterable);
   }
 
+  @Pure
   @SuppressWarnings("unchecked")
   @Override
   public <S> Ordering<S> reverse() {
     return (Ordering<S>) this;
   }
 
+  @Pure
   private Object readResolve() {
     return INSTANCE;
   }
 
+  @Pure
   @Override
   public String toString() {
     return "Ordering.allEqual()";

@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -35,6 +38,7 @@ import javax.annotation.Nullable;
  */
 @GwtCompatible
 public final class Strings {
+  @SideEffectFree
   private Strings() {}
 
   /**
@@ -43,6 +47,7 @@ public final class Strings {
    * @param string the string to test and possibly return
    * @return {@code string} itself if it is non-null; {@code ""} if it is null
    */
+  @Pure
   public static String nullToEmpty(@Nullable String string) {
     return (string == null) ? "" : string;
   }
@@ -54,6 +59,7 @@ public final class Strings {
    * @return {@code string} itself if it is nonempty; {@code null} if it is
    *     empty or null
    */
+  @Impure
   public static @Nullable String emptyToNull(@Nullable String string) {
     return isNullOrEmpty(string) ? null : string;
   }
@@ -71,6 +77,7 @@ public final class Strings {
    * @param string a string reference to check
    * @return {@code true} if the string is null or is the empty string
    */
+  @Pure
   public static boolean isNullOrEmpty(@Nullable String string) {
     return string == null || string.length() == 0; // string.isEmpty() in Java 6
   }
@@ -94,6 +101,7 @@ public final class Strings {
    *     the minimum length is reached
    * @return the padded string
    */
+  @Impure
   public static String padStart(String string, int minLength, char padChar) {
     checkNotNull(string);  // eager for GWT.
     if (string.length() >= minLength) {
@@ -126,6 +134,7 @@ public final class Strings {
    *     minimum length is reached
    * @return the padded string
    */
+  @Impure
   public static String padEnd(String string, int minLength, char padChar) {
     checkNotNull(string);  // eager for GWT.
     if (string.length() >= minLength) {
@@ -150,6 +159,7 @@ public final class Strings {
    *     (the empty string if {@code count} is zero)
    * @throws IllegalArgumentException if {@code count} is negative
    */
+  @Impure
   public static String repeat(String string, int count) {
     checkNotNull(string);  // eager for GWT.
 
@@ -185,6 +195,7 @@ public final class Strings {
    *
    * @since 11.0
    */
+  @Impure
   public static String commonPrefix(CharSequence a, CharSequence b) {
     checkNotNull(a);
     checkNotNull(b);
@@ -208,6 +219,7 @@ public final class Strings {
    *
    * @since 11.0
    */
+  @Impure
   public static String commonSuffix(CharSequence a, CharSequence b) {
     checkNotNull(a);
     checkNotNull(b);
@@ -229,6 +241,7 @@ public final class Strings {
    * True when a valid surrogate pair starts at the given {@code index} in the
    * given {@code string}. Out-of-range indexes return false.
    */
+  @Pure
   @VisibleForTesting
   static boolean validSurrogatePairAt(CharSequence string, int index) {
     return index >= 0 && index <= (string.length() - 2)

@@ -16,6 +16,8 @@
 
 package com.google.common.reflect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -56,14 +58,17 @@ public final class TypeResolver {
 
   private final TypeTable typeTable;
 
+  @Impure
   public TypeResolver() {
     this.typeTable = new TypeTable();
   }
 
+  @SideEffectFree
   private TypeResolver(TypeTable typeTable) {
     this.typeTable = typeTable;
   }
 
+  @Impure
   static TypeResolver accordingTo(Type type) {
     return new TypeResolver().where(TypeMappingIntrospector.getTypeMappings(type));
   }
@@ -87,6 +92,7 @@ public final class TypeResolver {
    *        other type variables, in which case these type variables will be further resolved if
    *        corresponding mappings exist in the current {@code TypeResolver} instance.
    */
+  @Impure
   public TypeResolver where(Type formal, Type actual) {
     Map<TypeVariableKey, Type> mappings = Maps.newHashMap();
     populateTypeMappings(mappings, checkNotNull(formal), checkNotNull(actual));
@@ -94,19 +100,23 @@ public final class TypeResolver {
   }
 
   /** Returns a new {@code TypeResolver} with {@code variable} mapping to {@code type}. */
+  @Impure
   TypeResolver where(Map<TypeVariableKey, ? extends Type> mappings) {
     return new TypeResolver(typeTable.where(mappings));
   }
 
+  @Impure
   private static void populateTypeMappings(
       final Map<TypeVariableKey, Type> mappings, Type from, final Type to) {
     if (from.equals(to)) {
       return;
     }
     new TypeVisitor() {
+      @Impure
       @Override void visitTypeVariable(TypeVariable<?> typeVariable) {
         mappings.put(new TypeVariableKey(typeVariable), to);
       }
+      @Impure
       @Override void visitWildcardType(WildcardType fromWildcardType) {
         WildcardType toWildcardType = expectArgument(WildcardType.class, to);
         Type[] fromUpperBounds = fromWildcardType.getUpperBounds();
@@ -124,6 +134,7 @@ public final class TypeResolver {
           populateTypeMappings(mappings, fromLowerBounds[i], toLowerBounds[i]);
         }
       }
+      @Impure
       @Override void visitParameterizedType(ParameterizedType fromParameterizedType) {
         ParameterizedType toParameterizedType = expectArgument(ParameterizedType.class, to);
         checkArgument(fromParameterizedType.getRawType().equals(toParameterizedType.getRawType()),
@@ -136,11 +147,13 @@ public final class TypeResolver {
           populateTypeMappings(mappings, fromArgs[i], toArgs[i]);
         }
       }
+      @Impure
       @Override void visitGenericArrayType(GenericArrayType fromArrayType) {
         Type componentType = Types.getComponentType(to);
         checkArgument(componentType != null, "%s is not an array type.", to);
         populateTypeMappings(mappings, fromArrayType.getGenericComponentType(), componentType);
       }
+      @SideEffectFree
       @Override void visitClass(Class<?> fromClass) {
         // Can't map from a raw class to anything other than itself.
         // You can't say "assuming String is Integer".
@@ -154,6 +167,7 @@ public final class TypeResolver {
    * Resolves all type variables in {@code type} and all downstream types and
    * returns a corresponding type with type variables resolved.
    */
+  @Impure
   public Type resolveType(Type type) {
     checkNotNull(type);
     if (type instanceof TypeVariable) {
@@ -170,6 +184,7 @@ public final class TypeResolver {
     }
   }
 
+  @Impure
   private Type[] resolveTypes(Type[] types) {
     Type[] result = new Type[types.length];
     for (int i = 0; i < types.length; i++) {
@@ -178,6 +193,7 @@ public final class TypeResolver {
     return result;
   }
 
+  @Impure
   private WildcardType resolveWildcardType(WildcardType type) {
     Type[] lowerBounds = type.getLowerBounds();
     Type[] upperBounds = type.getUpperBounds();
@@ -185,12 +201,14 @@ public final class TypeResolver {
         resolveTypes(lowerBounds), resolveTypes(upperBounds));
   }
 
+  @Impure
   private Type resolveGenericArrayType(GenericArrayType type) {
     Type componentType = type.getGenericComponentType();
     Type resolvedComponentType = resolveType(componentType);
     return Types.newArrayType(resolvedComponentType);
   }
 
+  @Impure
   private ParameterizedType resolveParameterizedType(ParameterizedType type) {
     Type owner = type.getOwnerType();
     Type resolvedOwner = (owner == null) ? null : resolveType(owner);
@@ -202,6 +220,7 @@ public final class TypeResolver {
         resolvedOwner, (Class<?>) resolvedRawType, resolvedArgs);
   }
 
+  @Impure
   private static <T> T expectArgument(Class<T> type, Object arg) {
     try {
       return type.cast(arg);
@@ -214,15 +233,18 @@ public final class TypeResolver {
   private static class TypeTable {
     private final ImmutableMap<TypeVariableKey, Type> map;
   
+    @Impure
     TypeTable() {
       this.map = ImmutableMap.of();
     }
     
+    @SideEffectFree
     private TypeTable(ImmutableMap<TypeVariableKey, Type> map) {
       this.map = map;
     }
 
     /** Returns a new {@code TypeResolver} with {@code variable} mapping to {@code type}. */
+    @Impure
     final TypeTable where(Map<TypeVariableKey, ? extends Type> mappings) {
       ImmutableMap.Builder<TypeVariableKey, Type> builder = ImmutableMap.builder();
       builder.putAll(map);
@@ -235,9 +257,11 @@ public final class TypeResolver {
       return new TypeTable(builder.build());
     }
 
+    @Impure
     final Type resolve(final TypeVariable<?> var) {
       final TypeTable unguarded = this;
       TypeTable guarded = new TypeTable() {
+        @Impure
         @Override public Type resolveInternal(
             TypeVariable<?> intermediateVar, TypeTable forDependent) {
           if (intermediateVar.getGenericDeclaration().equals(var.getGenericDeclaration())) {
@@ -257,6 +281,7 @@ public final class TypeResolver {
      *
      * <p>Should only be called and overridden by {@link #resolve(TypeVariable)}.
      */
+    @Impure
     Type resolveInternal(TypeVariable<?> var, TypeTable forDependants) {
       Type type = map.get(new TypeVariableKey(var));
       if (type == null) {
@@ -315,6 +340,7 @@ public final class TypeResolver {
      * Returns type mappings using type parameters and type arguments found in
      * the generic superclass and the super interfaces of {@code contextClass}.
      */
+    @Impure
     static ImmutableMap<TypeVariableKey, Type> getTypeMappings(
         Type contextType) {
       TypeMappingIntrospector introspector = new TypeMappingIntrospector();
@@ -322,11 +348,13 @@ public final class TypeResolver {
       return ImmutableMap.copyOf(introspector.mappings);
     }
 
+    @Impure
     @Override void visitClass(Class<?> clazz) {
       visit(clazz.getGenericSuperclass());
       visit(clazz.getGenericInterfaces());
     }
 
+    @Impure
     @Override void visitParameterizedType(ParameterizedType parameterizedType) {
       Class<?> rawClass = (Class<?>) parameterizedType.getRawType();
       TypeVariable<?>[] vars = rawClass.getTypeParameters();
@@ -339,14 +367,17 @@ public final class TypeResolver {
       visit(parameterizedType.getOwnerType());
     }
 
+    @Impure
     @Override void visitTypeVariable(TypeVariable<?> t) {
       visit(t.getBounds());
     }
 
+    @Impure
     @Override void visitWildcardType(WildcardType t) {
       visit(t.getUpperBounds());
     }
 
+    @Impure
     private void map(final TypeVariableKey var, final Type arg) {
       if (mappings.containsKey(var)) {
         // Mapping already established
@@ -382,6 +413,7 @@ public final class TypeResolver {
 
     private final AtomicInteger id = new AtomicInteger();
 
+    @Impure
     Type capture(Type type) {
       checkNotNull(type);
       if (type instanceof Class) {
@@ -418,6 +450,7 @@ public final class TypeResolver {
       throw new AssertionError("must have been one of the known types");
     }
 
+    @Impure
     private Type captureNullable(@Nullable Type type) {
       if (type == null) {
         return null;
@@ -425,6 +458,7 @@ public final class TypeResolver {
       return capture(type);
     }
 
+    @Impure
     private Type[] capture(Type[] types) {
       Type[] result = new Type[types.length];
       for (int i = 0; i < types.length; i++) {
@@ -451,14 +485,17 @@ public final class TypeResolver {
   static final class TypeVariableKey {
     private final TypeVariable<?> var;
 
+    @Impure
     TypeVariableKey(TypeVariable<?> var) {
       this.var = checkNotNull(var);
     }
 
+    @Impure
     @Override public int hashCode() {
       return Objects.hashCode(var.getGenericDeclaration(), var.getName());
     }
 
+    @Impure
     @Override public boolean equals(Object obj) {
       if (obj instanceof TypeVariableKey) {
         TypeVariableKey that = (TypeVariableKey) obj;
@@ -468,11 +505,13 @@ public final class TypeResolver {
       }
     }
 
+    @SideEffectFree
     @Override public String toString() {
       return var.toString();
     }
 
     /** Wraps {@code t} in a {@code TypeVariableKey} if it's a type variable. */
+    @Impure
     static Object forLookup(Type t) {
       if (t instanceof TypeVariable) {
         return new TypeVariableKey((TypeVariable<?>) t);
@@ -485,6 +524,7 @@ public final class TypeResolver {
      * Returns true if {@code type} is a {@code TypeVariable} with the same name and declared by
      * the same {@code GenericDeclaration}.
      */
+    @Impure
     boolean equalsType(Type type) {
       if (type instanceof TypeVariable) {
         return equalsTypeVariable((TypeVariable<?>) type);
@@ -493,6 +533,7 @@ public final class TypeResolver {
       }
     }
 
+    @Impure
     private boolean equalsTypeVariable(TypeVariable<?> that) {
       return var.getGenericDeclaration().equals(that.getGenericDeclaration())
           && var.getName().equals(that.getName());

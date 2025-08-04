@@ -14,6 +14,8 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -33,6 +35,7 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
   private final int bits;
   private final String toString;
 
+  @Impure
   ChecksumHashFunction(Supplier<? extends Checksum> checksumSupplier, int bits, String toString) {
     this.checksumSupplier = checkNotNull(checksumSupplier);
     checkArgument(bits == 32 || bits == 64, "bits (%s) must be either 32 or 64", bits);
@@ -40,16 +43,19 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
     this.toString = checkNotNull(toString);
   }
 
+  @Pure
   @Override
   public int bits() {
     return bits;
   }
 
+  @Impure
   @Override
   public Hasher newHasher() {
     return new ChecksumHasher(checksumSupplier.get());
   }
 
+  @Pure
   @Override
   public String toString() {
     return toString;
@@ -62,20 +68,24 @@ final class ChecksumHashFunction extends AbstractStreamingHashFunction implement
 
     private final Checksum checksum;
 
+    @Impure
     private ChecksumHasher(Checksum checksum) {
       this.checksum = checkNotNull(checksum);
     }
 
+    @Impure
     @Override
     protected void update(byte b) {
       checksum.update(b);
     }
 
+    @Impure
     @Override
     protected void update(byte[] bytes, int off, int len) {
       checksum.update(bytes, off, len);
     }
 
+    @Impure
     @Override
     public HashCode hash() {
       long value = checksum.getValue();

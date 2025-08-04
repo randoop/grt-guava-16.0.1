@@ -14,6 +14,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static java.lang.Double.doubleToRawLongBits;
 import static java.lang.Double.longBitsToDouble;
 
@@ -65,6 +67,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    *
    * @param initialValue the initial value
    */
+  @Impure
   public AtomicDouble(double initialValue) {
     value = doubleToRawLongBits(initialValue);
   }
@@ -72,6 +75,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
   /**
    * Creates a new {@code AtomicDouble} with initial value {@code 0.0}.
    */
+  @Impure
   public AtomicDouble() {
     // assert doubleToRawLongBits(0.0) == 0L;
   }
@@ -81,6 +85,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    *
    * @return the current value
    */
+  @Pure
   public final double get() {
     return longBitsToDouble(value);
   }
@@ -90,6 +95,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    *
    * @param newValue the new value
    */
+  @Impure
   public final void set(double newValue) {
     long next = doubleToRawLongBits(newValue);
     value = next;
@@ -100,6 +106,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    *
    * @param newValue the new value
    */
+  @Impure
   public final void lazySet(double newValue) {
     set(newValue);
     // TODO(user): replace with code below when jdk5 support is dropped.
@@ -113,6 +120,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    * @param newValue the new value
    * @return the previous value
    */
+  @Impure
   public final double getAndSet(double newValue) {
     long next = doubleToRawLongBits(newValue);
     return longBitsToDouble(updater.getAndSet(this, next));
@@ -128,6 +136,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    * @return {@code true} if successful. False return indicates that
    * the actual value was not bitwise equal to the expected value.
    */
+  @Impure
   public final boolean compareAndSet(double expect, double update) {
     return updater.compareAndSet(this,
                                  doubleToRawLongBits(expect),
@@ -149,6 +158,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    * @param update the new value
    * @return {@code true} if successful
    */
+  @Impure
   public final boolean weakCompareAndSet(double expect, double update) {
     return updater.weakCompareAndSet(this,
                                      doubleToRawLongBits(expect),
@@ -161,6 +171,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    * @param delta the value to add
    * @return the previous value
    */
+  @Impure
   public final double getAndAdd(double delta) {
     while (true) {
       long current = value;
@@ -179,6 +190,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    * @param delta the value to add
    * @return the updated value
    */
+  @Impure
   public final double addAndGet(double delta) {
     while (true) {
       long current = value;
@@ -195,6 +207,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    * Returns the String representation of the current value.
    * @return the String representation of the current value
    */
+  @Impure
   public String toString() {
     return Double.toString(get());
   }
@@ -203,6 +216,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    * Returns the value of this {@code AtomicDouble} as an {@code int}
    * after a narrowing primitive conversion.
    */
+  @Impure
   public int intValue() {
     return (int) get();
   }
@@ -211,6 +225,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    * Returns the value of this {@code AtomicDouble} as a {@code long}
    * after a narrowing primitive conversion.
    */
+  @Impure
   public long longValue() {
     return (long) get();
   }
@@ -219,6 +234,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    * Returns the value of this {@code AtomicDouble} as a {@code float}
    * after a narrowing primitive conversion.
    */
+  @Impure
   public float floatValue() {
     return (float) get();
   }
@@ -226,6 +242,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
   /**
    * Returns the value of this {@code AtomicDouble} as a {@code double}.
    */
+  @Impure
   public double doubleValue() {
     return get();
   }
@@ -235,6 +252,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
    *
    * @serialData The current value is emitted (a {@code double}).
    */
+  @Impure
   private void writeObject(java.io.ObjectOutputStream s)
       throws java.io.IOException {
     s.defaultWriteObject();
@@ -245,6 +263,7 @@ public class AtomicDouble extends Number implements java.io.Serializable {
   /**
    * Reconstitutes the instance from a stream (that is, deserializes it).
    */
+  @Impure
   private void readObject(java.io.ObjectInputStream s)
       throws java.io.IOException, ClassNotFoundException {
     s.defaultReadObject();

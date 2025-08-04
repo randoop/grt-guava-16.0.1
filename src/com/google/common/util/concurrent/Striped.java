@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Objects.firstNonNull;
 
 import com.google.common.annotations.Beta;
@@ -90,6 +92,7 @@ public abstract class Striped<L> {
    * @param key an arbitrary, non-null key
    * @return the stripe that the passed key corresponds to
    */
+  @Impure
   public abstract L get(Object key);
 
   /**
@@ -99,16 +102,19 @@ public abstract class Striped<L> {
    * @param index the index of the stripe to return; must be in {@code [0...size())}
    * @return the stripe at the specified index
    */
+  @Impure
   public abstract L getAt(int index);
 
   /**
    * Returns the index to which the given key is mapped, so that getAt(indexFor(key)) == get(key).
    */
+  @Impure
   abstract int indexFor(Object key);
 
   /**
    * Returns the total number of stripes in this instance.
    */
+  @Pure
   public abstract int size();
 
   /**
@@ -129,6 +135,7 @@ public abstract class Striped<L> {
    * @return the stripes corresponding to the objects (one per each object, derived by delegating
    *         to {@link #get(Object)}; may contain duplicates), in an increasing index order.
    */
+  @Impure
   public Iterable<L> bulkGet(Iterable<?> keys) {
     // Initially using the array to store the keys, then reusing it to store the respective L's
     final Object[] array = Iterables.toArray(keys, Object.class);
@@ -171,6 +178,7 @@ public abstract class Striped<L> {
    * @param stripes the minimum number of stripes (locks) required
    * @return a new {@code Striped<Lock>}
    */
+  @Impure
   public static Striped<Lock> lock(int stripes) {
     return new CompactStriped<Lock>(stripes, new Supplier<Lock>() {
       public Lock get() {
@@ -186,6 +194,7 @@ public abstract class Striped<L> {
    * @param stripes the minimum number of stripes (locks) required
    * @return a new {@code Striped<Lock>}
    */
+  @Impure
   public static Striped<Lock> lazyWeakLock(int stripes) {
     return new LazyStriped<Lock>(stripes, new Supplier<Lock>() {
       public Lock get() {
@@ -202,6 +211,7 @@ public abstract class Striped<L> {
    * @param permits the number of permits in each semaphore
    * @return a new {@code Striped<Semaphore>}
    */
+  @Impure
   public static Striped<Semaphore> semaphore(int stripes, final int permits) {
     return new CompactStriped<Semaphore>(stripes, new Supplier<Semaphore>() {
       public Semaphore get() {
@@ -218,6 +228,7 @@ public abstract class Striped<L> {
    * @param permits the number of permits in each semaphore
    * @return a new {@code Striped<Semaphore>}
    */
+  @Impure
   public static Striped<Semaphore> lazyWeakSemaphore(int stripes, final int permits) {
     return new LazyStriped<Semaphore>(stripes, new Supplier<Semaphore>() {
       public Semaphore get() {
@@ -233,6 +244,7 @@ public abstract class Striped<L> {
    * @param stripes the minimum number of stripes (locks) required
    * @return a new {@code Striped<ReadWriteLock>}
    */
+  @Impure
   public static Striped<ReadWriteLock> readWriteLock(int stripes) {
     return new CompactStriped<ReadWriteLock>(stripes, READ_WRITE_LOCK_SUPPLIER);
   }
@@ -244,6 +256,7 @@ public abstract class Striped<L> {
    * @param stripes the minimum number of stripes (locks) required
    * @return a new {@code Striped<ReadWriteLock>}
    */
+  @Impure
   public static Striped<ReadWriteLock> lazyWeakReadWriteLock(int stripes) {
     return new LazyStriped<ReadWriteLock>(stripes, READ_WRITE_LOCK_SUPPLIER);
   }
@@ -260,16 +273,19 @@ public abstract class Striped<L> {
     /** Capacity (power of two) minus one, for fast mod evaluation */
     final int mask;
 
+    @Impure
     PowerOfTwoStriped(int stripes) {
       Preconditions.checkArgument(stripes > 0, "Stripes must be positive");
       this.mask = stripes > Ints.MAX_POWER_OF_TWO ? ALL_SET : ceilToPowerOfTwo(stripes) - 1;
     }
 
+    @Impure
     @Override final int indexFor(Object key) {
       int hash = smear(key.hashCode());
       return hash & mask;
     }
 
+    @Impure
     @Override public final L get(Object key) {
       return getAt(indexFor(key));
     }
@@ -283,6 +299,7 @@ public abstract class Striped<L> {
     /** Size is a power of two. */
     private final Object[] array;
 
+    @Impure
     private CompactStriped(int stripes, Supplier<L> supplier) {
       super(stripes);
       Preconditions.checkArgument(stripes <= Ints.MAX_POWER_OF_TWO, "Stripes must be <= 2^30)");
@@ -293,11 +310,13 @@ public abstract class Striped<L> {
       }
     }
 
+    @Pure
     @SuppressWarnings("unchecked") // we only put L's in the array
     @Override public L getAt(int index) {
       return (L) array[index];
     }
 
+    @Pure
     @Override public int size() {
       return array.length;
     }
@@ -313,6 +332,7 @@ public abstract class Striped<L> {
     final Supplier<L> supplier;
     final int size;
 
+    @Impure
     LazyStriped(int stripes, Supplier<L> supplier) {
       super(stripes);
       this.size = (mask == ALL_SET) ? Integer.MAX_VALUE : mask + 1;
@@ -320,6 +340,7 @@ public abstract class Striped<L> {
       this.locks = new MapMaker().weakValues().makeMap();
     }
 
+    @Impure
     @Override public L getAt(int index) {
       if (size != Integer.MAX_VALUE) {
         Preconditions.checkElementIndex(index, size());
@@ -333,6 +354,7 @@ public abstract class Striped<L> {
       return firstNonNull(existing, created);
     }
 
+    @Pure
     @Override public int size() {
       return size;
     }
@@ -343,6 +365,7 @@ public abstract class Striped<L> {
    */
   private static final int ALL_SET = ~0;
 
+  @Impure
   private static int ceilToPowerOfTwo(int x) {
     return 1 << IntMath.log2(x, RoundingMode.CEILING);
   }
@@ -356,6 +379,7 @@ public abstract class Striped<L> {
    * method in OpenJDK 7's java.util.HashMap class.
    */
   // Copied from java/com/google/common/collect/Hashing.java
+  @Pure
   private static int smear(int hashCode) {
     hashCode ^= (hashCode >>> 20) ^ (hashCode >>> 12);
     return hashCode ^ (hashCode >>> 7) ^ (hashCode >>> 4);
@@ -370,6 +394,7 @@ public abstract class Striped<L> {
     @SuppressWarnings("unused")
     long q1, q2, q3;
 
+    @Impure
     PaddedLock() {
       super(false);
     }
@@ -380,6 +405,7 @@ public abstract class Striped<L> {
     @SuppressWarnings("unused")
     long q1, q2, q3;
 
+    @Impure
     PaddedSemaphore(int permits) {
       super(permits, false);
     }

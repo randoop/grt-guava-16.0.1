@@ -16,6 +16,9 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.Collections;
@@ -29,6 +32,7 @@ import java.util.Map;
  * @since 1.0
  */
 public final class Defaults {
+  @SideEffectFree
   private Defaults() {}
 
   private static final Map<Class<?>, Object> DEFAULTS;
@@ -47,6 +51,7 @@ public final class Defaults {
     DEFAULTS = Collections.unmodifiableMap(map);
   }
 
+  @Impure
   private static <T> void put(Map<Class<?>, Object> map, Class<T> type, T value) {
     map.put(type, value);
   }
@@ -56,6 +61,7 @@ public final class Defaults {
    * false} for {@code boolean} and {@code '\0'} for {@code char}. For non-primitive types and
    * {@code void}, null is returned.
    */
+  @Pure
   public static <T> T defaultValue(Class<T> type) {
     // Primitives.wrap(type).cast(...) would avoid the warning, but we can't use that from here
     @SuppressWarnings("unchecked") // the put method enforces this key-value relationship

@@ -16,6 +16,8 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ForwardingObject;
 
@@ -39,30 +41,37 @@ public abstract class ForwardingFuture<V> extends ForwardingObject
     implements Future<V> {
 
   /** Constructor for use by subclasses. */
+  @Impure
   protected ForwardingFuture() {}
 
+  @Pure
   @Override protected abstract Future<V> delegate();
 
+  @Impure
   @Override
   public boolean cancel(boolean mayInterruptIfRunning) {
     return delegate().cancel(mayInterruptIfRunning);
   }
 
+  @Impure
   @Override
   public boolean isCancelled() {
     return delegate().isCancelled();
   }
 
+  @Impure
   @Override
   public boolean isDone() {
     return delegate().isDone();
   }
 
+  @Impure
   @Override
   public V get() throws InterruptedException, ExecutionException {
     return delegate().get();
   }
 
+  @Impure
   @Override
   public V get(long timeout, TimeUnit unit)
       throws InterruptedException, ExecutionException, TimeoutException {
@@ -83,10 +92,12 @@ public abstract class ForwardingFuture<V> extends ForwardingObject
       extends ForwardingFuture<V> {
     private final Future<V> delegate;
 
+    @Impure
     protected SimpleForwardingFuture(Future<V> delegate) {
       this.delegate = Preconditions.checkNotNull(delegate);
     }
 
+    @Pure
     @Override
     protected final Future<V> delegate() {
       return delegate;

@@ -16,6 +16,7 @@
 
 package com.google.common.cache;
 
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 
@@ -38,6 +39,7 @@ public enum RemovalCause {
    * {@link Map#remove}, {@link ConcurrentMap#remove}, or {@link Iterator#remove}.
    */
   EXPLICIT {
+    @Pure
     @Override
     boolean wasEvicted() {
       return false;
@@ -51,6 +53,7 @@ public enum RemovalCause {
    * {@link ConcurrentMap#replace(Object, Object, Object)}.
    */
   REPLACED {
+    @Pure
     @Override
     boolean wasEvicted() {
       return false;
@@ -63,6 +66,7 @@ public enum RemovalCause {
    * {@link CacheBuilder#softValues}.
    */
   COLLECTED {
+    @Pure
     @Override
     boolean wasEvicted() {
       return true;
@@ -74,6 +78,7 @@ public enum RemovalCause {
    * {@link CacheBuilder#expireAfterWrite} or {@link CacheBuilder#expireAfterAccess}.
    */
   EXPIRED {
+    @Pure
     @Override
     boolean wasEvicted() {
       return true;
@@ -85,6 +90,7 @@ public enum RemovalCause {
    * {@link CacheBuilder#maximumSize} or {@link CacheBuilder#maximumWeight}.
    */
   SIZE {
+    @Pure
     @Override
     boolean wasEvicted() {
       return true;
@@ -95,5 +101,6 @@ public enum RemovalCause {
    * Returns {@code true} if there was an automatic removal due to eviction (the cause is neither
    * {@link #EXPLICIT} nor {@link #REPLACED}).
    */
+  @Pure
   abstract boolean wasEvicted();
 }

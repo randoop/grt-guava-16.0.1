@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.io.Serializable;
@@ -31,19 +33,23 @@ class ImmutableEntry<K, V> extends AbstractMapEntry<K, V>
   final K key;
   final V value;
 
+  @Impure
   ImmutableEntry(@Nullable K key, @Nullable V value) {
     this.key = key;
     this.value = value;
   }
 
+  @Pure
   @Nullable @Override public final K getKey() {
     return key;
   }
 
+  @Pure
   @Nullable @Override public final V getValue() {
     return value;
   }
 
+  @Pure
   @Override public final V setValue(V value) {
     throw new UnsupportedOperationException();
   }

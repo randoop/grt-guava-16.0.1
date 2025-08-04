@@ -14,6 +14,9 @@
 
 package com.google.common.hash;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.Beta;
 import com.google.common.primitives.Ints;
 
@@ -140,6 +143,8 @@ public interface HashFunction {
    *       .putBoolean(isActive)
    *       .hash();}</pre>
    */
+  @Impure
+  @Pure
   Hasher newHasher();
 
   /**
@@ -148,6 +153,8 @@ public interface HashFunction {
    * functions (hash functions that need to buffer their whole input before processing any
    * of it).
    */
+  @Impure
+  @Pure
   Hasher newHasher(int expectedInputSize);
 
   /**
@@ -157,6 +164,9 @@ public interface HashFunction {
    *
    * @since 12.0
    */
+  @SideEffectFree
+  @Impure
+  @Pure
   HashCode hashInt(int input);
 
   /**
@@ -164,6 +174,9 @@ public interface HashFunction {
    * given {@code long} value, interpreted in little-endian byte order. The implementation
    * <i>might</i> perform better than its longhand equivalent, but should not perform worse.
    */
+  @SideEffectFree
+  @Impure
+  @Pure
   HashCode hashLong(long input);
 
   /**
@@ -171,6 +184,7 @@ public interface HashFunction {
    * <i>might</i> perform better than its longhand equivalent, but should not perform
    * worse.
    */
+  @Pure
   HashCode hashBytes(byte[] input);
 
   /**
@@ -181,6 +195,7 @@ public interface HashFunction {
    * @throws IndexOutOfBoundsException if {@code off < 0} or {@code off + len > bytes.length}
    *   or {@code len < 0}
    */
+  @Pure
   HashCode hashBytes(byte[] input, int off, int len);
 
   /**
@@ -191,6 +206,9 @@ public interface HashFunction {
    *
    * @since 15.0 (since 11.0 as hashString(CharSequence)).
    */
+  @SideEffectFree
+  @Impure
+  @Pure
   HashCode hashUnencodedChars(CharSequence input);
 
   /**
@@ -198,6 +216,8 @@ public interface HashFunction {
    * using the given {@link Charset}. The implementation <i>might</i> perform better than its
    * longhand equivalent, but should not perform worse.
    */
+  @SideEffectFree
+  @Pure
   HashCode hashString(CharSequence input, Charset charset);
 
   /**
@@ -206,11 +226,13 @@ public interface HashFunction {
    *
    * @since 14.0
    */
+  @Pure
   <T> HashCode hashObject(T instance, Funnel<? super T> funnel);
 
   /**
    * Returns the number of bits (a multiple of 32) that each hash code produced by this
    * hash function has.
    */
+  @Pure
   int bits();
 }

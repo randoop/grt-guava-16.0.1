@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.ObjectArrays.checkElementNotNull;
 
@@ -79,6 +82,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    * and maintainability of your code.
    */
   // Casting to any type is safe because the set will never hold any elements.
+  @Pure
   @SuppressWarnings({"unchecked"})
   public static <E> ImmutableSet<E> of() {
     return (ImmutableSet<E>) EmptyImmutableSet.INSTANCE;
@@ -90,6 +94,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    * a null element. It is preferable mainly for consistency and
    * maintainability of your code.
    */
+  @Impure
   public static <E> ImmutableSet<E> of(E element) {
     return new SingletonImmutableSet<E>(element);
   }
@@ -101,6 +106,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    *
    * @throws NullPointerException if any element is null
    */
+  @Impure
   public static <E> ImmutableSet<E> of(E e1, E e2) {
     return construct(2, e1, e2);
   }
@@ -112,6 +118,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    *
    * @throws NullPointerException if any element is null
    */
+  @Impure
   public static <E> ImmutableSet<E> of(E e1, E e2, E e3) {
     return construct(3, e1, e2, e3);
   }
@@ -123,6 +130,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    *
    * @throws NullPointerException if any element is null
    */
+  @Impure
   public static <E> ImmutableSet<E> of(E e1, E e2, E e3, E e4) {
     return construct(4, e1, e2, e3, e4);
   }
@@ -134,6 +142,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    *
    * @throws NullPointerException if any element is null
    */
+  @Impure
   public static <E> ImmutableSet<E> of(E e1, E e2, E e3, E e4, E e5) {
     return construct(5, e1, e2, e3, e4, e5);
   }
@@ -146,6 +155,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    * @throws NullPointerException if any element is null
    * @since 3.0 (source-compatible since 2.0)
    */
+  @Impure
   public static <E> ImmutableSet<E> of(E e1, E e2, E e3, E e4, E e5, E e6,
       E... others) {
     final int paramCount = 6;
@@ -175,6 +185,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    * @throws NullPointerException if any of the first {@code n} elements of {@code elements} is
    *          null
    */
+  @Impure
   private static <E> ImmutableSet<E> construct(int n, Object... elements) {
     switch (n) {
       case 0:
@@ -244,6 +255,8 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    *
    * <p>Do not call this method with setSize < 2.
    */
+  @SideEffectFree
+  @Impure
   @VisibleForTesting static int chooseTableSize(int setSize) {
     // Correct the size for open addressing to match desired load factor.
     if (setSize < CUTOFF) {
@@ -268,6 +281,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    * @throws NullPointerException if any of {@code elements} is null
    * @since 3.0
    */
+  @Impure
   public static <E> ImmutableSet<E> copyOf(E[] elements) {
     switch (elements.length) {
       case 0:
@@ -296,6 +310,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    *
    * @throws NullPointerException if any of {@code elements} is null
    */
+  @Impure
   public static <E> ImmutableSet<E> copyOf(Iterable<? extends E> elements) {
     return (elements instanceof Collection)
         ? copyOf(Collections2.cast(elements))
@@ -309,6 +324,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    *
    * @throws NullPointerException if any of {@code elements} is null
    */
+  @Impure
   public static <E> ImmutableSet<E> copyOf(Iterator<? extends E> elements) {
     // We special-case for 0 or 1 elements, but anything further is madness.
     if (!elements.hasNext()) {
@@ -356,6 +372,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    * @throws NullPointerException if any of {@code elements} is null
    * @since 7.0 (source-compatible since 2.0)
    */
+  @Impure
   public static <E> ImmutableSet<E> copyOf(Collection<? extends E> elements) {
     /*
      * TODO(user): consider checking for ImmutableAsList here
@@ -375,18 +392,23 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
     return construct(array.length, array);
   }
 
+  @Impure
   private static <E extends Enum<E>> ImmutableSet<E> copyOfEnumSet(
       EnumSet<E> enumSet) {
     return ImmutableEnumSet.asImmutable(EnumSet.copyOf(enumSet));
   }
 
+  @SideEffectFree
+  @Impure
   ImmutableSet() {}
 
   /** Returns {@code true} if the {@code hashCode()} method runs quickly. */
+  @Pure
   boolean isHashCodeFast() {
     return false;
   }
 
+  @Impure
   @Override public boolean equals(@Nullable Object object) {
     if (object == this) {
       return true;
@@ -399,12 +421,14 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
     return Sets.equalsImpl(this, object);
   }
 
+  @Impure
   @Override public int hashCode() {
     return Sets.hashCodeImpl(this);
   }
 
   // This declaration is needed to make Set.iterator() and
   // ImmutableCollection.iterator() consistent.
+  @Impure
   @Override public abstract UnmodifiableIterator<E> iterator();
 
   /*
@@ -416,15 +440,19 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    */
   private static class SerializedForm implements Serializable {
     final Object[] elements;
+    @SideEffectFree
     SerializedForm(Object[] elements) {
       this.elements = elements;
     }
+    @Impure
     Object readResolve() {
       return copyOf(elements);
     }
     private static final long serialVersionUID = 0;
   }
 
+  @SideEffectFree
+  @Impure
   @Override Object writeReplace() {
     return new SerializedForm(toArray());
   }
@@ -433,6 +461,8 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
    * Returns a new builder. The generated builder is equivalent to the builder
    * created by the {@link Builder} constructor.
    */
+  @SideEffectFree
+  @Impure
   public static <E> Builder<E> builder() {
     return new Builder<E>();
   }
@@ -459,10 +489,14 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
      * Creates a new builder. The returned builder is equivalent to the builder
      * generated by {@link ImmutableSet#builder}.
      */
+    @SideEffectFree
+    @Impure
     public Builder() {
       this(DEFAULT_INITIAL_CAPACITY);
     }
 
+    @SideEffectFree
+    @Impure
     Builder(int capacity) {
       super(capacity);
     }
@@ -476,6 +510,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
      * @return this {@code Builder} object
      * @throws NullPointerException if {@code element} is null
      */
+    @Impure
     @Override public Builder<E> add(E element) {
       super.add(element);
       return this;
@@ -490,6 +525,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
      * @throws NullPointerException if {@code elements} is null or contains a
      *     null element
      */
+    @Impure
     @Override public Builder<E> add(E... elements) {
       super.add(elements);
       return this;
@@ -504,6 +540,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
      * @throws NullPointerException if {@code elements} is null or contains a
      *     null element
      */
+    @Impure
     @Override public Builder<E> addAll(Iterable<? extends E> elements) {
       super.addAll(elements);
       return this;
@@ -518,6 +555,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
      * @throws NullPointerException if {@code elements} is null or contains a
      *     null element
      */
+    @Impure
     @Override public Builder<E> addAll(Iterator<? extends E> elements) {
       super.addAll(elements);
       return this;
@@ -527,6 +565,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E>
      * Returns a newly-created {@code ImmutableSet} based on the contents of
      * the {@code Builder}.
      */
+    @Impure
     @Override public ImmutableSet<E> build() {
       ImmutableSet<E> result = construct(size, contents);
       // construct has the side effect of deduping contents, so we update size

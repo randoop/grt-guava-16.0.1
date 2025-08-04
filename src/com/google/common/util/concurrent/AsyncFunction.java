@@ -16,6 +16,7 @@
 
 package com.google.common.util.concurrent;
 
+import org.checkerframework.dataflow.qual.Impure;
 import java.util.concurrent.Future;
 
 /**
@@ -34,5 +35,6 @@ public interface AsyncFunction<I, O> {
    * <p>Throwing an exception from this method is equivalent to returning a
    * failing {@code Future}.
    */
+  @Impure
   ListenableFuture<O> apply(I input) throws Exception;
 }

@@ -16,6 +16,7 @@
 
 package com.google.common.base;
 
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 
@@ -36,6 +37,7 @@ import java.nio.charset.Charset;
  */
 @GwtCompatible(emulated = true)
 public final class Charsets {
+  @SideEffectFree
   private Charsets() {}
 
   /**

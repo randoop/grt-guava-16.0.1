@@ -16,6 +16,9 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
+import org.checkerframework.dataflow.qual.Pure;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -54,11 +57,13 @@ class StandardRowSortedTable<R, C, V> extends StandardTable<R, C, V>
    * RowSortedTable subinterface with the revised methods?
    */
 
+  @Impure
   StandardRowSortedTable(SortedMap<R, Map<C, V>> backingMap,
       Supplier<? extends Map<C, V>> factory) {
     super(backingMap, factory);
   }
 
+  @Pure
   private SortedMap<R, Map<C, V>> sortedBackingMap() {
     return (SortedMap<R, Map<C, V>>) backingMap;
   }
@@ -69,6 +74,7 @@ class StandardRowSortedTable<R, C, V> extends StandardTable<R, C, V>
    * <p>This method returns a {@link SortedSet}, instead of the {@code Set}
    * specified in the {@link Table} interface.
    */
+  @Impure
   @Override public SortedSet<R> rowKeySet() {
     return (SortedSet<R>) rowMap().keySet();
   }
@@ -79,41 +85,52 @@ class StandardRowSortedTable<R, C, V> extends StandardTable<R, C, V>
    * <p>This method returns a {@link SortedMap}, instead of the {@code Map}
    * specified in the {@link Table} interface.
    */
+  @Impure
   @Override public SortedMap<R, Map<C, V>> rowMap() {
     return (SortedMap<R, Map<C, V>>) super.rowMap();
   }
 
+  @Impure
   @Override
   SortedMap<R, Map<C, V>> createRowMap() {
     return new RowSortedMap();
   }
 
   private class RowSortedMap extends RowMap implements SortedMap<R, Map<C, V>> {
+    @SideEffectFree
     @Override
     public SortedSet<R> keySet() {
       return (SortedSet<R>) super.keySet();
     }
 
+    @Impure
     @Override
     SortedSet<R> createKeySet() {
       return new Maps.SortedKeySet<R, Map<C, V>>(this);
     }
 
+    @Pure
+    @Impure
     @Override
     public Comparator<? super R> comparator() {
       return sortedBackingMap().comparator();
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     public R firstKey() {
       return sortedBackingMap().firstKey();
     }
 
+    @SideEffectFree
+    @Impure
     @Override
     public R lastKey() {
       return sortedBackingMap().lastKey();
     }
 
+    @Impure
     @Override
     public SortedMap<R, Map<C, V>> headMap(R toKey) {
       checkNotNull(toKey);
@@ -121,6 +138,7 @@ class StandardRowSortedTable<R, C, V> extends StandardTable<R, C, V>
           sortedBackingMap().headMap(toKey), factory).rowMap();
     }
 
+    @Impure
     @Override
     public SortedMap<R, Map<C, V>> subMap(R fromKey, R toKey) {
       checkNotNull(fromKey);
@@ -129,6 +147,7 @@ class StandardRowSortedTable<R, C, V> extends StandardTable<R, C, V>
           sortedBackingMap().subMap(fromKey, toKey), factory).rowMap();
     }
 
+    @Impure
     @Override
     public SortedMap<R, Map<C, V>> tailMap(R fromKey) {
       checkNotNull(fromKey);

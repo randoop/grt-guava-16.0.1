@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.collect.Multisets.UnmodifiableMultiset;
 
@@ -32,25 +34,30 @@ import java.util.NavigableSet;
 @GwtCompatible(emulated = true)
 final class UnmodifiableSortedMultiset<E>
     extends UnmodifiableMultiset<E> implements SortedMultiset<E> {
+  @Impure
   UnmodifiableSortedMultiset(SortedMultiset<E> delegate) {
     super(delegate);
   }
 
+  @Impure
   @Override
   protected SortedMultiset<E> delegate() {
     return (SortedMultiset<E>) super.delegate();
   }
 
+  @Impure
   @Override
   public Comparator<? super E> comparator() {
     return delegate().comparator();
   }
 
+  @Impure
   @Override
   NavigableSet<E> createElementSet() {
     return Sets.unmodifiableNavigableSet(delegate().elementSet());
   }
 
+  @Impure
   @Override
   public NavigableSet<E> elementSet() {
     return (NavigableSet<E>) super.elementSet();
@@ -58,6 +65,7 @@ final class UnmodifiableSortedMultiset<E>
 
   private transient UnmodifiableSortedMultiset<E> descendingMultiset;
 
+  @Impure
   @Override
   public SortedMultiset<E> descendingMultiset() {
     UnmodifiableSortedMultiset<E> result = descendingMultiset;
@@ -70,32 +78,38 @@ final class UnmodifiableSortedMultiset<E>
     return result;
   }
 
+  @Impure
   @Override
   public Entry<E> firstEntry() {
     return delegate().firstEntry();
   }
 
+  @Impure
   @Override
   public Entry<E> lastEntry() {
     return delegate().lastEntry();
   }
 
+  @Pure
   @Override
   public Entry<E> pollFirstEntry() {
     throw new UnsupportedOperationException();
   }
 
+  @Pure
   @Override
   public Entry<E> pollLastEntry() {
     throw new UnsupportedOperationException();
   }
 
+  @Impure
   @Override
   public SortedMultiset<E> headMultiset(E upperBound, BoundType boundType) {
     return Multisets.unmodifiableSortedMultiset(
         delegate().headMultiset(upperBound, boundType));
   }
 
+  @Impure
   @Override
   public SortedMultiset<E> subMultiset(
       E lowerBound, BoundType lowerBoundType,
@@ -104,6 +118,7 @@ final class UnmodifiableSortedMultiset<E>
         lowerBound, lowerBoundType, upperBound, upperBoundType));
   }
 
+  @Impure
   @Override
   public SortedMultiset<E> tailMultiset(E lowerBound, BoundType boundType) {
     return Multisets.unmodifiableSortedMultiset(

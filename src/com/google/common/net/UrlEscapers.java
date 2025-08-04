@@ -16,6 +16,8 @@
 
 package com.google.common.net;
 
+import org.checkerframework.dataflow.qual.Pure;
+import org.checkerframework.dataflow.qual.SideEffectFree;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.escape.Escaper;
@@ -36,6 +38,7 @@ import com.google.common.escape.Escaper;
 @Beta
 @GwtCompatible
 public final class UrlEscapers {
+  @SideEffectFree
   private UrlEscapers() {}
 
   // For each xxxEscaper() method, please add links to external reference pages
@@ -81,6 +84,7 @@ public final class UrlEscapers {
    * for all percent-encodings."</i>
    *
    */
+  @Pure
   public static Escaper urlFormParameterEscaper() {
     return URL_FORM_PARAMETER_ESCAPER;
   }
@@ -122,6 +126,7 @@ public final class UrlEscapers {
    * <i>"URI producers and normalizers should use uppercase hexadecimal digits
    * for all percent-encodings."</i>
    */
+  @Pure
   public static Escaper urlPathSegmentEscaper() {
     return URL_PATH_SEGMENT_ESCAPER;
   }
@@ -160,6 +165,7 @@ public final class UrlEscapers {
    * <i>"URI producers and normalizers should use uppercase hexadecimal digits
    * for all percent-encodings."</i>
    */
+  @Pure
   public static Escaper urlFragmentEscaper() {
     return URL_FRAGMENT_ESCAPER;
   }

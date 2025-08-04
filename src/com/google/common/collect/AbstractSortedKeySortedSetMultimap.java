@@ -16,6 +16,7 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Collection;
@@ -34,20 +35,24 @@ import java.util.SortedSet;
 @GwtCompatible
 abstract class AbstractSortedKeySortedSetMultimap<K, V> extends AbstractSortedSetMultimap<K, V> {
 
+  @Impure
   AbstractSortedKeySortedSetMultimap(SortedMap<K, Collection<V>> map) {
     super(map);
   }
 
+  @Impure
   @Override
   public SortedMap<K, Collection<V>> asMap() {
     return (SortedMap<K, Collection<V>>) super.asMap();
   }
 
+  @Impure
   @Override
   SortedMap<K, Collection<V>> backingMap() {
     return (SortedMap<K, Collection<V>>) super.backingMap();
   }
 
+  @Impure
   @Override
   public SortedSet<K> keySet() {
     return (SortedSet<K>) super.keySet();

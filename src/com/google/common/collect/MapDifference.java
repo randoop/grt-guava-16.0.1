@@ -16,6 +16,8 @@
 
 package com.google.common.collect;
 
+import org.checkerframework.dataflow.qual.Impure;
+import org.checkerframework.dataflow.qual.Pure;
 import com.google.common.annotations.GwtCompatible;
 
 import java.util.Map;
@@ -34,30 +36,35 @@ public interface MapDifference<K, V> {
    * Returns {@code true} if there are no differences between the two maps;
    * that is, if the maps are equal.
    */
+  @Pure
   boolean areEqual();
 
   /**
    * Returns an unmodifiable map containing the entries from the left map whose
    * keys are not present in the right map.
    */
+  @Impure
   Map<K, V> entriesOnlyOnLeft();
 
   /**
    * Returns an unmodifiable map containing the entries from the right map whose
    * keys are not present in the left map.
    */
+  @Impure
   Map<K, V> entriesOnlyOnRight();
 
   /**
    * Returns an unmodifiable map containing the entries that appear in both
    * maps; that is, the intersection of the two maps.
    */
+  @Impure
   Map<K, V> entriesInCommon();
 
   /**
    * Returns an unmodifiable map describing keys that appear in both maps, but
    * with different values.
    */
+  @Impure
   Map<K, ValueDifference<V>> entriesDiffering();
 
   /**
@@ -67,6 +74,7 @@ public interface MapDifference<K, V> {
    * #entriesOnlyOnRight()}, {@link #entriesInCommon()} and {@link
    * #entriesDiffering()} of the two instances are equal.
    */
+  @Impure
   @Override
   boolean equals(@Nullable Object object);
 
@@ -77,6 +85,7 @@ public interface MapDifference<K, V> {
    *   Arrays.asList(entriesOnlyOnLeft(), entriesOnlyOnRight(),
    *       entriesInCommon(), entriesDiffering())}</pre>
    */
+  @Impure
   @Override
   int hashCode();
 
@@ -91,23 +100,27 @@ public interface MapDifference<K, V> {
     /**
      * Returns the value from the left map (possibly null).
      */
+    @Pure
     V leftValue();
 
     /**
      * Returns the value from the right map (possibly null).
      */
+    @Pure
     V rightValue();
 
     /**
      * Two instances are considered equal if their {@link #leftValue()}
      * values are equal and their {@link #rightValue()} values are also equal.
      */
+    @Impure
     @Override boolean equals(@Nullable Object other);
 
     /**
      * The hash code equals the value
      * {@code Arrays.asList(leftValue(), rightValue()).hashCode()}.
      */
+    @Impure
     @Override int hashCode();
   }
 
